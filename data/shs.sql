@@ -41,7 +41,7 @@ CREATE TABLE t_releve_plots (
     id_plot integer NOT NULL,
     id_base_visit integer NOT NULL,
     excretes_presence boolean
-)
+);
 COMMENT ON TABLE pr_monitoring_habitat_station.t_releve_plots IS 'Visites sur placette';
 
 CREATE TABLE cor_releve_plot_strats (
@@ -49,7 +49,7 @@ CREATE TABLE cor_releve_plot_strats (
     id_releve_plot integer NOT NULL,
     id_nomenclature_strate integer NOT NULL,
     cover_pourcentage integer
-)
+);
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_strats IS 'Strates par placette';
 
 CREATE TABLE cor_releve_plot_taxons (
@@ -57,21 +57,21 @@ CREATE TABLE cor_releve_plot_taxons (
     id_releve_plot integer NOT NULL,
     cd_nom integer NOT NULL,
     cover_pourcentage integer
-)
+);
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons IS 'Taxons observés par placette';
 
 CREATE TABLE cor_hab_taxon (
     id_cor_hab_taxon serial NOT NULL,
     cd_nom integer NOT NULL,
-    cd_hab integer NOT NULL,
-)
+    id_habitat integer NOT NULL
+);
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_hab_taxon IS 'Liste taxons par habitat';
 
 CREATE TABLE cor_transect_visit_perturbation (
     id_cor_transect_visit_perturb serial NOT NULL,
-    id_base_visit: integer NOT NULL,
-    id_nomenclature_perturb integer NOT NULL,
-)
+    id_base_visit integer NOT NULL,
+    id_nomenclature_perturb integer NOT NULL
+);
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_transect_visit_perturbation IS 'Perturbations lors visite transect';
 
 
@@ -96,8 +96,10 @@ ALTER TABLE ONLY cor_releve_plot_taxons
 
 ALTER TABLE ONLY cor_hab_taxon 
     ADD CONSTRAINT pk_id_cor_hab_taxon PRIMARY KEY (id_cor_hab_taxon);
+
 ALTER TABLE ONLY cor_transect_visit_perturbation
     ADD CONSTRAINT pk_id_cor_transect_visit_perturb PRIMARY KEY (id_cor_transect_visit_perturb);
+
 ---------------
 --FOREIGN KEY--
 ---------------
@@ -107,10 +109,10 @@ ALTER TABLE ONLY t_transects
     ADD CONSTRAINT fk_t_transects_cd_hab FOREIGN KEY (cd_hab) REFERENCES ref_habitat.habref (cd_hab) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY t_plots 
-    ADD CONSTRAINT fk_t_plots_id_transect FOREIGN KEY (id_transect) REFERENCES pr_monitoring_habitat_station.id_transect (id_transect) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_t_plots_id_transect FOREIGN KEY (id_transect) REFERENCES pr_monitoring_habitat_station.t_transects (id_transect) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE ONLY t_releve_plots 
-    ADD CONSTRAINT fk_t_releve_plots_id_plot FOREIGN KEY (id_plot) REFERENCES pr_monitoring_habitat_station.id_plot (id_plot) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_t_releve_plots_id_plot FOREIGN KEY (id_plot) REFERENCES pr_monitoring_habitat_station.t_plots (id_plot) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY t_releve_plots 
     ADD CONSTRAINT fk_t_releve_plots_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -127,7 +129,7 @@ ALTER TABLE ONLY cor_releve_plot_taxons
 ALTER TABLE ONLY cor_hab_taxon 
     ADD CONSTRAINT fk_cor_hab_taxon_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
 ALTER TABLE ONLY cor_hab_taxon 
-    ADD CONSTRAINT fk_cor_hab_taxon_cd_hab FOREIGN KEY (cd_hab) REFERENCES ref_habitat.habref (cd_hab) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_hab_taxon_id_habitat FOREIGN KEY (id_habitat) REFERENCES ref_habitat.habref (cd_hab) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY cor_transect_visit_perturbation 
     ADD CONSTRAINT fk_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -135,7 +137,8 @@ ALTER TABLE ONLY cor_transect_visit_perturbation
 ----------
 --UNIQUE--
 ----------
-
+ALTER TABLE ONLY cor_hab_taxon
+    ADD CONSTRAINT unique_cor_hab_taxon UNIQUE ( id_habitat, cd_nom );
 
 ----------
 --EXPORT--
