@@ -1,0 +1,149 @@
+<div id="cover-spin" *ngIf="!dataLoaded"></div>
+<div class="row row-0">
+    <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
+        <div>
+            <button type="button" class="btn btn-link btn-sm back-button" (click)="backToSites()">
+                <i class="fa fa-arrow-left" aria-hidden="true"> </i>
+                Retour à la liste des sites
+            </button>
+        </div>
+            <div class="wrapper">
+                <h3> Consultation du site {{ siteName }} </h3>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab">
+                            <i class="fa fa-info-circle"> </i> Informations Générales </a>
+                    </li>
+                    <li class="nav-item" *ngIf="show">
+                        <a class="nav-link" data-toggle="tab" href="#details" role="tab">
+                            <i class="fa fa-search police"> </i> Détails </a>
+                    </li>
+                </ul>
+    
+                <div class="tab-content">
+                    <div class="tab-pane active modal-header  list-group-item" id="infoGen" role="tabpanel">
+                        <p> <span> Code site : </span> <span class="strong "> {{ siteCode }} </span></p>
+                        <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ nomHabitat }}"> {{ nomHabitat }}
+                            </span></p>
+                        <p> <span> Commune : </span> <span class="strong"> {{ nomCommune}} </span></p>
+                    </div>
+    
+                    <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
+                        <p> <span> Nom du site : </span> <span class="strong"> {{ siteName }} </span></p>
+                        <p> <span> Organisme : </span> <span class="strong"> {{ organisme }} </span></p>
+                        <p> <span> Description du site : </span> <span class="strong"> {{ siteDesc }} </span></p>
+                    </div>
+                </div>
+    
+            </div>
+
+            <form>
+                <fieldset>
+                        <div class="form-group">
+                            <div class="form-group">
+                                <label>coord GPS départ</label>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-6">
+                                        <input type="number" class="form-control" placeholder="latitude">
+                                    </div>
+                                    <div class="col-sm-12 col-md-6">
+                                        <input type="number" class="form-control" placeholder="longitude">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>coord GPS arrivée</label>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-6">
+                                        <input type="number" class="form-control" placeholder="latitude">
+                                    </div>
+                                    <div class="col-sm-12 col-md-6">
+                                        <input type="number" class="form-control" placeholder="longitude">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
+                            <button class="btn btn-warning" data-toggle="button">
+                                <i class="fa fa-edit" aria-hidden="true"> </i>
+                                Modifier
+                            </button>
+                        </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>
+                        <h4>Informations placette</h4>
+                    </legend>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <label> Position des placettes </label>
+                                <select class="form-control">
+                                    <option selected>Choisissez la position des placette</option>
+                                    <option value="1">haut</option>
+                                    <option value="2">bas</option>
+                                    <option value="3">droite</option>
+                                    <option value="4">gauche</option>
+
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <label> Taille des placettes </label>
+                                <input class="form-control" type="number" placeholder="Taille des placettes" />
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <label> Liste des placettes </label>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Cras justo odio</li>
+                        <li class="list-group-item">Dapibus ac facilisis in</li>
+                        <li class="list-group-item">Vestibulum at eros</li>
+                    </ul>
+                    <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
+                        <button class="btn btn-warning" data-toggle="button">
+                            <i class="fa fa-edit" aria-hidden="true"> </i>
+                            Modifier
+                        </button>
+                    </div>
+                </fieldset>
+            </form>
+        <div class="card-footer">
+        </div>
+    </div>
+    <div class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
+        <div class="card">
+            <div class="card-header">
+                <h3>Consultation des relevés du site {{ siteName }}</h3>
+            </div>
+            <div class="card-body">
+                    <ngx-datatable class="material" [columnMode]="'force'" [rows]="rows" [headerHeight]="50" [footerHeight]="50"
+                        [rowHeight]="'auto'" [messages]="storeService.shsConfig.list_visit_message" [offset]="mapListService.page.pageNumber"
+                        [limit]="mapListService.page.size">
+
+                        <ngx-datatable-column *ngFor="let col of storeService.shsConfig.default_list_visit_columns" [name]="col.name"
+                            [prop]="col.prop" maxWidth="col.maxWidth">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column maxWidth="120">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                            </ng-template>
+                        </ngx-datatable-column>
+
+                    </ngx-datatable>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <pnx-modal-download labelButton='Télécharger ces relevés' [pathDownload]='storeService.urlLoad' >
+                    </pnx-modal-download>
+                    <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
+                        iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
+                    </modal-shs>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

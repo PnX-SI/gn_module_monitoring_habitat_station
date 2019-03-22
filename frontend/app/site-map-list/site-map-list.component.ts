@@ -169,6 +169,12 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     let site = feature.properties;
     this.mapListService.layerDict[feature.id] = layer;
 
+    const customPopup = '<div class="title">' + site.transect_label + "</div>";
+    const customOptions = {
+      className: "custom-popup"
+    };
+
+    layer.bindPopup(customPopup, customOptions);
     layer.on({
       click: e => {
         this.onMapClick(feature.id);
@@ -181,12 +187,12 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     const integerId = parseInt(id);
     this.mapListService.selectedRow = [];
     this.mapListService.selectedRow.push(
-      this.mapListService.tableData[integerId]
+      this.mapListService.tableData[integerId-1]
     );
   }
 
   onRowSelect(row) {
-    let id = row.selected[0]["id_infos_site"];
+    let id = row.selected[0]["id_transect"];
     let site = row.selected[0];
     const selectedLayer = this.mapListService.layerDict[id];
     this.zoomOnSelectedLayer(this._map, selectedLayer, 16);

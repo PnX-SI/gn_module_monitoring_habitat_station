@@ -12,15 +12,18 @@ import { FormService } from './services/form.service';
 import { UserService } from './services/user.service';
 
 import { SiteMapListComponent } from "./site-map-list/site-map-list.component";
+import { ListVisitComponent } from "./list-visit/list-visit.component";
+import { ModalSHSComponent } from "./modal-shs/modal-shs.component";
 
 
 // my module routing
 const routes: Routes = [
-  { path: "", component: SiteMapListComponent }
+  { path: "", component: SiteMapListComponent },
+  { path: 'listVisit/:idSite', component: ListVisitComponent }
 ];
 
 @NgModule({
-  declarations: [SiteMapListComponent],
+  declarations: [SiteMapListComponent, ListVisitComponent, ModalSHSComponent],
   imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule],
   providers: [HttpClient, DataService, StoreService, FormService, UserService],
   bootstrap: []

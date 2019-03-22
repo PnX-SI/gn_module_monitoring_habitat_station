@@ -14,6 +14,17 @@ export class StoreService {
 
   public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
 
+
+  public currentSite$: BehaviorSubject<any> = new BehaviorSubject();
+
+  getCurrentSite() {
+    return this.currentSite$.asObservable();
+  }
+
+  setCurrentSite(cd_hab, nomhab, idBaseSite) {
+    this.currentSite$.next({ "cd_hab": cd_hab, "nom_habitat": nomhab, "id_base_site": idBaseSite });
+  }
+
 }
 
 
