@@ -55,7 +55,7 @@ COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_strats IS 'Strate
 CREATE TABLE cor_releve_plot_taxons (
     id_cor_releve_plot_taxon serial NOT NULL,
     id_releve_plot integer NOT NULL,
-    cd_nom integer NOT NULL,
+    id_cor_hab_taxon integer NOT NULL,
     cover_pourcentage integer
 );
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons IS 'Taxons observés par placette';
@@ -124,7 +124,7 @@ ALTER TABLE ONLY cor_releve_plot_strats
 ALTER TABLE ONLY cor_releve_plot_taxons 
     ADD CONSTRAINT fk_cor_releve_plot_taxons_id_releve_plot FOREIGN KEY (id_releve_plot) REFERENCES pr_monitoring_habitat_station.t_releve_plots (id_releve_plot) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY cor_releve_plot_taxons 
-    ADD CONSTRAINT fk_cor_releve_plot_taxons_cd_nom FOREIGN KEY (cd_nom) REFERENCES pr_monitoring_habitat_station.cor_hab_taxon (cd_nom) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_releve_plot_taxons_id_cor_hab_taxon FOREIGN KEY (id_cor_hab_taxon) REFERENCES pr_monitoring_habitat_station.cor_hab_taxon (id_cor_hab_taxon) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY cor_hab_taxon 
     ADD CONSTRAINT fk_cor_hab_taxon_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
