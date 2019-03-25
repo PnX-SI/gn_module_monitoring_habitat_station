@@ -17,4 +17,19 @@ export class FormService {
       });
       return formSuivi;
     }
+
+    initFormTransect(): FormGroup {
+      const formSuivi = this._fb.group({
+        id_base_site: null,
+        id_transect: null,
+        geom_end_lat: [null, Validators.required],
+        geom_end_long: [null, Validators.required],
+        geom_start_lat: [null, Validators.required],
+        geom_start_long: [null, Validators.required],
+        plot_size: null,
+        position_plot: null,
+        transect_label: null
+      });
+      return formSuivi;
+    }
 }

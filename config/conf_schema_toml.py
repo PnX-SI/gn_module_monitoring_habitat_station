@@ -11,6 +11,7 @@ zoom_center = [44.863664, 6.268670]
 zoom= 10
 pagination_serverside= False
 items_per_page = 5
+plot_size_unite = "mètre"
 
 site_message = {"emptyMessage" : "Aucun site à afficher ", "totalMessage" : "sites(s) au total"}
 list_visit_message = {"emptyMessage" : "Aucune visite sur ce site ", "totalMessage" : "visites au total"}
@@ -43,3 +44,4 @@ class GnModuleSchemaConf(Schema):
     zoom=fields.Integer(missing=10)
     pagination_serverside = fields.Boolean(missing=pagination_serverside)
     items_per_page = fields.Integer(missing=items_per_page)
+    plot_size_unite = fields.String(missing=plot_size_unite)

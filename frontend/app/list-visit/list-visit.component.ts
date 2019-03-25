@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Location } from "@angular/common";
 import { ToastrService } from "ngx-toastr";
+import { FormGroup } from "@angular/forms";
 
 import { MapListService } from "@geonature_common/map-list/map-list.service";
 
@@ -9,6 +10,8 @@ import { DataService } from "../services/data.service";
 import { StoreService } from "../services/store.service";
 import { ModuleConfig } from "../module.config";
 import { UserService } from "../services/user.service";
+import { FormService } from "../services/form.service";
+
 
 @Component({
   selector: "pnx-list-visit",
@@ -27,6 +30,14 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public siteCode;
   public siteDesc;
   public cdHabitat;
+  public geom_end;
+  public geom_start;
+  public plot_size;
+  public plots;
+  public position_plot;
+  public transect_label;
+  disabledForm = true;
+
   public taxons;
   public rows = [];
   public paramApp = this.storeService.queryString.append(
@@ -38,6 +49,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public exportIsAllowed = false;
   public dataLoaded = false;
 
+  public formTransect: FormGroup;
+
 
   constructor(
     public storeService: StoreService,
@@ -46,12 +59,16 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     public activatedRoute: ActivatedRoute,
     private toastr: ToastrService,
     public mapListService: MapListService,
-    private userService: UserService
+    private userService: UserService,
+    public formService: FormService,
+
   ) {}
 
   ngOnInit() {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
+    this.formTransect = this.formService.initFormTransect();
+
   }
 
  
@@ -64,7 +81,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this._api.getVisits({ id_base_site: this.idSite }).subscribe(
       data => {
         data.forEach(visit => {
-          if (visit && visit.length) {
+          if (visit && Object.keys(visit).length) {
             let fullName = "";
             let count = visit.observers.length;
             visit.observers.forEach((obs, index) => {
@@ -100,6 +117,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
 
   getSites() {
     this.paramApp = this.paramApp.append("id_base_site", this.idSite);
+    this.geom_end = [];
+    this.geom_start = [];
     this._api.getSite(this.paramApp).subscribe(
       data => {
         this.site = data;
@@ -107,19 +126,34 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         this.organisme = data.organisme;
         this.nomCommune = data.nom_commune;
         this.nomHabitat = data.nom_habitat;
-        this.siteName = data.base_site_name;
+        this.siteName = data.transect_label;
         this.siteCode = data.base_site_code;
         this.siteDesc = data.base_site_description;
         this.cdHabitat = data.cd_hab;
+        this.geom_end =  data.geom_end;
+        this.geom_start = data.geom_start;
+
+        this.plot_size = data.plot_size;
+        this.plots = data.plots;
+        this.position_plot = data.position_plot;
+        this.transect_label = data.transect_label;
+
 
 
         // UP cd_hab nom_habitat id site
         this.storeService.setCurrentSite(
           this.cdHabitat,
           this.nomHabitat,
-          this.idSite
+          this.idSite,
+          this.geom_end,
+          this.geom_start,
+          this.plot_size,
+          this.plots,
+          this.position_plot,
+          this.transect_label
         );
 
+        this.pachForm();
         this.getVisits();
       },
       error => {
@@ -139,6 +173,21 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         console.log("error: ", error);
       }
     );
+  }
+
+  pachForm() {
+    this.formTransect.patchValue({
+      id_base_site: (this.site.id_base_site) ? this.site.id_base_site : '',
+      id_transect: (this.site.id_transect) ? this.site.id_transect : '',
+      geom_start_lat: this.geom_start[0],
+      geom_start_long: this.geom_start[1],
+      geom_end_lat: this.geom_end[0],
+      geom_end_long: this.geom_end[1],
+
+      geom_start: this.geom_start,
+      position_plot: this.position_plot,
+      plot_size: this.plot_size
+    });
   }
 
   backToSites() {

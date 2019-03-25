@@ -9,9 +9,8 @@
 }
 
 .list-group-item {
-    background-color: #fff;
+    background-color: #e9ecef;
     color: #181818;
-    border: none;
 }
 
 .wrapper {
@@ -41,4 +40,9 @@ legend {
 
 .wrapper {
     margin-bottom: 18px;
+}
+
+fieldset:disabled {
+    color: #6c757d;
+    pointer-events: none;
 }
