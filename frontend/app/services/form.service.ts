@@ -14,12 +14,13 @@ export class FormService {
         visit_date_min: [null, Validators.required],
         cor_visit_observer: [new Array(), Validators.required],
         cor_visit_perturbation: new Array(),
+        excretes_presence: null,
       });
       return formSuivi;
     }
 
     initFormTransect(): FormGroup {
-      const formSuivi = this._fb.group({
+      const formTransect = this._fb.group({
         id_base_site: null,
         id_transect: null,
         geom_end_lat: [null, Validators.required],
@@ -30,6 +31,6 @@ export class FormService {
         position_plot: null,
         transect_label: null
       });
-      return formSuivi;
+      return formTransect;
     }
 }

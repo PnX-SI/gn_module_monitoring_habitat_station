@@ -198,13 +198,17 @@ export class DataService {
     return Observable.of(mock);
   }
 
-  getStrate(params) {
-    let mock = [];
+  getStrates() {
+    let mock = [{
+      "id_nomenclature": 499,
+      "mnemonique": "Activit\u00e9s foresti\u00e8res",
+      "label_default": "Activit\u00e9s foresti\u00e8res"
+    }];
     return Observable.of(mock);
   }
 
   getOneVisit(params) {
-    let mock = [{
+    let mock = {
       "id_transect": 1,
       "transect_label": "T1",
       "id_base_site": 1,
@@ -233,7 +237,7 @@ export class DataService {
         "id_plot": 124,
         "cor_releve_plot_strats": [{
           "id_base_visit": 2,
-          "id_nomenclature_perturbation": 499,
+          "id_nomenclature_strate": 499,
           "create_date": "2019-03-04 18:37:30.461149",
           "t_nomenclature": {
             "id_nomenclature": 499,
@@ -275,7 +279,8 @@ export class DataService {
         "id_plot": 125,
         "cor_releve_plot_strats": [{
           "id_base_visit": 2,
-          "id_nomenclature_perturbation": 499,
+          "id_nomenclature_strate": 499,
+          "cover_porcentage": 100,
           "create_date": "2019-03-04 18:37:30.461149",
           "t_nomenclature": {
             "id_nomenclature": 499,
@@ -317,8 +322,8 @@ export class DataService {
         "id_plot": 126,
         "cor_releve_plot_strats": [{
           "id_base_visit": 2,
-          "id_nomenclature_perturbation": 499,
-          "create_date": "2019-03-04 18:37:30.461149",
+          "id_nomenclature_strate": 499,
+          "cover_porcentage": 100,
           "t_nomenclature": {
             "id_nomenclature": 499,
             "mnemonique": "Activit\u00e9s foresti\u00e8res",
@@ -357,7 +362,7 @@ export class DataService {
       }, {
         "code_plot": "127A",
         "id_plot": 127,
-        "strates": [{
+        "cor_releve_plot_strats": [{
           "id_nomenclature_strate": 12,
           "cover_porcentage": 20
         }, {
@@ -403,7 +408,7 @@ export class DataService {
           "cd_nom": 126806
         }]
       }]
-    }];
+    };
     return Observable.of(mock);
   }
 

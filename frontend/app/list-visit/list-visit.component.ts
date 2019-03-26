@@ -70,7 +70,6 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.formTransect = this.formService.initFormTransect();
 
   }
-
  
 
   ngAfterViewInit() {

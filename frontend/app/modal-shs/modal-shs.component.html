@@ -47,24 +47,66 @@
                         </pnx-nomenclature>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <div class="form-check" id="newExcretes">
+                        <input class="form-check-input" id="defaultCheck1" type="checkbox" value="" [formControl]=formVisit.controls.excretes_presence
+                        [checked]="formVisit.get('excretes_presence').value" />
+                        <label class="form-check-label" for="defaultCheck1">
+                            Présence de crottes
+                        </label>
+                    </div>
+                </div>
             </fieldset>
         </form>
         <hr>
-        <form>
+        <form [formGroup]="formPlot">
             <fieldset [disabled]="disabledForm">
                 <legend>
-                    Placettes
+                    <h3>Placettes</h3>
                 </legend>
-                <div class="form-group" *ngFor=''>
-                    <div class="form-group" *ngFor=''>
-                        <input class="form-control" type='number' placeholder="% de taxon"/>
+
+                <div formArrayName="plots">
+                <div *ngFor="let pl of formPlot.get('plots').controls; let i=index">
+                <fieldset>
+                    <legend>
+                        <h4>Placette {{i+1}} -
+                            <span >Code : {{ pl.controls.code_plot.value }} </span>
+                        </h4>
+                    </legend>
+                    <div [formGroupName]="i">
+                        <fieldset>
+                            <legend><b>Pourcentage de recouvrement taxons</b></legend>
+                            <div formArrayName="cor_releve_plot_taxons">
+                                <div *ngFor="let taxon of pl.get('cor_releve_plot_taxons').controls; let j=index">
+                                    <div  class="form-row">
+                                        <div [formGroupName]="j" class="form-group">
+                                            <!-- <label>cd_nom :</label>
+                                            <input formControlName="cd_nom" /> -->
+                                            <label>{{ taxon.get('nom_complet').value }} : </label>
+                                            <input type="number" class="col-md-4" formControlName="cover_porcentage" placeholder="Pourcentage de recouvrement"/> <span>%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                        <legend><h4>Pourcentage de recouvrement strates</h4></legend>
+                            <div formArrayName="cor_releve_plot_strats">
+                                <div *ngFor="let strat of pl.get('cor_releve_plot_strats').controls; let k=index">
+                                    <div [formGroupName]="k">
+                                        <label>{{ strat.get('label_default').value }}</label>
+                                        <input type="number" class="col-md-4" formControlName="cover_porcentage" placeholder="Pourcentage de recouvrement"/> <span>%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
                     </div>
-                    <label class="form-check-label" [for]="species[i].id"> {{species[i].nom_complet}} </label>
-                    <pnx-nomenclature  [multiSelect]="true"
-                        [disabled]="disabledForm"
-                        codeNomenclatureType="TYPE_STRATE">
-                    </pnx-nomenclature>
-                </div>       
+                </fieldset>
+                </div>
+                </div><br>
             </fieldset>
         </form>
     </div>
