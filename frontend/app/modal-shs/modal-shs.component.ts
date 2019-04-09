@@ -1,17 +1,6 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  OnDestroy,
-  EventEmitter
-} from "@angular/core";
-import {
-  NgbModal,
-  NgbModalRef,
-  NgbDateParserFormatter
-} from "@ng-bootstrap/ng-bootstrap";
-import { FormGroup, FormBuilder, FormArray, NgForm } from "@angular/forms";
+import { Component, OnInit, Input, Output, OnDestroy, EventEmitter } from "@angular/core";
+import { NgbModal, NgbModalRef, NgbDateParserFormatter } from "@ng-bootstrap/ng-bootstrap";
+import { FormGroup, FormBuilder, FormArray, NgForm ,Validators} from "@angular/forms";
 import { ToastrService } from "ngx-toastr";
 
 import { forkJoin } from "rxjs/observable/forkJoin";
@@ -47,7 +36,7 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
     id_base_visit: "",
     visit_date_min: "",
     observers: [],
-    plots:[{
+    plots: [{
       code_plot: "",
       id_plot: "",
       cor_releve_plot_taxons: [],
@@ -71,7 +60,7 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
     public dateParser: NgbDateParserFormatter,
     private toastr: ToastrService,
     private userService: UserService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.labelButton = this.labelButton || "";
@@ -89,7 +78,7 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
 
   }
 
-  getDatas() {
+  /*getDatas() {
     this._currentSite = this.storeService.getCurrentSite().subscribe(csite => {
       this.cd_hab = csite.cd_hab;
       this.nom_habitat = csite.nom_habitat;
@@ -120,7 +109,7 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
       this.strates = results[2];
       this.pachForm();
     });
-  }
+  }*/
 
 
   pachForm() {
@@ -138,9 +127,9 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
   setPlots() {
     let control = this.formPlot.controls.plots as FormArray;
     this.visit.plots.forEach(x => {
-      control.push(this._fb.group({ 
+      control.push(this._fb.group({
         code_plot: x.code_plot,
-        id_plot: x.id_plot,
+        id_plot: [x.id_plot,{validators : Validators.required}],
         cor_releve_plot_taxons: this.setPlotTaxons(x),
         cor_releve_plot_strats: this.setPlotStrates(x)
       }))
@@ -156,9 +145,9 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
       plot_strats['mnemonique'] = st.mnemonique;
       plot_strats['label_default'] = st.label_default;
       plot_strats['cover_porcentage'] = 0;
-      if(plot && plot.cor_releve_plot_strats && plot.cor_releve_plot_strats.length ) {
+      if (plot && plot.cor_releve_plot_strats && plot.cor_releve_plot_strats.length) {
         crps.forEach(y => {
-          if(st.id_nomenclature_strate = y.id_nomenclature) {
+          if (st.id_nomenclature_strate = y.id_nomenclature) {
             plot_strats['cover_porcentage'] = y.cover_porcentage;
             plot_strats['id_releve_plot_strat'] = y.id_releve_plot_strat;
           }
@@ -178,9 +167,9 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
       plot_taxon['cd_nom'] = specie.cd_nom;
       plot_taxon['nom_complet'] = specie.nom_complet;
       plot_taxon['cover_porcentage'] = 0;
-      if(plot && plot.cor_releve_plot_taxons && plot.cor_releve_plot_taxons.length) {
+      if (plot && plot.cor_releve_plot_taxons && plot.cor_releve_plot_taxons.length) {
         crps.forEach(y => {
-          if(y.cd_nom == specie.cd_nom) {
+          if (y.cd_nom == specie.cd_nom) {
             plot_taxon['cover_porcentage'] = y.cover_porcentage;
             plot_taxon['id_cor_hab_taxon'] = y.id_cor_hab_taxon;
           }
@@ -208,7 +197,7 @@ export class ModalSHSComponent implements OnInit, OnDestroy {
   }
 
   initData() {
-    this.getDatas();
+    //this.getDatas();
   }
 
   open(content) {

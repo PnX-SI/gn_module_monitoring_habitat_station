@@ -1,50 +1,42 @@
-import {
-  HttpParams
-} from '@angular/common/http';
-import {
-  Injectable
-} from '@angular/core';
-import {
-  Layer
-} from 'leaflet';
-import {
-  ModuleConfig
-} from '../module.config';
-import {
-  BehaviorSubject
-} from 'rxjs';
-import {
-  AppConfig
-} from '@geonature_config/app.config';
+import { HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';;
+import { ModuleConfig } from '../module.config';
+import { AppConfig } from '@geonature_config/app.config';
 
 @Injectable()
 export class StoreService {
 
   public shsConfig = ModuleConfig;
-
   public queryString = new HttpParams();
-
   public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
-
-
-  public currentSite$: BehaviorSubject < any > = new BehaviorSubject();
+  public currentSite: ISite;
 
   getCurrentSite() {
-    return this.currentSite$.asObservable();
+    return this.currentSite;
   }
 
-  setCurrentSite(cd_hab, nomhab, idBaseSite, geom_end, geom_start, plot_size, plots, position_plot, transect_label) {
-    this.currentSite$.next({
-      "cd_hab": cd_hab,
-      "nom_habitat": nomhab,
-      "id_base_site": idBaseSite,
-      "geom_end": geom_end,
-      "geom_start": geom_start,
-      "plot_size": plot_size,
-      "plots": plots,
-      "position_plot": position_plot,
-      "transect_label": transect_label
-    });
+  setCurrentSite(site: ISite) {
+    this.currentSite = site
   }
 
+}
+
+export interface ISite {
+  id_base_site?: number,
+  id_transect?: number,
+  cd_hab?: number,
+  organisme?: string,
+  nom_habitat?: string,
+  nom_commune?: string,
+  geom_end?: number[],
+  geom_start?: number[],
+  plot_size?: number,
+  plots?: any[],
+  position_plot?: string,
+  transect_label?: string,
+  base_site_code?: string,
+  base_site_description?: string,
+  base_site_name?: string,
+  date_max?: string,
+  observers?: any[]
 }

@@ -1,0 +1,53 @@
+<div>
+    <form [formGroup]="plotForm">
+        <div class="custom-control custom-checkbox">
+            <div class="form-check" id="newExcretes">
+                <input class="custom-control-input" id="defaultCheck1" type="checkbox"
+                    [formControl]=plotForm.controls.excretes_presence (change)='onBlurMethod()' />
+                <label class="custom-control-label" for="defaultCheck1">
+                    Présence de crottes
+                </label>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width: 70%">Strate</th>
+                    <th style="width: 30%">Recouvrement</th>
+                </tr>
+            </thead>
+            <tr *ngFor="let strate of plotForm.controls.strates_releve.controls" formArrayName="strates_releve">
+                <td>{{strate.controls.label_default.value}}</td>
+                <td>
+                    <div class="input-group">
+                        <input type="text" class="form-control" [formControl]=strate.controls.cover_pourcentage
+                            (blur)="onBlurMethod()">
+                        <div class="input-group-append">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <table class="table table-striped">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width: 70%">Taxon</th>
+                    <th style="width: 30%">Recouvrement</th>
+                </tr>
+            </thead>
+            <tr *ngFor="let taxon of plotForm.controls.taxons_releve.controls" formArrayName="taxons_releve">
+                <td>{{taxon.controls.nom_complet.value}}</td>
+                <td>
+                    <div class="input-group">
+                        <input type="text" class="form-control" [formControl]=taxon.controls.cover_pourcentage
+                            (blur)="onBlurMethod()">
+                        <div class="input-group-append">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>

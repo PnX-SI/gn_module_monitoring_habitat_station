@@ -15,75 +15,75 @@ import {
 
 @Injectable()
 export class DataService {
-  constructor(private _http: HttpClient) {}
+  constructor(private _http: HttpClient) { }
 
   getSites(params) {
     let mock = [{
-        "totalItmes": 0,
-        "items_per_page": 5
+      "totalItmes": 0,
+      "items_per_page": 5
+    },
+    {
+      "type": "FeatureCollection",
+      "features": [{
+        "type": "Feature",
+        "id": "1",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [6.7683121, 44.2840853],
+            [6.7679639, 44.2841710]
+          ]
+        },
+        "properties": {
+          "id_transect": 1,
+          "id_base_site": 1,
+          "transect_label": "T1",
+          "cd_hab": 16265,
+          "date_max": "2018-03-09",
+          "nom_habitat": "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
+          "nb_visit": "1",
+          "organisme": "Autre",
+          "observers": [{
+            "nom_role": "Nom-agent1",
+            "prenom_role": "Prénom-agent1"
+          }],
+          "nom_commune": "Bayasse",
+          "base_site_code": "4033890",
+          "base_site_description": "Aucune description",
+          "base_site_name": "HABSHS-1"
+        }
       },
       {
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "id": "1",
-            "geometry": {
-              "type": "LineString",
-              "coordinates": [
-                [6.7683121, 44.2840853],
-                [6.7679639, 44.2841710]
-              ]
-            },
-            "properties": {
-              "id_transect": 1,
-              "id_base_site": 1,
-              "transect_label": "T1",
-              "cd_hab": 16265,
-              "date_max": "2018-03-09",
-              "nom_habitat": "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
-              "nb_visit": "1",
-              "organisme": "Autre",
-              "observers": [{
-                "nom_role": "Nom-agent1",
-                "prenom_role": "Prénom-agent1"
-              }],
-              "nom_commune": "Bayasse",
-              "base_site_code": "4033890",
-              "base_site_description": "Aucune description",
-              "base_site_name": "HABSHS-1"
-            }
-          },
-          {
-            "type": "Feature",
-            "id": "2",
-            "geometry": {
-              "type": "LineString",
-              "coordinates": [
-                [6.7656401, 44.2873361],
-                [6.7657098, 44.2873147]
-              ]
-            },
-            "properties": {
-              "id_transect": 2,
-              "id_base_site": 2,
-              "transect_label": "T2",
-              "cd_hab": 16265,
-              "date_max": "2018-03-09",
-              "nom_habitat": "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
-              "nb_visit": "1",
-              "organisme": "Autre",
-              "observers": [{
-                "nom_role": "Nom-agent1",
-                "prenom_role": "Prénom-agent1"
-              }],
-              "nom_commune": "Bayasse",
-              "base_site_code": "4033890",
-              "base_site_description": "Aucune description",
-              "base_site_name": "HABSHS-2"
-            }
-          }
-        ]
+        "type": "Feature",
+        "id": "2",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [6.7656401, 44.2873361],
+            [6.7657098, 44.2873147]
+          ]
+        },
+        "properties": {
+          "id_transect": 2,
+          "id_base_site": 2,
+          "transect_label": "T2",
+          "cd_hab": 16265,
+          "date_max": "2018-03-09",
+          "nom_habitat": "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
+          "nb_visit": "1",
+          "organisme": "Autre",
+          "observers": [{
+            "nom_role": "Nom-agent1",
+            "prenom_role": "Prénom-agent1"
+          }],
+          "nom_commune": "Bayasse",
+          "base_site_code": "4033890",
+          "base_site_description": "Aucune description",
+          "base_site_name": "HABSHS-2"
+        }
       }
+      ]
+    }
     ]
     return Observable.of(mock);
   }
@@ -238,6 +238,8 @@ export class DataService {
         "cor_releve_plot_strats": [{
           "id_base_visit": 2,
           "id_nomenclature_strate": 499,
+          // "label_strate"
+          "cover_porcentage": 100,
           "create_date": "2019-03-04 18:37:30.461149",
           "t_nomenclature": {
             "id_nomenclature": 499,
@@ -248,31 +250,38 @@ export class DataService {
         "cor_releve_plot_taxons": [{
           "id_cor_hab_taxon": 180,
           "cover_porcentage": 0,
-          "cd_nom": 104123
+          "cd_nom": 104123,
+          "nom_complet": "Juncus arcticus Willd., 1799"
         }, {
           "id_cor_hab_taxon": 182,
           "cover_porcentage": 10,
-          "cd_nom": 88675
+          "cd_nom": 88675,
+          "nom_complet": "Carex microglochin Wahlenb., 1803"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 15,
           "cd_nom": 88662,
+          "nom_complet": "Carex maritima Gunnerus, 1772"
         }, {
           "id_cor_hab_taxon": 184,
           "cover_porcentage": 15,
           "cd_nom": 88380,
+          "nom_complet": "Carex bicolor All., 1785"
         }, {
           "id_cor_hab_taxon": 185,
           "cover_porcentage": 20,
-          "cd_nom": 88360
+          "cd_nom": 88360,
+          "nom_complet": "Carex atrofusca Schkuhr, 1801"
         }, {
           "id_cor_hab_taxon": 186,
           "cover_porcentage": 10,
-          "cd_nom": 127195
+          "cd_nom": 127195,
+          "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 30,
-          "cd_nom": 126806
+          "cd_nom": 126806,
+          "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
         }]
       }, {
         "code_plot": "125A",
@@ -291,31 +300,38 @@ export class DataService {
         "cor_releve_plot_taxons": [{
           "id_cor_hab_taxon": 180,
           "cover_porcentage": 0,
-          "cd_nom": 104123
+          "cd_nom": 104123,
+          "nom_complet": "Juncus arcticus Willd., 1799"
         }, {
           "id_cor_hab_taxon": 182,
           "cover_porcentage": 10,
-          "cd_nom": 88675
+          "cd_nom": 88675,
+          "nom_complet": "Carex microglochin Wahlenb., 1803"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 15,
           "cd_nom": 88662,
+          "nom_complet": "Carex maritima Gunnerus, 1772"
         }, {
           "id_cor_hab_taxon": 184,
           "cover_porcentage": 15,
           "cd_nom": 88380,
+          "nom_complet": "Carex bicolor All., 1785"
         }, {
           "id_cor_hab_taxon": 185,
           "cover_porcentage": 20,
-          "cd_nom": 88360
+          "cd_nom": 88360,
+          "nom_complet": "Carex atrofusca Schkuhr, 1801"
         }, {
           "id_cor_hab_taxon": 186,
           "cover_porcentage": 10,
-          "cd_nom": 127195
+          "cd_nom": 127195,
+          "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 30,
-          "cd_nom": 126806
+          "cd_nom": 126806,
+          "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
         }]
       }, {
         "code_plot": "126A",
@@ -333,31 +349,38 @@ export class DataService {
         "cor_releve_plot_taxons": [{
           "id_cor_hab_taxon": 180,
           "cover_porcentage": 0,
-          "cd_nom": 104123
+          "cd_nom": 104123,
+          "nom_complet": "Juncus arcticus Willd., 1799"
         }, {
           "id_cor_hab_taxon": 182,
           "cover_porcentage": 10,
-          "cd_nom": 88675
+          "cd_nom": 88675,
+          "nom_complet": "Carex microglochin Wahlenb., 1803"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 15,
           "cd_nom": 88662,
+          "nom_complet": "Carex maritima Gunnerus, 1772"
         }, {
           "id_cor_hab_taxon": 184,
           "cover_porcentage": 15,
           "cd_nom": 88380,
+          "nom_complet": "Carex bicolor All., 1785"
         }, {
           "id_cor_hab_taxon": 185,
           "cover_porcentage": 20,
-          "cd_nom": 88360
+          "cd_nom": 88360,
+          "nom_complet": "Carex atrofusca Schkuhr, 1801"
         }, {
           "id_cor_hab_taxon": 186,
           "cover_porcentage": 10,
-          "cd_nom": 127195
+          "cd_nom": 127195,
+          "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 30,
-          "cd_nom": 126806
+          "cd_nom": 126806,
+          "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
         }]
       }, {
         "code_plot": "127A",
@@ -381,35 +404,58 @@ export class DataService {
         "cor_releve_plot_taxons": [{
           "id_cor_hab_taxon": 180,
           "cover_porcentage": 0,
-          "cd_nom": 104123
+          "cd_nom": 104123,
+          "nom_complet": "Juncus arcticus Willd., 1799"
         }, {
           "id_cor_hab_taxon": 182,
           "cover_porcentage": 10,
-          "cd_nom": 88675
+          "cd_nom": 88675,
+          "nom_complet": "Carex microglochin Wahlenb., 1803"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 15,
           "cd_nom": 88662,
+          "nom_complet": "Carex maritima Gunnerus, 1772"
         }, {
           "id_cor_hab_taxon": 184,
           "cover_porcentage": 15,
           "cd_nom": 88380,
+          "nom_complet": "Carex bicolor All., 1785"
         }, {
           "id_cor_hab_taxon": 185,
           "cover_porcentage": 20,
-          "cd_nom": 88360
+          "cd_nom": 88360,
+          "nom_complet": "Carex atrofusca Schkuhr, 1801"
         }, {
           "id_cor_hab_taxon": 186,
           "cover_porcentage": 10,
-          "cd_nom": 127195
+          "cd_nom": 127195,
+          "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
         }, {
           "id_cor_hab_taxon": 183,
           "cover_porcentage": 30,
-          "cd_nom": 126806
+          "cd_nom": 126806,
+          "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
         }]
       }]
     };
     return Observable.of(mock);
   }
-
 }
+
+export interface IVisit {
+  id_base_visit?: string,
+  visit_date_min?: string,
+  observers?: string[],
+  cor_visit_perturbation?: string[],
+  excretes_presence?: boolean,
+  plots: Plot[]
+}
+
+export interface Plot {
+  code_plot?: string,
+  id_plot?: string,
+  cor_releve_plot_taxons?: string[],
+  cor_releve_plot_strats?: string[],
+}
+

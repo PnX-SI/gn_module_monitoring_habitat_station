@@ -1,5 +1,5 @@
 <div id="cover-spin" *ngIf="!dataLoaded"></div>
-<div class="row row-0">
+<div class="row row-0" *ngIf="dataLoaded">
     <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
         <div>
             <button type="button" class="btn btn-link btn-sm back-button" (click)="backToSites()">
@@ -8,7 +8,7 @@
             </button>
         </div>
         <div class="card-header">
-            <h3 class="card-title"> Consultation du transect {{ siteName }} </h3>
+            <h3 class="card-title"> Consultation du transect {{ site.transect_label }} </h3>
         </div>
         <div class="card-body">
             <ul class="nav nav-tabs" role="tablist">
@@ -24,16 +24,16 @@
 
             <div class="tab-content">
                 <div class="tab-pane active modal-header " id="infoGen" role="tabpanel">
-                    <p> <span> Code site : </span> <span class="strong "> {{ siteCode }} </span></p>
-                    <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ nomHabitat }}"> {{ nomHabitat }}
+                    <p> <span> Code site : </span> <span class="strong "> {{ site.base_site_code }} </span></p>
+                    <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ site.nom_habitat }}"> {{ site.nom_habitat }}
                         </span></p>
-                    <p> <span> Commune : </span> <span class="strong"> {{ nomCommune}} </span></p>
+                    <p> <span> Commune : </span> <span class="strong"> {{ site.nom_commune}} </span></p>
                 </div>
 
                 <div class="tab-pane modal-header" id="details" role="tabpanel">
-                    <p> <span> Nom du site : </span> <span class="strong"> {{ siteName }} </span></p>
-                    <p> <span> Organisme : </span> <span class="strong"> {{ organisme }} </span></p>
-                    <p> <span> Description du site : </span> <span class="strong"> {{ siteDesc }} </span></p>
+                    <p> <span> Nom du site : </span> <span class="strong"> {{ site.transect_label }} </span></p>
+                    <p> <span> Organisme : </span> <span class="strong"> {{ site.organisme }} </span></p>
+                    <p> <span> Description du site : </span> <span class="strong"> {{ site.base_site_description }} </span></p>
                 </div>
             </div>
 
@@ -106,7 +106,7 @@
                     <hr>
                     <label> Liste des placettes :</label>
                     <ul class="list-group list-group-flush" >
-                        <li *ngFor="let plot of plots"  class="list-group-item" >
+                        <li *ngFor="let plot of site.plots"  class="list-group-item" >
                             <span>code placette : </span> {{ plot.code_plot }}
                         </li>
                     </ul>
@@ -132,11 +132,9 @@
                 <ngx-datatable class="material" [columnMode]="'force'" [rows]="rows" [headerHeight]="50" [footerHeight]="50"
                     [rowHeight]="'auto'" [messages]="storeService.shsConfig.list_visit_message" [offset]="mapListService.page.pageNumber"
                     [limit]="mapListService.page.size">
-
                     <ngx-datatable-column *ngFor="let col of storeService.shsConfig.default_list_visit_columns" [name]="col.name"
                         [prop]="col.prop" maxWidth="col.maxWidth">
                     </ngx-datatable-column>
-
                     <ngx-datatable-column maxWidth="120">
                         <ng-template let-row="row" ngx-datatable-cell-template>
                             <modal-shs classStyle="btn btn-lg btn-outline-shadow btn-ghost" title="Visualiser" iconStyle="fa fa-info-circle"
@@ -144,16 +142,19 @@
                             </modal-shs>
                         </ng-template>
                     </ngx-datatable-column>
-
                 </ngx-datatable>
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-between">
                     <pnx-modal-download labelButton='Télécharger ces relevés' [pathDownload]='storeService.urlLoad' >
                     </pnx-modal-download>
-                    <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
+                    <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
                         iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
-                    </modal-shs>
+                    </modal-shs> -->
+                    <button class="btn btn-sm btn-success pull-right" (click)="onNewReleve()">
+                        <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+                        Ajouter une nouvelle visite
+                    </button>
                 </div>
             </div>
         </div>

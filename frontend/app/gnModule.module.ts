@@ -2,7 +2,6 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
-
 import { GN2CommonModule } from "@geonature_common/GN2Common.module";
 
 // Service
@@ -14,18 +13,36 @@ import { UserService } from './services/user.service';
 import { SiteMapListComponent } from "./site-map-list/site-map-list.component";
 import { ListVisitComponent } from "./list-visit/list-visit.component";
 import { ModalSHSComponent } from "./modal-shs/modal-shs.component";
-
+import { ReleveComponent } from "./releve/releve.component";
+import { PlotReleveComponent } from "./plot_relev/plot_relev.component";
 
 // my module routing
 const routes: Routes = [
   { path: "", component: SiteMapListComponent },
-  { path: 'listVisit/:idSite', component: ListVisitComponent }
+  { path: 'site/:idSite', component: ListVisitComponent },
+  { path: 'site/:idSite/newReleve', component: ReleveComponent }
 ];
 
 @NgModule({
-  declarations: [SiteMapListComponent, ListVisitComponent, ModalSHSComponent],
-  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule],
-  providers: [HttpClient, DataService, StoreService, FormService, UserService],
+  declarations: [
+    SiteMapListComponent,
+    ListVisitComponent,
+    ModalSHSComponent,
+    ReleveComponent,
+    PlotReleveComponent
+  ],
+  imports: [
+    GN2CommonModule,
+    RouterModule.forChild(routes),
+    CommonModule
+  ],
+  providers: [
+    HttpClient,
+    DataService,
+    StoreService,
+    FormService,
+    UserService
+  ],
   bootstrap: []
 })
-export class GeonatureModule {}
+export class GeonatureModule { }

@@ -12,8 +12,8 @@ export class FormService {
         id_base_site: null,
         id_base_visit: null,
         visit_date_min: [null, Validators.required],
-        cor_visit_observer: [new Array(), Validators.required],
-        cor_visit_perturbation: new Array(),
+        cor_visit_observer: [null, Validators.required],
+        cor_visit_perturbation: null,
         excretes_presence: null,
       });
       return formSuivi;
@@ -33,4 +33,7 @@ export class FormService {
       });
       return formTransect;
     }
+
+  
+
 }

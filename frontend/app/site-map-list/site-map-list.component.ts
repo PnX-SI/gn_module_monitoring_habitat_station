@@ -211,7 +211,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onInfo(id_base_site) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/listVisit`,
+      `${ModuleConfig.MODULE_URL}/site`,
       id_base_site
     ]);
   }
