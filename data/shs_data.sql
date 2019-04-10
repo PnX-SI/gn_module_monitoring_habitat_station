@@ -78,6 +78,20 @@ SELECT
 ;
 
 
+--- Insérer les placettes
+
+do $$
+begin
+for r in 1..20 loop
+    INSERT INTO pr_monitoring_habitat_station.t_plots (id_transect, code_plot) VALUES
+        ((SELECT id_transect FROM pr_monitoring_habitat_station.t_transects WHERE id_base_site = (SELECT id_base_site FROM gn_monitoring.t_base_sites WHERE base_site_code='TESTSHS1')),
+        concat('Qu', r))
+    ;
+end loop;
+end;
+$$;
+
+
 -- Insérer dans cor_site_module les sites suivis de ce module
 INSERT INTO gn_monitoring.cor_site_module
 WITH id_module AS(
