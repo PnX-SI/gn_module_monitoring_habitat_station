@@ -20,8 +20,8 @@ CREATE TABLE t_transects (
     id_transect serial NOT NULL,
     id_base_site integer NOT NULL,
     transect_label character varying(50),
-    geom_start public.geometry(MultiPolygon, MY_SRID_WORLD),
-    geom_end public.geometry(MultiPolygon, MY_SRID_WORLD),
+    geom_start public.geometry(Point, MY_SRID_WORLD),
+    geom_end public.geometry(Point, MY_SRID_WORLD),
     id_nomenclature_plot_position integer NOT NULL,
     cd_hab integer NOT NULL,
     plot_size character varying(50)
