@@ -41,10 +41,24 @@ def get_all_sites():
     q = (
         DB.session.query(
             TTransect,
+            func.max(TBaseVisits.visit_date_min),
             HabrefSHS.lb_hab_fr_complet,
-            func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
+            func.count(distinct(TBaseVisits.id_base_visit)),
+            func.string_agg(distinct(BibOrganismes.nom_organisme), ', ')
             ).outerjoin(
+                TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
+            )
+            # get habitat
+            .outerjoin(
                 HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
+            )
+            # get organisme
+            .outerjoin(
+                corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
+            ).outerjoin(
+                User, User.id_role == corVisitObserver.c.id_role
+            ).outerjoin(
+                BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
             )
             .group_by(
                 TTransect, HabrefSHS.lb_hab_fr_complet
@@ -56,6 +70,22 @@ def get_all_sites():
 
     if 'id_base_site' in parameters:
         q = q.filter(TTransect.id_base_site == parameters['id_base_site'])
+
+    if 'year' in parameters:
+        # relance la requête pour récupérer la date_max exacte si on filtre sur l'année
+        q_year = (
+            DB.session.query(
+                TTransect.id_base_site,
+                func.max(TBaseVisits.visit_date_min),
+            ).outerjoin(
+                TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
+            ).group_by(TTransect.id_base_site)
+        )
+
+        data_year = q_year.all()
+
+        q = q.filter(func.date_part('year', TBaseVisits.visit_date_min) == parameters['year'])
+
 
     page = request.args.get('page', 1, type=int)
     items_per_page = blueprint.config['items_per_page']
@@ -79,13 +109,29 @@ def get_all_sites():
     if data:
         for d in data:
             feature = d[0].get_geofeature()
-            print("feature: ", feature)
             id_site = feature['properties']['id_base_site']
             base_site_code = feature['properties']['t_base_site']['base_site_code']
             base_site_description = feature['properties']['t_base_site']['base_site_description'] or 'Aucune description'
             base_site_name = feature['properties']['t_base_site']['base_site_name']
             if feature['properties']['t_base_site']:
-                            del feature['properties']['t_base_site']
+                del feature['properties']['t_base_site']
+
+            if 'year' in parameters:
+                for dy in data_year:
+                    #  récupérer la bonne date max du site si on filtre sur année
+                    if id_site == dy[0]:
+                        feature['properties']['date_max'] = str(d[1])
+            else:
+                feature['properties']['date_max'] = str(d[1])
+                if d[1] == None:
+                    feature['properties']['date_max'] = 'Aucune visite'
+
+            feature['properties']['nom_habitat'] = str(d[2])
+            feature['properties']['nb_visit'] = str(d[3])
+
+            if d[4] == None:
+                feature['properties']['organisme'] = 'Aucun'
+
             feature['properties']['organisme'] = 'Aucun'
             feature['properties']['base_site_code'] = base_site_code
             feature['properties']['base_site_description'] = base_site_description
