@@ -124,13 +124,15 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   backToSites() {
-    this._location.back();
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/`]);
   }
 
-  onNewReleve() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.id_base_site}/newReleve`]);
+  onNewVisit() {
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.id_base_site}/newVisit`]);
   }
-
+  onVisitDetails(idVisit) {
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.id_base_site}/visit/`,idVisit]);
+  }
   ngOnDestroy() {
     this.storeService.queryString = this.storeService.queryString.delete(
       "id_base_site"

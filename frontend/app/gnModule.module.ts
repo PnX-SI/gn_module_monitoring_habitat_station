@@ -12,7 +12,6 @@ import { UserService } from './services/user.service';
 
 import { SiteMapListComponent } from "./site-map-list/site-map-list.component";
 import { ListVisitComponent } from "./list-visit/list-visit.component";
-import { ModalSHSComponent } from "./modal-shs/modal-shs.component";
 import { ReleveComponent } from "./releve/releve.component";
 import { PlotReleveComponent } from "./plot_relev/plot_relev.component";
 
@@ -20,14 +19,14 @@ import { PlotReleveComponent } from "./plot_relev/plot_relev.component";
 const routes: Routes = [
   { path: "", component: SiteMapListComponent },
   { path: 'site/:idSite', component: ListVisitComponent },
-  { path: 'site/:idSite/newReleve', component: ReleveComponent }
+  { path: 'site/:idSite/visit/:idVisit', component: ReleveComponent },
+  { path: 'site/:idSite/newVisit', component: ReleveComponent }
 ];
 
 @NgModule({
   declarations: [
     SiteMapListComponent,
     ListVisitComponent,
-    ModalSHSComponent,
     ReleveComponent,
     PlotReleveComponent
   ],

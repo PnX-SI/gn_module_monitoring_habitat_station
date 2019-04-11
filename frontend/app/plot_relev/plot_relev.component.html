@@ -1,4 +1,5 @@
-<div>
+<h4 class="plot-title">Code Placette: {{plot_title}}</h4>
+<div class="plot-releve">
     <form [formGroup]="plotForm">
         <div class="custom-control custom-checkbox">
             <div class="form-check" id="newExcretes">
@@ -20,7 +21,7 @@
                 <td>{{strate.controls.label_default.value}}</td>
                 <td>
                     <div class="input-group">
-                        <input type="text" class="form-control" [formControl]=strate.controls.cover_pourcentage
+                        <input type="text" class="form-control" [formControl]=strate.controls.cover_porcentage
                             (blur)="onBlurMethod()">
                         <div class="input-group-append">
                             <span class="input-group-text">%</span>
@@ -40,7 +41,7 @@
                 <td>{{taxon.controls.nom_complet.value}}</td>
                 <td>
                     <div class="input-group">
-                        <input type="text" class="form-control" [formControl]=taxon.controls.cover_pourcentage
+                        <input type="text" class="form-control" [formControl]=taxon.controls.cover_porcentage
                             (blur)="onBlurMethod()">
                         <div class="input-group-append">
                             <span class="input-group-text">%</span>

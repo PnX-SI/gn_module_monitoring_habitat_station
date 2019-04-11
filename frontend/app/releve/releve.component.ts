@@ -6,7 +6,8 @@ import { forkJoin } from "rxjs/observable/forkJoin";
 import { ModuleConfig } from "../module.config";
 import { DataService, IVisit } from "../services/data.service";
 import { StoreService, ISite } from "../services/store.service";
-
+import { ToastrService } from "ngx-toastr";
+import * as _ from 'lodash';
 
 @Component({
     selector: "releve",
@@ -17,6 +18,7 @@ import { StoreService, ISite } from "../services/store.service";
 export class ReleveComponent implements OnInit {
 
     dataLoaded: boolean = false;
+    idSite: number;
     idVisit: number;
     visit: IVisit;
     isNew: boolean;
@@ -25,10 +27,16 @@ export class ReleveComponent implements OnInit {
     public id_base_site = 1;
     public strates = [];
     taxons;
+    plotReleve;
     currentSite: ISite;
     plot: any;
     id_plot: number;
     visitForm: FormGroup;
+    plot_title: string;
+    // mock data
+    dataIn;
+    spinner: boolean;
+
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -37,48 +45,67 @@ export class ReleveComponent implements OnInit {
         public dateParser: NgbDateParserFormatter,
         private storeService: StoreService,
         private _api: DataService,
-
+        private toastr: ToastrService,
     ) {
 
     }
 
     ngOnInit() {
-        this.idVisit = this.activatedRoute.snapshot.params['idSite'];
+        this.idSite = this.activatedRoute.snapshot.params['idSite'];
+        this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
+        this.isNew = !this.idVisit;
+
         this.currentSite = this.storeService.getCurrentSite();
         this.intitForm();
-        console.log('currenSite 1', this.currentSite);
         if (!this.currentSite) {
-            forkJoin([this._api.getStrates(), this._api.getSite(this.idVisit)])
+            forkJoin([this._api.getStrates(), this._api.getSite(this.idSite)])
                 .subscribe(results => {
                     this.strates = results[0];
                     this.currentSite = results[1];
                     this.id_plot = this.currentSite.plots[0].id_plot;
+                    this.plot_title = this.currentSite.plots[0].code_plot;
                     this._api.getTaxons(this.currentSite.cd_hab).subscribe(
                         (taxons) => {
                             this.taxons = taxons;
-                            console.log('currenSite 2', this.currentSite);
-                            this.dataLoaded = true;
+                            if (!this.isNew) {
+                                this.getVisit();
+                            }
+                            else {
+                                this.dataLoaded = true;
+                                this.visit = this._api.getDefaultVisit()
+                            }
                         }
                     )
                 });
         }
         else {
             this.id_plot = this.currentSite.plots[0].id_plot;
+            this.plot_title = this.currentSite.plots[0].code_plot;
             forkJoin([this._api.getStrates(), this._api.getTaxons(this.currentSite.cd_hab)])
                 .subscribe(results => {
                     this.strates = results[0];
                     this.taxons = results[1];
-                    this.dataLoaded = true;
+                    if (!this.isNew) {
+                        this.getVisit();
+                    }
+                    else {
+                        this.dataLoaded = true;
+                        this.visit = this._api.getDefaultVisit()
+                    }
                 });
         }
     }
 
-    /* getVisit() {
+    getVisit() {
         this._api.getOneVisit(this.idVisit).subscribe(
             data => {
                 this.visit = data;
                 this.intitForm();
+                this.dataIn = this.visit.plots.find((plot) => {
+                    return plot.id_plot == this.id_plot
+                });
                 this.dataLoaded = true;
+                this.pachForm();
                 console.log("visit", this.visit);
             },
             error => {
@@ -94,22 +121,35 @@ export class ReleveComponent implements OnInit {
                 this.dataLoaded = true;
             }
         );
-    } */
+    }
 
     getPlotReleve(plotReleve) {
-        console.log('plotReleve',plotReleve);
+        this.plotReleve = plotReleve;
+        console.log('plotReleve', plotReleve);
     }
 
     backToVisites() {
         this.router.navigate([`${ModuleConfig.MODULE_URL}/site`, this.id_base_site]);
     }
 
-    onChangePlot(plot){
-        console.log('p',plot);
-        
-        this.id_plot = plot.id_plot
-    }
+    onChangePlot(plot) {
+        this.spinner = true;
+        this.id_plot = plot.id_plot;
+        this.plot_title = this.currentSite.plots.find((plot) => {
+            return plot.id_plot == this.id_plot
+        }).code_plot;
+        this.dataIn = this.visit.plots.find((plot) => {
+            return plot.id_plot == this.id_plot
+        });
+        setTimeout(() => {
+            this.spinner = false
+        }, 300);
 
+    }
+    isActive(plot) {
+        return this.id_plot === plot.id_plot;
+
+    }
     intitForm() {
         this.visitForm = this._fb.group({
             visit_date_min: [null, Validators.required],
@@ -118,37 +158,13 @@ export class ReleveComponent implements OnInit {
         });
     }
 
-
-    initPlots() {
-        return this._fb.group({
-            id_plot: [null, Validators.required],
-            taxons_releve: this._fb.array([this.initTaxon_relev()]),
-            strates_releve: this._fb.array([this.initSrate_relev()])
-        });
-    };
-
-    initTaxon_relev() {
-        return this._fb.group({
-            id_taxon: [null, Validators.required],
-            cover_porcentage: [0]
-        });
-    }
-
-    initSrate_relev() {
-        return this._fb.group({
-            id_strate: [null, Validators.required],
-            cover_porcentage: [0]
-        });
-    }
-
-    /*pachForm() {
-        this.formVisit.patchValue({
+    pachForm() {
+        this.visitForm.patchValue({
             visit_date_min: this.dateParser.parse(this.visit.visit_date_min),
             observers: this.visit.observers,
-            perturbations: this.visit.perturbations,
-           
+            perturbations: this.visit.cor_transect_visit_perturbation,
         });
-    };*/
+    };
 
 
 }

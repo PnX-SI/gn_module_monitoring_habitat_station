@@ -137,9 +137,7 @@
                     </ngx-datatable-column>
                     <ngx-datatable-column maxWidth="120">
                         <ng-template let-row="row" ngx-datatable-cell-template>
-                            <modal-shs classStyle="btn btn-lg btn-outline-shadow btn-ghost" title="Visualiser" iconStyle="fa fa-info-circle"
-                                idVisit="{{ row.id_base_visit }}" (visitsUp)='getVisits()' >
-                            </modal-shs>
+                            <i class="btn fa fa-info-circle" aria-hidden="true" (click)="onVisitDetails(row.id_base_visit)"></i>
                         </ng-template>
                     </ngx-datatable-column>
                 </ngx-datatable>
@@ -151,7 +149,7 @@
                     <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
                         iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
                     </modal-shs> -->
-                    <button class="btn btn-sm btn-success pull-right" (click)="onNewReleve()">
+                    <button class="btn btn-sm btn-success pull-right" (click)="onNewVisit()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
                         Ajouter une nouvelle visite
                     </button>

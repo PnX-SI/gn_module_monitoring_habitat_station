@@ -1,4 +1,4 @@
-<div *ngIf="dataLoaded">
+<div class="releve" *ngIf="dataLoaded">
     <div class="row row-0">
         <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
             <div>
@@ -49,19 +49,29 @@
                 <div class="list-plots">
                     <button *ngFor="let plot of currentSite.plots"
                      class="plot"
+                     [class.active]="isActive(plot)"
                      (click)="onChangePlot(plot)" >code placette : {{ plot.code_plot }}</button>
                   </div>
               
             </fieldset>
         </div>
         <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 ">
+                <div id="cover-spin" *ngIf="spinner"></div>
             <plot_relev 
                 [id_plot]='id_plot'
                 [taxons]='taxons'
                 [strates]='strates'
+                [(data)]='dataIn'
+                [plot_title]='plot_title'
                 (plotReleve)='getPlotReleve($event)'>
             </plot_relev>
         </div>
     </div>
-
+    <div class="card-footer">
+        <div class="d-flex justify-content-between">
+            <button class="btn btn-sm btn-success" (click)="onNewReleve()">
+                Ajouter une nouvelle visite
+            </button>
+        </div>
+    </div>
 </div>
