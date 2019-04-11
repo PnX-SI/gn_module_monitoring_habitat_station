@@ -79,12 +79,12 @@ class TTransect(DB.Model):
     #habref = DB.relationship('HabrefSHS', primaryjoin='TTransect.cd_hab == HabrefSHS.cd_hab', backref='t_transects')
     t_base_site = DB.relationship('TBaseSites')
 
-    def get_geofeature(self):
+    def get_geofeature(self, recursif=False):
         line = self.points_to_linestring()
         feature = Feature(
             id=str( self.id_base_site ),
             geometry=line,
-            properties=self.as_dict(True),
+            properties=self.as_dict(recursif),
         )
         return feature
 

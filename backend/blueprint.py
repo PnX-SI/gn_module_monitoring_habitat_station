@@ -24,7 +24,7 @@ from geonature.core.users.models import BibOrganismes
 
 from .repositories import check_user_cruved_visit, check_year_visit
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot
+from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
 
@@ -35,8 +35,6 @@ def get_all_sites():
     Retourne tous les sites
     '''
     parameters = request.args
-
-    id_type_commune = blueprint.config['id_type_commune']
 
     q = (
         DB.session.query(
@@ -108,7 +106,7 @@ def get_all_sites():
 
     if data:
         for d in data:
-            feature = d[0].get_geofeature()
+            feature = d[0].get_geofeature(True)
             id_site = feature['properties']['id_base_site']
             base_site_code = feature['properties']['t_base_site']['base_site_code']
             base_site_description = feature['properties']['t_base_site']['base_site_description'] or 'Aucune description'
@@ -139,4 +137,62 @@ def get_all_sites():
             features.append(feature)
 
         return [pageInfo,FeatureCollection(features)]
+    return None
+
+
+@blueprint.route('/sites/<id_site>', methods=['GET'])
+@json_resp
+def get_site(id_site):
+    '''
+    Retourne un site à l'aide de son id
+    '''
+
+    id_type_commune = blueprint.config['id_type_commune']
+
+    data = DB.session.query(
+        TTransect,
+        TNomenclatures,
+        func.string_agg(distinct(LAreas.area_name), ', '),
+        func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
+        HabrefSHS.lb_hab_fr_complet
+    ).filter_by(id_transect = id_site
+    ).outerjoin(
+        TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
+    ).outerjoin(
+        TNomenclatures, TTransect.id_nomenclature_plot_position == TNomenclatures.id_nomenclature
+     # get habitat
+    ).outerjoin(
+        HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
+    # get organisme
+    ).outerjoin(
+        corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
+    ).outerjoin(
+        User, User.id_role == corVisitObserver.c.id_role
+    ).outerjoin(
+        BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
+    # get municipalities of a site
+    ).outerjoin(
+        corSiteArea, corSiteArea.c.id_base_site == TTransect.id_base_site
+    ).outerjoin(
+        LAreas, and_(LAreas.id_area == corSiteArea.c.id_area, LAreas.id_type == id_type_commune)
+    ).group_by(TTransect.id_transect, TNomenclatures.id_nomenclature, HabrefSHS.lb_hab_fr_complet
+    ).first()
+
+    plots = DB.session.query(TPlot).filter_by(id_transect = id_site)
+
+    site = []
+    if data:
+        transect = data[0].get_geofeature(True)
+        plot_position = data[1].as_dict()
+        transect['properties']['plot_position'] = plot_position
+        if data[2]:
+            transect['properties']['nom_commune'] = str(data[2])
+        if data[3]:
+            transect['properties']['observers'] = str(data[3])
+        if data[4]:
+            transect['properties']['nom_habitat'] = str(data[4])
+        if(plots):
+            transect['properties']['plots'] = [p.as_dict() for p in plots]
+        site.append(transect)
+        return site
     return None
