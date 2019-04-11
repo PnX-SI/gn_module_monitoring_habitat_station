@@ -1,17 +1,8 @@
-import {
-  Injectable,
-  Inject
-} from "@angular/core";
-import {
-  HttpClient,
-  HttpParams
-} from "@angular/common/http";
-import {
-  AppConfig
-} from "@geonature_config/app.config";
-import {
-  Observable
-} from "rxjs/Observable";
+import { Injectable, Inject } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { AppConfig } from "@geonature_config/app.config";
+import { ModuleConfig } from "../module.config";
+import { Observable } from "rxjs/Observable";
 
 @Injectable()
 export class DataService {
@@ -87,7 +78,10 @@ export class DataService {
     ]
     return Observable.of(mock);
   }
+  getSiteByID(idSite) {
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/site/${idSite}`)
 
+  }
   getSite(params) {
     let mock = {
       "id_transect": 1,

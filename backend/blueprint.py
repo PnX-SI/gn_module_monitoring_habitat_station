@@ -24,7 +24,7 @@ from geonature.core.users.models import BibOrganismes
 
 from .repositories import check_user_cruved_visit, check_year_visit
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS
+from .models import HabrefSHS, TTransect, TPlot, TRelevePlot
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
 
@@ -140,7 +140,7 @@ def get_all_sites():
     return None
 
 
-@blueprint.route('/sites/<id_site>', methods=['GET'])
+@blueprint.route('/site/<id_site>', methods=['GET'])
 @json_resp
 def get_site(id_site):
     '''
@@ -180,7 +180,7 @@ def get_site(id_site):
 
     plots = DB.session.query(TPlot).filter_by(id_transect = id_site)
 
-    site = []
+
     if data:
         transect = data[0].get_geofeature(True)
         plot_position = data[1].as_dict()
@@ -193,6 +193,6 @@ def get_site(id_site):
             transect['properties']['nom_habitat'] = str(data[4])
         if(plots):
             transect['properties']['plots'] = [p.as_dict() for p in plots]
-        site.append(transect)
-        return site
+        
+        return transect
     return None

@@ -55,6 +55,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.formTransect = this.formService.initFormTransect();
     this.getSite();
+    this.getSiteByID()
   }
 
   getVisits() {
@@ -85,7 +86,11 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       }
     );
   }
-
+ getSiteByID(){
+   this._api.getSiteByID(1).subscribe(
+     (site) => console.log('siteApi',site)
+   )
+ }
   getSite() {
     this.paramApp = this.paramApp.append("id_base_site", this.idSite);
     this._api.getSite(this.paramApp).subscribe(

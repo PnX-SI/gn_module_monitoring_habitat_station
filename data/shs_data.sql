@@ -39,11 +39,8 @@ INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemoni
 -- Créer la nomenclature type de site habitat 
 ---------------------------------------------
 INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, label_fr, definition_fr, source )
-SELECT (ref_nomenclatures.get_id_nomenclature_type('TYPE_SITE'), 'HAB', 'Zone d''habitat', 'Zone d''habitat - suivi habitat', 'Zone d''habitat',  'Zone d''habitat issu des modules suivi habitat', 'CBNA')
-WHERE
-    NOT EXISTS (
-        SELECT cd_nomenclature FROM ref_nomenclatures.t_nomenclatures WHERE cd_nomenclature = 'HAB'
-    );
+VALUES (ref_nomenclatures.get_id_nomenclature_type('TYPE_SITE'), 'HAB', 'Zone d''habitat', 'Zone d''habitat - suivi habitat', 'Zone d''habitat',  'Zone d''habitat issu des modules suivi habitat', 'CBNA');
+
 
 ----------------------
 -- Insérer les sites
