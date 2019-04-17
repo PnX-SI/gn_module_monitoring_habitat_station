@@ -125,7 +125,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onChargeList(param?) {
-    this._api.getSites(param).subscribe(
+    this._api.getAllSites().subscribe(
       data => {
         this.sites = data[1];
         this.page.totalElements = data[0].totalItmes;
@@ -157,6 +157,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     );
   }
+
   setPage(pageInfo) {
     this.page.pageNumber = pageInfo.offset;
     if (this.storeService.shsConfig.pagination_serverside) {
@@ -192,7 +193,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onRowSelect(row) {
-    let id = row.selected[0]["id_transect"];
+    let id = row.selected[0]["id_base_site"];
     let site = row.selected[0];
     const selectedLayer = this.mapListService.layerDict[id];
     this.zoomOnSelectedLayer(this._map, selectedLayer, 16);

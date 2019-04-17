@@ -20,7 +20,7 @@ const routes: Routes = [
   { path: "", component: SiteMapListComponent },
   { path: 'site/:idSite', component: ListVisitComponent },
   { path: 'site/:idSite/visit/:idVisit', component: ReleveComponent },
-  { path: 'site/:idSite/newVisit', component: ReleveComponent }
+  { path: 'site/:idSite/new_visit', component: ReleveComponent }
 ];
 
 @NgModule({

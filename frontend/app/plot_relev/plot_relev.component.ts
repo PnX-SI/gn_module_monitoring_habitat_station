@@ -1,5 +1,6 @@
-import { Component, OnInit, Output, Input, EventEmitter ,OnChanges} from "@angular/core";
+import { Component, OnInit, Output, Input, EventEmitter, OnChanges } from "@angular/core";
 import { FormGroup, FormBuilder, FormArray } from "@angular/forms";
+import * as _ from 'lodash';
 
 @Component({
     selector: "plot_relev",
@@ -7,7 +8,7 @@ import { FormGroup, FormBuilder, FormArray } from "@angular/forms";
     styleUrls: ["./plot_relev.component.scss"]
 })
 
-export class PlotReleveComponent implements OnInit,OnChanges {
+export class PlotReleveComponent implements OnInit, OnChanges {
 
     @Input() taxons: any[];
     @Input() strates: any[];
@@ -29,7 +30,6 @@ export class PlotReleveComponent implements OnInit,OnChanges {
         this.initStrates();
         if (this.data)
             this.patchForm()
-
     }
 
     ngOnInit() {
@@ -39,7 +39,7 @@ export class PlotReleveComponent implements OnInit,OnChanges {
         this.plotForm = this._fb.group({
             taxons_releve: this._fb.array([]),
             strates_releve: this._fb.array([]),
-            excretes_presence: null
+            excretes_presence: false
         });
     }
 
@@ -49,9 +49,9 @@ export class PlotReleveComponent implements OnInit,OnChanges {
         });
         this.plotForm.get('taxons_releve').controls.forEach(releve => {
             this.data.plot_data.taxons_releve.forEach(item => {
-                if (item.cd_nom == releve.value.cd_nom) {
+                if (item.id_cor_hab_taxon == releve.value.id_cor_hab_taxon) {
                     releve.patchValue({
-                        'cover_porcentage': item.cover_porcentage
+                        'cover_pourcentage': item.cover_pourcentage
                     });
                 }
             })
@@ -60,20 +60,19 @@ export class PlotReleveComponent implements OnInit,OnChanges {
             this.data.plot_data.strates_releve.forEach(item => {
                 if (item.id_nomenclature_strate == releve.value.id_nomenclature_strate) {
                     releve.patchValue({
-                        'cover_porcentage': item.cover_porcentage
+                        'cover_pourcentage': item.cover_pourcentage
                     });
                 }
             })
         })
-
     }
 
     initTaxon(): void {
         this.taxons.forEach(taxon => {
             (this.plotForm.get('taxons_releve') as FormArray).push(
                 this._fb.group({
-                    cd_nom: [taxon.cd_nom],
-                    cover_porcentage: [null],
+                    id_cor_hab_taxon: [taxon.id_cor_hab_taxon],
+                    cover_pourcentage: [null],
                     nom_complet: [taxon.nom_complet]
                 })
             );
@@ -85,7 +84,7 @@ export class PlotReleveComponent implements OnInit,OnChanges {
             (this.plotForm.get('strates_releve') as FormArray).push(
                 this._fb.group({
                     id_nomenclature_strate: [strate.id_nomenclature_strate],
-                    cover_porcentage: [null],
+                    cover_pourcentage: [null],
                     label_default: [strate.label_default]
                 })
             );
@@ -93,6 +92,12 @@ export class PlotReleveComponent implements OnInit,OnChanges {
     }
 
     onBlurMethod() {
+        _.map(this.plotForm.value.strates_releve, (strate) => {
+            delete strate.label_default
+        });
+        _.map(this.plotForm.value.taxons_releve, (taxon) => {
+            delete taxon.nom_complet
+        });
         this.plotReleve.emit({ id_plot: this.id_plot, plot_data: this.plotForm.value });
     }
 }

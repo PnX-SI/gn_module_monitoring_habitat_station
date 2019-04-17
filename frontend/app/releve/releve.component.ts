@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { forkJoin } from "rxjs/observable/forkJoin";
 import { ModuleConfig } from "../module.config";
-import { DataService, IVisit } from "../services/data.service";
+import { DataService, IVisit, Plot } from "../services/data.service";
 import { StoreService, ISite } from "../services/store.service";
 import { ToastrService } from "ngx-toastr";
 import * as _ from 'lodash';
@@ -17,24 +17,22 @@ import * as _ from 'lodash';
 
 export class ReleveComponent implements OnInit {
 
-    dataLoaded: boolean = false;
+
     idSite: number;
     idVisit: number;
     visit: IVisit;
     isNew: boolean;
     public species = [];
-    public nom_habitat;
-    public id_base_site = 1;
+    public visit_name: string = "Nouvelle visite";
+    public id_base_site: number;
     public strates = [];
     taxons;
-    plotReleve;
     currentSite: ISite;
-    plot: any;
+    plots: Plot[] = [];
     id_plot: number;
     visitForm: FormGroup;
     plot_title: string;
-    // mock data
-    dataIn;
+    selectedPolt;
     spinner: boolean;
 
 
@@ -54,34 +52,34 @@ export class ReleveComponent implements OnInit {
         this.idSite = this.activatedRoute.snapshot.params['idSite'];
         this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
         this.isNew = !this.idVisit;
-
         this.currentSite = this.storeService.getCurrentSite();
         this.intitForm();
         if (!this.currentSite) {
-            forkJoin([this._api.getStrates(), this._api.getSite(this.idSite)])
+            forkJoin([this._api.getStrates(), this._api.getSiteByID(this.idSite)])
                 .subscribe(results => {
                     this.strates = results[0];
                     this.currentSite = results[1];
-                    this.id_plot = this.currentSite.plots[0].id_plot;
-                    this.plot_title = this.currentSite.plots[0].code_plot;
-                    this._api.getTaxons(this.currentSite.cd_hab).subscribe(
+                    this.id_base_site = this.currentSite.properties.id_base_site;
+                    this.id_plot = this.currentSite.properties.plots[0].id_plot;
+                    this.plot_title = this.currentSite.properties.plots[0].code_plot;
+                    this._api.getTaxonsByHabitat(this.currentSite.properties.cd_hab).subscribe(
                         (taxons) => {
                             this.taxons = taxons;
                             if (!this.isNew) {
                                 this.getVisit();
                             }
                             else {
-                                this.dataLoaded = true;
-                                this.visit = this._api.getDefaultVisit()
+                                this.visit = this._api.getDefaultVisit();
                             }
                         }
                     )
                 });
         }
         else {
-            this.id_plot = this.currentSite.plots[0].id_plot;
-            this.plot_title = this.currentSite.plots[0].code_plot;
-            forkJoin([this._api.getStrates(), this._api.getTaxons(this.currentSite.cd_hab)])
+            this.id_plot = this.currentSite.properties.plots[0].id_plot;
+            this.plot_title = this.currentSite.properties.plots[0].code_plot;
+            this.id_base_site = this.currentSite.properties.id_base_site;
+            forkJoin([this._api.getStrates(), this._api.getTaxonsByHabitat(this.currentSite.properties.cd_hab)])
                 .subscribe(results => {
                     this.strates = results[0];
                     this.taxons = results[1];
@@ -89,7 +87,6 @@ export class ReleveComponent implements OnInit {
                         this.getVisit();
                     }
                     else {
-                        this.dataLoaded = true;
                         this.visit = this._api.getDefaultVisit()
                     }
                 });
@@ -100,13 +97,11 @@ export class ReleveComponent implements OnInit {
         this._api.getOneVisit(this.idVisit).subscribe(
             data => {
                 this.visit = data;
-                this.intitForm();
-                this.dataIn = this.visit.plots.find((plot) => {
+                this.selectedPolt = this.visit.plots.find((plot) => {
                     return plot.id_plot == this.id_plot
                 });
-                this.dataLoaded = true;
+                this.visit_name = "Visite N°" + this.visit.id_base_visit;
                 this.pachForm();
-                console.log("visit", this.visit);
             },
             error => {
                 if (error.status != 404) {
@@ -118,14 +113,17 @@ export class ReleveComponent implements OnInit {
                         }
                     );
                 }
-                this.dataLoaded = true;
             }
         );
     }
 
     getPlotReleve(plotReleve) {
-        this.plotReleve = plotReleve;
-        console.log('plotReleve', plotReleve);
+        let index = _.findIndex(this.plots, { id_plot: plotReleve.id_plot });
+        if (index >= 0) {
+            this.plots.splice(index, 1, plotReleve)
+        }
+        else
+            this.plots.push(plotReleve)
     }
 
     backToVisites() {
@@ -135,10 +133,10 @@ export class ReleveComponent implements OnInit {
     onChangePlot(plot) {
         this.spinner = true;
         this.id_plot = plot.id_plot;
-        this.plot_title = this.currentSite.plots.find((plot) => {
+        this.plot_title = this.currentSite.properties.plots.find((plot) => {
             return plot.id_plot == this.id_plot
         }).code_plot;
-        this.dataIn = this.visit.plots.find((plot) => {
+        this.selectedPolt = this.plots.find((plot) => {
             return plot.id_plot == this.id_plot
         });
         setTimeout(() => {
@@ -146,10 +144,12 @@ export class ReleveComponent implements OnInit {
         }, 300);
 
     }
+    
     isActive(plot) {
         return this.id_plot === plot.id_plot;
 
     }
+
     intitForm() {
         this.visitForm = this._fb.group({
             visit_date_min: [null, Validators.required],
@@ -164,7 +164,24 @@ export class ReleveComponent implements OnInit {
             observers: this.visit.observers,
             perturbations: this.visit.cor_transect_visit_perturbation,
         });
-    };
+    }
 
+    onSubmitVisit(visitForm) {
+        if (visitForm.valid) {
+            this.visitForm.value["observers"] = visitForm.value["observers"].map(
+                obs => { return obs.id_role }
+            );
+            if (visitForm.value["perturbations"])
+                this.visitForm.value["perturbations"] = visitForm.value["perturbations"].map(
+                    perturbation => { return { 'id_nomenclature_perturb': perturbation.id_nomenclature } }
+                );
+            this.visitForm.value["visit_date_min"] = this.dateParser.format(visitForm.value["visit_date_min"]);
+            this.visitForm.value["plots"] = this.plots;
+            this.visitForm.value["id_base_site"] = this.id_base_site;
+            this._api.postVisit(this.visitForm.value).subscribe(
+                () => this.visitForm.reset()
+            )
+        }
+    }
 
 }

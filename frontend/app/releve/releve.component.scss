@@ -8,6 +8,7 @@ fieldset {
     border: 1px solid silver ;
     margin: 0 2px ;
     border-radius: 3px;
+    margin-bottom: 20px;
 }
 legend {
     width: auto;
@@ -30,6 +31,14 @@ legend {
     max-height: 94vh;
     overflow-y: auto;
     padding-bottom: 5px;
+}
+
+.card-header{
+  border-top: 1px solid rgba(0,0,0,.125);
+}
+
+.card-title{
+  margin-bottom: 0
 }
 
 .plot {
@@ -113,4 +122,14 @@ legend {
   border-radius: 50%;
   -webkit-animation: spin 0.8s linear infinite;
   animation: spin 0.8s linear infinite;
+}
+
+
+.plot-icon{
+  display: none;
+  float: right;
+  font-size: 22px;
+}
+.plot-active{
+ display: inline;
 }

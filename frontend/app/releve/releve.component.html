@@ -1,4 +1,4 @@
-<div class="releve" *ngIf="dataLoaded">
+<div class="releve" *ngIf="visit">
     <div class="row row-0">
         <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
             <div>
@@ -8,68 +8,65 @@
                 </button>
             </div>
             <div class="card-header">
-                <h3 class="card-title"> visite n° 1 </h3>
+                <h4 class="card-title">{{visit_name}}</h4>
             </div>
-            <form [formGroup]="visitForm">
+            <div class="card-body">
+                <form [formGroup]="visitForm">
+                    <fieldset>
+                        <legend>
+                            Transect
+                        </legend>
+                        <div class="form-group">
+                            <label> Observateur(s) :* </label>
+                            <div id="newObserver">
+                                <pnx-observers [parentFormControl]="visitForm.controls.observers" [bindAllItem]="true"
+                                    [idMenu]="storeService.shsConfig.id_menu_list_user">
+                                </pnx-observers>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label> Perturbation(s) : </label>
+                            <div id="newPerturs">
+                                <pnx-nomenclature [parentFormControl]="visitForm.controls.perturbations"
+                                    [multiSelect]="true" keyValue="id_nomenclature" [bindAllItem]="true"
+                                    keyLabel="label_default" codeNomenclatureType="TYPE_PERTURBATION">
+                                </pnx-nomenclature>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label> Date de la visite :* </label>
+                            <div>
+                                <pnx-date [parentFormControl]="visitForm.controls.visit_date_min">
+                                </pnx-date>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
                 <fieldset>
                     <legend>
-                        Transect
+                        Placettes
                     </legend>
-                    <div class="form-group">
-                        <label> Observateur(s) : </label>
-                        <div id="newObserver">
-                            <pnx-observers [parentFormControl]="visitForm.controls.observers" [bindAllItem]="true"
-                                [idMenu]="storeService.shsConfig.id_menu_list_user">
-                            </pnx-observers>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label> Perturbation(s) : </label>
-                        <div id="newPerturs">
-                            <pnx-nomenclature [parentFormControl]="visitForm.controls.perturbations"
-                                [multiSelect]="true" keyValue="id_nomenclature" [bindAllItem]="true"
-                                keyLabel="label_default" codeNomenclatureType="TYPE_PERTURBATION">
-                            </pnx-nomenclature>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label> Date de la visite : </label>
-                        <div>
-                            <pnx-date [parentFormControl]="visitForm.controls.visit_date_min">
-                            </pnx-date>
-                        </div>
+
+                    <div class="list-plots">
+                        <button *ngFor="let plot of currentSite.properties.plots" class="plot"
+                            [class.active]="isActive(plot)" (click)="onChangePlot(plot)">code placette :
+                            {{ plot.code_plot }} <i class="fa fa-angle-right plot-icon"
+                                [class.plot-active]="isActive(plot)" aria-hidden="true"></i></button>
                     </div>
                 </fieldset>
-            </form>
-            <fieldset>
-                <legend>
-                    Placettes
-                </legend>
-
-                <div class="list-plots">
-                    <button *ngFor="let plot of currentSite.plots"
-                     class="plot"
-                     [class.active]="isActive(plot)"
-                     (click)="onChangePlot(plot)" >code placette : {{ plot.code_plot }}</button>
-                  </div>
-              
-            </fieldset>
+            </div>
         </div>
+
         <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 ">
-                <div id="cover-spin" *ngIf="spinner"></div>
-            <plot_relev 
-                [id_plot]='id_plot'
-                [taxons]='taxons'
-                [strates]='strates'
-                [(data)]='dataIn'
-                [plot_title]='plot_title'
-                (plotReleve)='getPlotReleve($event)'>
+            <div id="cover-spin" *ngIf="spinner"></div>
+            <plot_relev [id_plot]='id_plot' [taxons]='taxons' [strates]='strates' [(data)]='selectedPolt'
+                [plot_title]='plot_title' (plotReleve)='getPlotReleve($event)'>
             </plot_relev>
         </div>
     </div>
     <div class="card-footer">
         <div class="d-flex justify-content-between">
-            <button class="btn btn-sm btn-success" (click)="onNewReleve()">
+            <button type="submit" class="btn btn-sm btn-success" [disabled]="!visitForm.valid" (click)="onSubmitVisit(visitForm)">
                 Ajouter une nouvelle visite
             </button>
         </div>

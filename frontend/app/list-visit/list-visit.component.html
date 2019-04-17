@@ -8,7 +8,7 @@
             </button>
         </div>
         <div class="card-header">
-            <h3 class="card-title"> Consultation du transect {{ site.transect_label }} </h3>
+            <h3 class="card-title"> Consultation du transect {{ site.properties.transect_label }} </h3>
         </div>
         <div class="card-body">
             <ul class="nav nav-tabs" role="tablist">
@@ -24,16 +24,16 @@
 
             <div class="tab-content">
                 <div class="tab-pane active modal-header " id="infoGen" role="tabpanel">
-                    <p> <span> Code site : </span> <span class="strong "> {{ site.base_site_code }} </span></p>
-                    <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ site.nom_habitat }}"> {{ site.nom_habitat }}
+                    <p> <span> Code site : </span> <span class="strong "> {{ site.properties.base_site_code }} </span></p>
+                    <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ site.properties.nom_habitat }}"> {{ site.properties.nom_habitat }}
                         </span></p>
-                    <p> <span> Commune : </span> <span class="strong"> {{ site.nom_commune}} </span></p>
+                    <p> <span> Commune : </span> <span class="strong"> {{ site.properties.nom_commune}} </span></p>
                 </div>
 
                 <div class="tab-pane modal-header" id="details" role="tabpanel">
-                    <p> <span> Nom du site : </span> <span class="strong"> {{ site.transect_label }} </span></p>
-                    <p> <span> Organisme : </span> <span class="strong"> {{ site.organisme }} </span></p>
-                    <p> <span> Description du site : </span> <span class="strong"> {{ site.base_site_description }} </span></p>
+                    <p> <span> Nom du site : </span> <span class="strong"> {{ site.properties.transect_label }} </span></p>
+                    <p> <span> Organisme : </span> <span class="strong"> {{ site.properties.organisme }} </span></p>
+                    <p> <span> Description du site : </span> <span class="strong"> {{ site.properties.base_site_description }} </span></p>
                 </div>
             </div>
 
@@ -106,7 +106,7 @@
                     <hr>
                     <label> Liste des placettes :</label>
                     <ul class="list-group list-group-flush" >
-                        <li *ngFor="let plot of site.plots"  class="list-group-item" >
+                        <li *ngFor="let plot of site.properties.plots"  class="list-group-item" >
                             <span>code placette : </span> {{ plot.code_plot }}
                         </li>
                     </ul>

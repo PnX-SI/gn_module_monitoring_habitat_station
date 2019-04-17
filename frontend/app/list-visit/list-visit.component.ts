@@ -54,8 +54,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.formTransect = this.formService.initFormTransect();
-    this.getSite();
-    this.getSiteByID()
+    this.getSiteByID();
   }
 
   getVisits() {
@@ -86,16 +85,11 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       }
     );
   }
- getSiteByID(){
-   this._api.getSiteByID(1).subscribe(
-     (site) => console.log('siteApi',site)
-   )
- }
-  getSite() {
-    this.paramApp = this.paramApp.append("id_base_site", this.idSite);
-    this._api.getSite(this.paramApp).subscribe(
-      data => {
-        this.site = data;
+  getSiteByID() {
+    this._api.getSiteByID(this.idSite).subscribe(
+      (site) => {
+        this.site = site;
+        console.log('site',site);
         this.storeService.setCurrentSite(this.site)
         this.pachForm();
         this.getVisits();
@@ -110,21 +104,18 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         this.toastr.error(msg, "", { positionClass: "toast-top-right" });
         console.log("error: ", error);
       }
-    );
+    )
   }
+
 
   pachForm() {
     this.formTransect.patchValue({
-      id_base_site: (this.site.id_base_site) ? this.site.id_base_site : '',
-      id_transect: (this.site.id_transect) ? this.site.id_transect : '',
-      geom_start_lat: this.site.geom_start[0],
-      geom_start_long: this.site.geom_start[1],
-      geom_end_lat: this.site.geom_end[0],
-      geom_end_long: this.site.geom_end[1],
-
-      geom_start: this.site.geom_start,
-      position_plot: this.site.position_plot,
-      plot_size: this.site.plot_size
+      geom_start_lat: this.site.geometry.coordinates[0][0],
+      geom_start_long: this.site.geometry.coordinates[0][1],
+      geom_end_lat: this.site.geometry.coordinates[1][0],
+      geom_end_long: this.site.geometry.coordinates[1][1],
+      position_plot: this.site.properties.position_plot,
+      plot_size: this.site.properties.plot_size
     });
   }
 
@@ -133,10 +124,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   onNewVisit() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.id_base_site}/newVisit`]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.properties.id_base_site}/new_visit`]);
   }
   onVisitDetails(idVisit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.id_base_site}/visit/`,idVisit]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.properties.id_base_site}/visit/`, idVisit]);
   }
   ngOnDestroy() {
     this.storeService.queryString = this.storeService.queryString.delete(

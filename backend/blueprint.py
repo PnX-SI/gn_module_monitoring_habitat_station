@@ -4,14 +4,14 @@ import datetime
 from flask import Blueprint, request, session, current_app, send_from_directory, abort, jsonify
 from geojson import FeatureCollection, Feature
 from sqlalchemy.sql.expression import func
-from sqlalchemy import and_ , distinct, desc
+from sqlalchemy import and_, distinct, desc
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
 
 from pypnusershub.db.tools import InsufficientRightsError
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
- 
+
 from geonature.utils.env import DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
 from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
@@ -24,9 +24,10 @@ from geonature.core.users.models import BibOrganismes
 
 from .repositories import check_user_cruved_visit, check_year_visit
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot
+from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
+
 
 @blueprint.route('/sites', methods=['GET'])
 @json_resp
@@ -43,25 +44,25 @@ def get_all_sites():
             HabrefSHS.lb_hab_fr_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
             func.string_agg(distinct(BibOrganismes.nom_organisme), ', ')
-            ).outerjoin(
-                TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
-            )
-            # get habitat
-            .outerjoin(
-                HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
-            )
-            # get organisme
-            .outerjoin(
-                corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
-            ).outerjoin(
-                User, User.id_role == corVisitObserver.c.id_role
-            ).outerjoin(
-                BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
-            )
-            .group_by(
-                TTransect, HabrefSHS.lb_hab_fr_complet
-            )
+        ).outerjoin(
+            TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
         )
+        # get habitat
+        .outerjoin(
+            HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
+        )
+        # get organisme
+        .outerjoin(
+            corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
+        ).outerjoin(
+            User, User.id_role == corVisitObserver.c.id_role
+        ).outerjoin(
+            BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
+        )
+        .group_by(
+            TTransect, HabrefSHS.lb_hab_fr_complet
+        )
+    )
 
     if 'cd_hab' in parameters:
         q = q.filter(TTransect.cd_hab == parameters['cd_hab'])
@@ -82,8 +83,8 @@ def get_all_sites():
 
         data_year = q_year.all()
 
-        q = q.filter(func.date_part('year', TBaseVisits.visit_date_min) == parameters['year'])
-
+        q = q.filter(func.date_part(
+            'year', TBaseVisits.visit_date_min) == parameters['year'])
 
     page = request.args.get('page', 1, type=int)
     items_per_page = blueprint.config['items_per_page']
@@ -97,12 +98,11 @@ def get_all_sites():
         totalItmes = 0
         data = q.all()
 
-    pageInfo= {
-        'totalItmes' : totalItmes,
-        'items_per_page' : items_per_page,
+    pageInfo = {
+        'totalItmes': totalItmes,
+        'items_per_page': items_per_page,
     }
     features = []
-
 
     if data:
         for d in data:
@@ -136,7 +136,7 @@ def get_all_sites():
             feature['properties']['base_site_name'] = base_site_name
             features.append(feature)
 
-        return [pageInfo,FeatureCollection(features)]
+        return [pageInfo, FeatureCollection(features)]
     return None
 
 
@@ -155,31 +155,32 @@ def get_site(id_site):
         func.string_agg(distinct(LAreas.area_name), ', '),
         func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
         HabrefSHS.lb_hab_fr_complet
-    ).filter_by(id_transect = id_site
-    ).outerjoin(
+    ).filter_by(id_base_site=id_site
+                ).outerjoin(
         TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
     ).outerjoin(
         TNomenclatures, TTransect.id_nomenclature_plot_position == TNomenclatures.id_nomenclature
-     # get habitat
+        # get habitat
     ).outerjoin(
         HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
-    # get organisme
+        # get organisme
     ).outerjoin(
         corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
     ).outerjoin(
         User, User.id_role == corVisitObserver.c.id_role
     ).outerjoin(
         BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
-    # get municipalities of a site
+        # get municipalities of a site
     ).outerjoin(
         corSiteArea, corSiteArea.c.id_base_site == TTransect.id_base_site
     ).outerjoin(
-        LAreas, and_(LAreas.id_area == corSiteArea.c.id_area, LAreas.id_type == id_type_commune)
+        LAreas, and_(LAreas.id_area == corSiteArea.c.id_area,
+                     LAreas.id_type == id_type_commune)
     ).group_by(TTransect.id_transect, TNomenclatures.id_nomenclature, HabrefSHS.lb_hab_fr_complet
-    ).first()
+               ).first()
 
-    plots = DB.session.query(TPlot).filter_by(id_transect = id_site)
-
+    plots = DB.session.query(TPlot).filter_by(
+        id_transect=TTransect.id_transect)
 
     if data:
         transect = data[0].get_geofeature(True)
@@ -193,6 +194,94 @@ def get_site(id_site):
             transect['properties']['nom_habitat'] = str(data[4])
         if(plots):
             transect['properties']['plots'] = [p.as_dict() for p in plots]
-        
+        base_site_code = transect['properties']['t_base_site']['base_site_code']
+        base_site_description = transect['properties']['t_base_site']['base_site_description'] or 'Aucune description'
+        base_site_name = transect['properties']['t_base_site']['base_site_name']
+        if transect['properties']['t_base_site']:
+            del transect['properties']['t_base_site']
+        transect['properties']['base_site_code'] = base_site_code
+        transect['properties']['base_site_description'] = base_site_description
+        transect['properties']['base_site_name'] = base_site_name
         return transect
+    return None
+
+
+@blueprint.route('/visit', methods=['POST'])
+@json_resp
+def post_visit():
+    '''
+    Poster une nouvelle visite
+    '''
+    data = dict(request.get_json())
+
+    tab_releve_plots = []
+    tab_observers = []
+    tab_perturbations = []
+    tab_plot_data = []
+
+    if 'plots' in data:
+        tab_releve_plots = data.pop('plots')
+    if 'observers' in data:
+        tab_observers = data.pop('observers')
+    if 'perturbations' in data:
+        tab_perturbations = data.pop('perturbations')
+
+    visit = TVisitSHS(**data)
+
+    for per in tab_perturbations:
+        visit_per = CorTransectVisitPerturbation(**per)
+        visit.cor_visit_perturbation.append(visit_per)
+
+    for releve in tab_releve_plots:
+        if 'plot_data' in releve:
+            releve['excretes_presence'] = releve['plot_data']['excretes_presence']
+            tab_plot_data = releve.pop('plot_data')
+        releve_plot = TRelevePlot(**releve)
+        for strat in tab_plot_data['strates_releve']:
+            strat_item = CorRelevePlotStrat(**strat)
+            releve_plot.cor_releve_strats.append(strat_item)
+        for taxon in tab_plot_data['taxons_releve']:
+            taxon_item = CorRelevePlotTaxon(**taxon)
+            releve_plot.cor_releve_taxons.append(taxon_item)
+        visit.cor_releve_plot.append(releve_plot)
+
+    observers = DB.session.query(User).filter(
+        User.id_role.in_(tab_observers)
+    ).all()
+    for o in observers:
+        visit.observers.append(o)
+
+    visit.as_dict(True)
+    DB.session.add(visit)
+    DB.session.commit()
+
+    return visit.as_dict(recursif=True)
+
+
+@blueprint.route('/habitats/<cd_hab>/taxons', methods=['GET'])
+@json_resp
+def get_taxa_by_habitats(cd_hab):
+    '''
+    tous les taxons d'un habitat
+    '''
+
+    q = DB.session.query(
+        CorHabTaxon.id_cor_hab_taxon,
+        Taxonomie.nom_complet
+    ).join(
+        Taxonomie, CorHabTaxon.cd_nom == Taxonomie.cd_nom
+    ).group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxonomie.nom_complet)
+
+    q = q.filter(CorHabTaxon.id_habitat == cd_hab)
+    data = q.all()
+
+    taxons = []
+
+    if data:
+        for d in data:
+            taxon = dict()
+            taxon['id_cor_hab_taxon'] = str(d[0])
+            taxon['nom_complet'] = str(d[1])
+            taxons.append(taxon)
+        return taxons
     return None

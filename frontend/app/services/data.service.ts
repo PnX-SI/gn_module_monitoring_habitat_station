@@ -80,7 +80,17 @@ export class DataService {
   }
   getSiteByID(idSite) {
     return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/site/${idSite}`)
+  }
+  getAllSites() {
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`)
+  }
 
+  postVisit(visit) {
+    return this._http.post(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit`,visit)
+  }
+  
+  getTaxonsByHabitat(cd_hab) {
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/habitats/${cd_hab}/taxons`)
   }
   getSite(params) {
     let mock = {
@@ -165,28 +175,28 @@ export class DataService {
 
   getTaxons(params) {
     let mock = [{
-      "cd_nom": "104123",
+      "id_cor_hab_taxon": "104123",
       "nom_complet": "Juncus arcticus Willd., 1799"
     }, {
-      "cd_nom": "88386",
+      "id_cor_hab_taxon": "88386",
       "nom_complet": "Carex bipartita Bellardi ex All., 1785"
     }, {
-      "cd_nom": "88662",
+      "id_cor_hab_taxon": "88662",
       "nom_complet": "Carex maritima Gunnerus, 1772"
     }, {
-      "cd_nom": "88675",
+      "id_cor_hab_taxon": "88675",
       "nom_complet": "Carex microglochin Wahlenb., 1803"
     }, {
-      "cd_nom": "88380",
+      "id_cor_hab_taxon": "88380",
       "nom_complet": "Carex bicolor All., 1785"
     }, {
-      "cd_nom": "88360",
+      "id_cor_hab_taxon": "88360",
       "nom_complet": "Carex atrofusca Schkuhr, 1801"
     }, {
-      "cd_nom": "127195",
+      "id_cor_hab_taxon": "127195",
       "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
     }, {
-      "cd_nom": "126806",
+      "id_cor_hab_taxon": "126806",
       "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
     }];
     return Observable.of(mock);
@@ -237,7 +247,7 @@ export class DataService {
             "id_base_visit": 2,
             "id_nomenclature_strate": 499,
             // "label_strate"
-            "cover_porcentage": 100,
+            "cover_pourcentage": 100,
             "create_date": "2019-03-04 18:37:30.461149",
             "t_nomenclature": {
               "id_nomenclature": 499,
@@ -247,38 +257,38 @@ export class DataService {
           }],
           "taxons_releve": [{
             "id_cor_hab_taxon": 180,
-            "cover_porcentage": 0,
-            "cd_nom": 104123,
+            "cover_pourcentage": 0,
+            "id_cor_hab_taxon": 104123,
             "nom_complet": "Juncus arcticus Willd., 1799"
           }, {
             "id_cor_hab_taxon": 182,
-            "cover_porcentage": 10,
-            "cd_nom": 88675,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 88675,
             "nom_complet": "Carex microglochin Wahlenb., 1803"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 15,
-            "cd_nom": 88662,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88662,
             "nom_complet": "Carex maritima Gunnerus, 1772"
           }, {
             "id_cor_hab_taxon": 184,
-            "cover_porcentage": 15,
-            "cd_nom": 88380,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88380,
             "nom_complet": "Carex bicolor All., 1785"
           }, {
             "id_cor_hab_taxon": 185,
-            "cover_porcentage": 20,
-            "cd_nom": 88360,
+            "cover_pourcentage": 20,
+            "id_cor_hab_taxon": 88360,
             "nom_complet": "Carex atrofusca Schkuhr, 1801"
           }, {
             "id_cor_hab_taxon": 186,
-            "cover_porcentage": 10,
-            "cd_nom": 127195,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 127195,
             "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 30,
-            "cd_nom": 126806,
+            "cover_pourcentage": 30,
+            "id_cor_hab_taxon": 126806,
             "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
           }]
         }
@@ -290,7 +300,7 @@ export class DataService {
           "strates_releve": [{
             "id_base_visit": 2,
             "id_nomenclature_strate": 499,
-            "cover_porcentage": 100,
+            "cover_pourcentage": 100,
             "create_date": "2019-03-04 18:37:30.461149",
             "t_nomenclature": {
               "id_nomenclature": 499,
@@ -300,38 +310,38 @@ export class DataService {
           }],
           "taxons_releve": [{
             "id_cor_hab_taxon": 180,
-            "cover_porcentage": 0,
-            "cd_nom": 104123,
+            "cover_pourcentage": 0,
+            "id_cor_hab_taxon": 104123,
             "nom_complet": "Juncus arcticus Willd., 1799"
           }, {
             "id_cor_hab_taxon": 182,
-            "cover_porcentage": 10,
-            "cd_nom": 88675,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 88675,
             "nom_complet": "Carex microglochin Wahlenb., 1803"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 15,
-            "cd_nom": 88662,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88662,
             "nom_complet": "Carex maritima Gunnerus, 1772"
           }, {
             "id_cor_hab_taxon": 184,
-            "cover_porcentage": 15,
-            "cd_nom": 88380,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88380,
             "nom_complet": "Carex bicolor All., 1785"
           }, {
             "id_cor_hab_taxon": 185,
-            "cover_porcentage": 20,
-            "cd_nom": 88360,
+            "cover_pourcentage": 20,
+            "id_cor_hab_taxon": 88360,
             "nom_complet": "Carex atrofusca Schkuhr, 1801"
           }, {
             "id_cor_hab_taxon": 186,
-            "cover_porcentage": 10,
-            "cd_nom": 127195,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 127195,
             "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 30,
-            "cd_nom": 126806,
+            "cover_pourcentage": 30,
+            "id_cor_hab_taxon": 126806,
             "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
           }]
         }
@@ -343,7 +353,7 @@ export class DataService {
           "strates_releve": [{
             "id_base_visit": 2,
             "id_nomenclature_strate": 499,
-            "cover_porcentage": 100,
+            "cover_pourcentage": 100,
             "t_nomenclature": {
               "id_nomenclature": 499,
               "mnemonique": "Activit\u00e9s foresti\u00e8res",
@@ -352,38 +362,38 @@ export class DataService {
           }],
           "taxons_releve": [{
             "id_cor_hab_taxon": 180,
-            "cover_porcentage": 0,
-            "cd_nom": 104123,
+            "cover_pourcentage": 0,
+            "id_cor_hab_taxon": 104123,
             "nom_complet": "Juncus arcticus Willd., 1799"
           }, {
             "id_cor_hab_taxon": 182,
-            "cover_porcentage": 10,
-            "cd_nom": 88675,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 88675,
             "nom_complet": "Carex microglochin Wahlenb., 1803"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 15,
-            "cd_nom": 88662,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88662,
             "nom_complet": "Carex maritima Gunnerus, 1772"
           }, {
             "id_cor_hab_taxon": 184,
-            "cover_porcentage": 15,
-            "cd_nom": 88380,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88380,
             "nom_complet": "Carex bicolor All., 1785"
           }, {
             "id_cor_hab_taxon": 185,
-            "cover_porcentage": 20,
-            "cd_nom": 88360,
+            "cover_pourcentage": 20,
+            "id_cor_hab_taxon": 88360,
             "nom_complet": "Carex atrofusca Schkuhr, 1801"
           }, {
             "id_cor_hab_taxon": 186,
-            "cover_porcentage": 10,
-            "cd_nom": 127195,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 127195,
             "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 30,
-            "cd_nom": 126806,
+            "cover_pourcentage": 30,
+            "id_cor_hab_taxon": 126806,
             "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
           }]
         }
@@ -394,54 +404,54 @@ export class DataService {
           "excretes_presence": true,
           "strates_releve": [{
             "id_nomenclature_strate": 12,
-            "cover_porcentage": 20
+            "cover_pourcentage": 20
           }, {
             "id_nomenclature_strate": 13,
-            "cover_porcentage": 0
+            "cover_pourcentage": 0
           }, {
             "id_nomenclature_strate": 14,
-            "cover_porcentage": 60
+            "cover_pourcentage": 60
           }, {
             "id_nomenclature_strate": 15,
-            "cover_porcentage": 20
+            "cover_pourcentage": 20
           }, {
             "id_nomenclature_strate": 18,
-            "cover_porcentage": 0
+            "cover_pourcentage": 0
           }],
           "taxons_releve": [{
             "id_cor_hab_taxon": 180,
-            "cover_porcentage": 0,
-            "cd_nom": 104123,
+            "cover_pourcentage": 0,
+            "id_cor_hab_taxon": 104123,
             "nom_complet": "Juncus arcticus Willd., 1799"
           }, {
             "id_cor_hab_taxon": 182,
-            "cover_porcentage": 10,
-            "cd_nom": 88675,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 88675,
             "nom_complet": "Carex microglochin Wahlenb., 1803"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 15,
-            "cd_nom": 88662,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88662,
             "nom_complet": "Carex maritima Gunnerus, 1772"
           }, {
             "id_cor_hab_taxon": 184,
-            "cover_porcentage": 15,
-            "cd_nom": 88380,
+            "cover_pourcentage": 15,
+            "id_cor_hab_taxon": 88380,
             "nom_complet": "Carex bicolor All., 1785"
           }, {
             "id_cor_hab_taxon": 185,
-            "cover_porcentage": 20,
-            "cd_nom": 88360,
+            "cover_pourcentage": 20,
+            "id_cor_hab_taxon": 88360,
             "nom_complet": "Carex atrofusca Schkuhr, 1801"
           }, {
             "id_cor_hab_taxon": 186,
-            "cover_porcentage": 10,
-            "cd_nom": 127195,
+            "cover_pourcentage": 10,
+            "id_cor_hab_taxon": 127195,
             "nom_complet": "Trichophorum pumilum (Vahl) Schinz & Thell., 1921"
           }, {
             "id_cor_hab_taxon": 183,
-            "cover_porcentage": 30,
-            "cd_nom": 126806,
+            "cover_pourcentage": 30,
+            "id_cor_hab_taxon": 126806,
             "nom_complet": "Tofieldia pusilla (Michx.) Pers., 1805"
           }]
         }
@@ -469,7 +479,10 @@ export class DataService {
       ]
     }
   }
+
+  
 }
+
 
 
 
