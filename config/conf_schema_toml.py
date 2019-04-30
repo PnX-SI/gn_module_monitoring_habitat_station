@@ -10,7 +10,7 @@ id_type_commune = 25
 zoom_center = [44.863664, 6.268670]
 zoom= 10
 pagination_serverside= False
-items_per_page = 5
+items_per_page = 10
 plot_size_unite = "mètre"
 
 site_message = {"emptyMessage" : "Aucun site à afficher ", "totalMessage" : "sites(s) au total"}
@@ -20,13 +20,12 @@ default_site_columns = [
     { "name" : "Identifiant", "prop" : "id_base_site", "width" : "90"},
     { "name" : "Habitat", "prop" : "nom_habitat", "width" : "350"},
     { "name" : "Nombre de visites", "prop" : "nb_visit", "width" : "120"},
-    { "name" : "Date de la dernière visite", "prop" : "date_max", "width" : "160"},
+    { "name" : "Date de la dernière visite", "prop" : "date_max", "width" : "160"}
 ]
 
 default_list_visit_columns = [
     { "name" : "Date", "prop" : "visit_date_min", "width": "120"},
-    { "name" : "Observateur(s)", "prop" : "observers", "width": "350"},
-    { "name" : "Espèce(s) présente(s)", "prop" : "state", "width": "120"}
+    { "name" : "Observateur(s)", "prop" : "observers", "width": "350"}
 ]
 id_menu_list_user = 1
 

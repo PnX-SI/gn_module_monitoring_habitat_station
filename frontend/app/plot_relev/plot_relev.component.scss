@@ -1,79 +1,84 @@
-.plot-releve{
+.plot-releve {
   padding: 20px;
-  padding-top: 0
+  padding-top: 0;
 }
-.plot-title{
-  padding-top:10px 
+.plot-title {
+  padding-top: 10px;
 }
 fieldset:disabled {
-    color: #6c757d;
-    pointer-events: none;
+  color: #6c757d;
+  pointer-events: none;
 }
 fieldset {
-    padding: 0.35em 0.625em 0.75em !important;
-    border: 1px solid silver !important;
-    margin: 0 2px !important;
-    border-radius: 3px;
+  padding: 0.35em 0.625em 0.75em !important;
+  border: 1px solid silver !important;
+  margin: 0 2px !important;
+  border-radius: 3px;
 }
 legend {
-    width: auto;
-    font-size: inherit;
+  width: auto;
+  font-size: inherit;
 }
 
-.back-button{
-    text-align: left;
+.back-button {
+  text-align: left;
 }
 
-.table{
-    margin: 30px 0;
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
-    td{
-        vertical-align: middle;
-        padding: 4px 10px;
-    }
+.table {
+  margin: 30px 0;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  td {
+    vertical-align: middle;
+    padding: 4px 10px;
+  }
 }
-.card{
-    max-height: 94vh;
-    overflow-y: auto;
-    padding-bottom: 5px;
+.card {
+  max-height: 94vh;
+  overflow-y: auto;
+  padding-bottom: 5px;
 }
 
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #00188f;
+  border: none;
+}
 
-.custom-checkbox .custom-control-input:checked~.custom-control-label::before {
-    background-color: #00188F;
-    border: none
-  }
-  
-  .custom-control-label::before,
-  .custom-control-label::after {
-    width: 1.3rem;
-    height: 1.3rem;
-  }
-  
-  .custom-control {
-    padding-top: 10px;
-    padding-left: 3px
-  
-  }
-  
-  .custom-control-label {
-    cursor: pointer;
-    padding-top: 4px;
-    padding-left: 6px;
-    font-size: 14px;
-    font-weight: 400;
-  }
-  
-  .custom-control-label:before {
-  
-    background-color: white;
-    border: 2px solid #a9a7a7;
-  }
-  .custom-control-input:disabled~.custom-control-label {
-    color: #b3b3b39e;
-    cursor: default;
-  }
-  
-  .custom-checkbox .custom-control-input:disabled:checked~.custom-control-label::before {
-    background-color:  #b3b3b39e;;
-  }
+.custom-control-label::before,
+.custom-control-label::after {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.custom-control {
+  padding-top: 10px;
+  padding-left: 3px;
+}
+
+.custom-control-label {
+  cursor: pointer;
+  padding-top: 4px;
+  padding-left: 6px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.custom-control-label:before {
+  background-color: white;
+  border: 2px solid #a9a7a7;
+}
+.custom-control-input:disabled ~ .custom-control-label {
+  color: #b3b3b39e;
+  cursor: default;
+}
+
+.custom-checkbox .custom-control-input:disabled:checked ~ .custom-control-label::before {
+  background-color: #b3b3b39e;
+}
+
+.card-header {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-title {
+  margin-bottom: 0;
+}

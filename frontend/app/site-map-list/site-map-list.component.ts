@@ -1,138 +1,125 @@
-import {
-  Component,
-  OnInit,
-  AfterViewInit,
-  Output,
-  EventEmitter,
-  OnDestroy
-} from "@angular/core";
+import { Component, OnInit, Injectable, AfterViewInit, OnDestroy } from "@angular/core";
 import { Router } from "@angular/router";
+import { NgbDateParserFormatter, NgbDatepickerConfig, NgbDatepickerI18n, NgbDateStruct } from "@ng-bootstrap/ng-bootstrap";
 import { ToastrService } from "ngx-toastr";
-import { FormGroup, FormBuilder, FormControl } from "@angular/forms";
+import { FormGroup, FormBuilder } from "@angular/forms";
 import { Page } from "../shared/page";
 import * as L from "leaflet";
 
 import { MapService } from "@geonature_common/map/map.service";
 import { MapListService } from "@geonature_common/map-list/map-list.service";
 
-import { DataService } from "../services/data.service";
+import { DataService, Habitat } from "../services/data.service";
 import { StoreService } from "../services/store.service";
 import { ModuleConfig } from "../module.config";
+import * as _ from 'lodash'
+
+
+const I18N_VALUES = {
+  'fr': {
+    weekdays: ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'],
+    months: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Déc'],
+  }
+  // other languages you would support
+};
+
+@Injectable()
+export class I18n {
+  language = 'fr';
+}
+// Define custom service providing the months and weekdays translations
+@Injectable()
+export class CustomDatepickerI18n extends NgbDatepickerI18n {
+  constructor(private _i18n: I18n) {
+    super();
+  }
+  getWeekdayShortName(weekday: number): string {
+    return I18N_VALUES[this._i18n.language].weekdays[weekday - 1];
+  }
+  getMonthShortName(month: number): string {
+    return I18N_VALUES[this._i18n.language].months[month - 1];
+  }
+  getMonthFullName(month: number): string {
+    return this.getMonthShortName(month);
+  }
+  getDayAriaLabel(date: NgbDateStruct): string {
+    return `${date.day}-${date.month}-${date.year}`;
+  }
+}
+@Injectable()
+export class NgbDateCustomParserFormatter extends NgbDateParserFormatter {
+  format(date: NgbDateStruct): string {
+    return date ? `${date.day}-${date.month}-${date.year}` : '';
+  }
+}
 
 @Component({
   selector: "site-map-list",
   templateUrl: "site-map-list.component.html",
-  styleUrls: ["site-map-list.component.scss"]
+  styleUrls: ["site-map-list.component.scss"],
+  providers: [NgbDatepickerConfig, I18n, { provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter }, { provide: NgbDatepickerI18n, useClass: CustomDatepickerI18n }]
 })
 export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
+
   public sites;
   public filteredData = [];
-  public tabHab = [];
-  public tabYears = [];
+  public tabHab: Habitat[] = [];
   public dataLoaded = false;
-  public oldFilterDate;
   public center;
   public zoom;
   private _map;
   public filterForm: FormGroup;
   public page = new Page();
-  public isAllowed = false;
+  minDate: any;
+  maxDate: any;
 
-  @Output()
-  onDeleteFiltre = new EventEmitter<any>();
+
 
   constructor(
     public mapService: MapService,
     private _api: DataService,
+    public dateParser: NgbDateParserFormatter,
+    datePickerConfig: NgbDatepickerConfig,
     public storeService: StoreService,
     public mapListService: MapListService,
     public router: Router,
     private toastr: ToastrService,
     private _fb: FormBuilder,
-  ) {}
+  ) {
+    datePickerConfig.outsideDays = 'hidden';
+    datePickerConfig.minDate = { year: 1735, month: 1, day: 1 };
+    datePickerConfig.maxDate = { year: 2200, month: 1, day: 1 };
+  }
 
   ngOnInit() {
     this.onChargeList();
     this.center = this.storeService.shsConfig.zoom_center;
     this.zoom = this.storeService.shsConfig.zoom;
-
-    this.filterForm = this._fb.group({
-      filterYear: null,
-      filterHab: null
-    });
-
-    this.filterForm.controls.filterYear.valueChanges
-      .filter(input => {
-        return input != null && input.toString().length === 4;
-      })
-      .subscribe(year => {
-        this.onSearchDate(year);
-      });
-
-    this.filterForm.controls.filterYear.valueChanges
-      .filter(input => {
-        return input === null;
-      })
-      .subscribe(year => {
-        this.onDeleteParams("year", year);
-        this.onDeleteFiltre.emit();
-      });
-
-    this.filterForm.controls.filterHab.valueChanges
-      .filter(select => {
-        return select !== null;
-      })
-      .subscribe(hab => {
-        this.onSearchHab(hab);
-      });
-
-    this.filterForm.controls.filterHab.valueChanges
-      .filter(input => {
-        return input === null;
-      })
-      .subscribe(hab => {
-        this.onDeleteParams("cd_hab", hab);
-        this.onDeleteFiltre.emit();
-      });
+    this.initFilterForm();
   }
-
 
   ngAfterViewInit() {
     this._map = this.mapService.getMap();
     this.addCustomControl();
-
-    /* 
-    this._api
-      .getHabitatsList(ModuleConfig.id_bib_list_habitat)
-      .subscribe(habs => {
-        habs.forEach(hab => {
-          this.tabHab.push({ label: hab.nom_complet, id: hab.cd_hab });
-          this.tabHab.sort((a, b) => {
-            return a.localeCompare(b);
-          });
-        });
-      });
-
-    this._api
-      .getVisitsYears()
-      .subscribe(years => {
-        years.forEach((year, i) => {
-          this.tabYears.push({ label: year[i], id: year[i] });
-          console.log('year', year[i])
-        });
-      });
-     */
   }
 
-  onChargeList(param?) {
-    this._api.getAllSites().subscribe(
+  onChargeList(params?) {
+    this._api.getAllSites(params).subscribe(
       data => {
         this.sites = data[1];
         this.page.totalElements = data[0].totalItmes;
         this.page.size = data[0].items_per_page;
+        this.sites.features.forEach(site => {
+          if (!_.find(this.tabHab, (habitat: Habitat) => { return habitat.cd_hab == site.properties.cd_hab })) {
+            this.tabHab.push({
+              cd_hab: site.properties.cd_hab,
+              nom_habitat: site.properties.nom_habitat
+            });
+            this.tabHab = _.sortBy(this.tabHab, [(habitat: Habitat) => { return habitat.nom_habitat }])
+          }
+        });
         this.mapListService.loadTableData(data[1]);
         this.filteredData = this.mapListService.tableData;
-
         this.dataLoaded = true;
       },
       error => {
@@ -156,6 +143,30 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dataLoaded = true;
       }
     );
+  }
+
+  initFilterForm() {
+    this.filterForm = this._fb.group({
+      date_low: null,
+      date_up: null,
+      filterHab: null
+    });
+    this.filterForm.controls['date_low'].statusChanges
+      .subscribe(() => {
+        if (this.filterForm.controls['date_low'].value) {
+          this.minDate = this.filterForm.controls['date_low'].value;
+          if (!this.filterForm.controls['date_up'].value)
+            this.filterForm.controls['date_up'].setValue(this.minDate);
+        }
+      })
+    this.filterForm.controls['date_up'].statusChanges
+      .subscribe(() => {
+        if (this.filterForm.controls['date_up'].value) {
+          this.maxDate = this.filterForm.controls['date_up'].value;
+          if (!this.filterForm.controls['date_low'].value)
+            this.filterForm.controls['date_low'].setValue(this.minDate);
+        }
+      })
   }
 
   setPage(pageInfo) {
@@ -183,25 +194,22 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-
   onMapClick(id): void {
     const integerId = parseInt(id);
     this.mapListService.selectedRow = [];
     this.mapListService.selectedRow.push(
-      this.mapListService.tableData[integerId-1]
+      this.mapListService.tableData[integerId - 1]
     );
   }
 
   onRowSelect(row) {
     let id = row.selected[0]["id_base_site"];
-    let site = row.selected[0];
     const selectedLayer = this.mapListService.layerDict[id];
     this.zoomOnSelectedLayer(this._map, selectedLayer, 16);
   }
 
   zoomOnSelectedLayer(map, layer, zoom) {
     let latlng;
-
     if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
       latlng = (layer as any).getCenter();
       map.setView(latlng, zoom);
@@ -226,11 +234,10 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
         " btn btn-sm btn-outline-shadow leaflet-bar leaflet-control leaflet-control-custom"
       );
       container.innerHTML =
-        '<i class="material-icons" style="line-height:normal;">crop_free</i>';
-      container.style.padding = "1px 4px";
+        '<i class="material-icons" style="vertical-align: text-bottom">crop_free</i>';
+      container.style.padding = "4px 4px 1px";
       container.title = "Réinitialiser l'emprise de la carte";
       container.onclick = () => {
-        console.log("buttonClicked");
         this._map.setView(this.center, this.zoom);
       };
       return container;
@@ -238,11 +245,6 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     initzoomcontrol.addTo(this._map);
   }
 
-  // Filters
-  onDelete() {
-    console.log("ondelete");
-    this.onChargeList();
-  }
 
   onSetParams(param: string, value) {
     //  ajouter le queryString pour télécharger les données
@@ -252,28 +254,40 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  onDeleteParams(param: string, value) {
-    // effacer le queryString
-    console.log("ondelete params", param + " value: " + value);
-    this.storeService.queryString = this.storeService.queryString.delete(param);
-    this.onChargeList(this.storeService.queryString.toString());
+  onFilter() {
+    console.log('onFilter');
+    let filter = _.clone(this.filterForm.value);
+    filter.date_low = this.dateParser.format(this.filterForm.value.date_low);
+    filter.date_up = this.dateParser.format(this.filterForm.value.date_up);
+    this.onChargeList(filter);
+  
   }
 
-  onSearchDate(event) {
-    this.onSetParams("year", event);
-    this.oldFilterDate = event;
-    this.onChargeList(this.storeService.queryString.toString());
+  resetFilters() {
+    this.filterForm.reset();
+    this.onChargeList();
+    this.resetMinMaxDate();
+    setTimeout(() => {
+      this._map.setView(this.center, this.zoom);
+    }, 100);
   }
 
-  onSearchHab(event) {
-    this.onSetParams("cd_hab", event);
-    this.onChargeList(this.storeService.queryString.toString());
+
+  closeFix(event, datePicker) {
+    if (event.target.offsetParent == null)
+      datePicker.close();
+    else if (event.target.offsetParent.nodeName != "NGB-DATEPICKER")
+      datePicker.close();
+  }
+  resetMinMaxDate() {
+    this.maxDate = { year: 2200, month: 1, day: 1 };
+    this.minDate = null;
   }
 
   ngOnDestroy() {
     let filterkey = this.storeService.queryString.keys();
     filterkey.forEach(key => {
-      this.storeService.queryString= this.storeService.queryString.delete(key);
+      this.storeService.queryString = this.storeService.queryString.delete(key);
     });
   }
 }

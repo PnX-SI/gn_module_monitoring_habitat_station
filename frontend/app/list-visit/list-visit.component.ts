@@ -1,15 +1,13 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Location } from "@angular/common";
 import { ToastrService } from "ngx-toastr";
 import { FormGroup } from "@angular/forms";
-
+import { Page } from "../shared/page";
 import { MapListService } from "@geonature_common/map-list/map-list.service";
 
 import { DataService } from "../services/data.service";
 import { StoreService, ISite } from "../services/store.service";
 import { ModuleConfig } from "../module.config";
-import { UserService } from "../services/user.service";
 import { FormService } from "../services/form.service";
 
 
@@ -25,6 +23,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public idSite;
   public disabledForm = true;
   public rows = [];
+  public page = new Page();
   public paramApp = this.storeService.queryString.append(
     "id_application",
     ModuleConfig.ID_MODULE
@@ -39,12 +38,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
 
   constructor(
     public storeService: StoreService,
-    private _location: Location,
     public _api: DataService,
     public activatedRoute: ActivatedRoute,
     private toastr: ToastrService,
     public mapListService: MapListService,
-    private userService: UserService,
     public router: Router,
     public formService: FormService,
 
@@ -58,9 +55,11 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   getVisits() {
-    this._api.getVisits({ id_base_site: this.idSite }).subscribe(
+    this._api.getVisits(this.idSite).subscribe(
       data => {
-        data.forEach(visit => {
+        this.page.totalElements = data[0].totalItmes;
+        this.page.size = data[0].items_per_page;
+        data[1].forEach(visit => {
           if (visit && Object.keys(visit).length) {
             let fullName = "";
             let count = visit.observers.length;
@@ -74,7 +73,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
             visit.observers = fullName;
           }
         });
-        this.rows = data;
+        this.rows = data[1];
         this.dataLoaded = true;
       },
       error => {
@@ -89,7 +88,6 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this._api.getSiteByID(this.idSite).subscribe(
       (site) => {
         this.site = site;
-        console.log('site',site);
         this.storeService.setCurrentSite(this.site)
         this.pachForm();
         this.getVisits();
@@ -129,6 +127,11 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   onVisitDetails(idVisit) {
     this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.properties.id_base_site}/visit/`, idVisit]);
   }
+
+
+
+
+
   ngOnDestroy() {
     this.storeService.queryString = this.storeService.queryString.delete(
       "id_base_site"

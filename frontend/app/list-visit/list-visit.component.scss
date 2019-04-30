@@ -1,49 +1,60 @@
 .box-shadow {
-    box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  }
-  
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
 .list-shs {
-    max-height: 94vh;
-    overflow-y: auto;
-    padding-bottom: 5px;
+  max-height: 94vh;
+  overflow-y: auto;
+  padding-bottom: 5px;
 }
 
 .list-group-item {
-    background-color: #e9ecef;
-    color: #181818;
+  background-color: #e9ecef;
+  color: #181818;
 }
 
 .wrapper {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
-.back-button{
-    text-align: left;
+.back-button {
+  text-align: left;
 }
 
 .box-shadow {
-    box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 fieldset {
-    padding: 0.35em 0.625em 0.75em !important;
-    border: 1px solid silver !important;
-    margin: 0 2px !important;
-    border-radius: 3px;
-    // background-color: #f3f3f3;
+  padding: 0.35em 0.625em 0.75em !important;
+  border: 1px solid silver !important;
+  margin: 0 2px !important;
+  border-radius: 3px;
+  // background-color: #f3f3f3;
 }
 
 legend {
-    width: auto;
-    font-size: inherit;
+  width: auto;
+  font-size: inherit;
 }
 
 .wrapper {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 fieldset:disabled {
-    color: #6c757d;
-    pointer-events: none;
+  color: #6c757d;
+  pointer-events: none;
 }
 
+.card-header {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-title {
+  margin-bottom: 0;
+}
+
+.box-shadow {
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}

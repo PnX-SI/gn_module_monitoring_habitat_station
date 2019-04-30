@@ -134,6 +134,9 @@ ALTER TABLE ONLY cor_hab_taxon
 ALTER TABLE ONLY cor_transect_visit_perturbation 
     ADD CONSTRAINT fk_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
 
+ALTER TABLE ONLY cor_transect_visit_perturbation 
+    ADD CONSTRAINT fk_id_nomenclature_perturb FOREIGN KEY (id_nomenclature_perturb) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE ON DELETE CASCADE;
+
 ----------
 --UNIQUE--
 ----------

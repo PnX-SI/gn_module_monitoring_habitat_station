@@ -114,8 +114,7 @@ class TPlot(DB.Model):
                                           ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     code_plot = DB.Column(DB.String(50))
 
-    t_transect = DB.relationship(
-        'TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
+    #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
 @serializable
@@ -152,8 +151,7 @@ class CorRelevePlotStrat(DB.Model):
         'ref_nomenclatures.t_nomenclatures.id_nomenclature', onupdate='CASCADE'), nullable=False)
     cover_pourcentage = DB.Column(DB.Integer)
 
-    t_nomenclature = DB.relationship(
-        'TNomencla', primaryjoin='CorRelevePlotStrat.id_nomenclature_strate == TNomencla.id_nomenclature', backref='cor_releve_plot_strats')
+    #t_nomenclature = DB.relationship('TNomencla', primaryjoin='CorRelevePlotStrat.id_nomenclature_strate == TNomencla.id_nomenclature', backref='cor_releve_plot_strats')
     # t_releve_plot = DB.relationship('TRelevePlot', primaryjoin='CorRelevePlotStrat.id_releve_plot == TRelevePlot.id_releve_plot', backref='cor_releve_plot_strats')
 
 
@@ -170,8 +168,7 @@ class CorRelevePlotTaxon(DB.Model):
         'pr_monitoring_habitat_station.cor_hab_taxon.id_cor_hab_taxon', onupdate='CASCADE'), nullable=False)
     cover_pourcentage = DB.Column(DB.Integer)
 
-    cor_hab_taxon = DB.relationship(
-        'CorHabTaxon', primaryjoin='CorRelevePlotTaxon.id_cor_hab_taxon == CorHabTaxon.id_cor_hab_taxon', backref='cor_releve_plot_taxons')
+    #cor_hab_taxon = DB.relationship('CorHabTaxon', primaryjoin='CorRelevePlotTaxon.id_cor_hab_taxon == CorHabTaxon.id_cor_hab_taxon', backref='cor_releve_plot_taxons')
     # t_releve_plot = DB.relationship('TRelevePlot', primaryjoin='CorRelevePlotTaxon.id_releve_plot == TRelevePlot.id_releve_plot', backref='cor_releve_plot_taxons')
 
 
@@ -193,10 +190,8 @@ class TRelevePlot(DB.Model):
     cor_releve_taxons = DB.relationship(
         "CorRelevePlotTaxon", backref='id_releve_plot_t')
     
-    t_base_visit = DB.relationship(
-        'TBaseVisits', primaryjoin='TRelevePlot.id_base_visit == TBaseVisits.id_base_visit', backref='t_releve_plots')
-    t_plot = DB.relationship(
-        'TPlot', primaryjoin='TRelevePlot.id_plot == TPlot.id_plot', backref='t_releve_plots')
+    #t_base_visit = DB.relationship('TBaseVisits', primaryjoin='TRelevePlot.id_base_visit == TBaseVisits.id_base_visit', backref='t_releve_plots')
+    #t_plot = DB.relationship('TPlot', primaryjoin='TRelevePlot.id_plot == TPlot.id_plot', backref='t_releve_plots')
 
 
 
@@ -209,10 +204,11 @@ class CorTransectVisitPerturbation(DB.Model):
         DB.Integer, primary_key=True, server_default=DB.FetchedValue())
     id_base_visit = DB.Column(DB.ForeignKey(
         'gn_monitoring.t_base_visits.id_base_visit', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    id_nomenclature_perturb = DB.Column(DB.Integer, nullable=False)
+    id_nomenclature_perturb =  DB.Column(DB.ForeignKey(
+        'ref_nomenclatures.t_nomenclatures.id_nomenclature', onupdate='CASCADE'), nullable=False)
 
-    t_base_visit = DB.relationship(
-        'TBaseVisits', primaryjoin='CorTransectVisitPerturbation.id_base_visit == TBaseVisits.id_base_visit', backref='cor_transect_visit_perturbations')
+    #t_base_visit = DB.relationship('TBaseVisits', primaryjoin='CorTransectVisitPerturbation.id_base_visit == TBaseVisits.id_base_visit', backref='cor_transect_visit_perturbations')
+    t_nomenclature = DB.relationship('TNomencla', primaryjoin='CorTransectVisitPerturbation.id_nomenclature_perturb == TNomencla.id_nomenclature', backref='cor_perturb_nomencla')
 
 
 @serializable
@@ -237,6 +233,7 @@ class TVisitSHS(TBaseVisits):
 
     cor_visit_perturbation = DB.relationship(
         'CorTransectVisitPerturbation', backref='t_base_visits')
+    
     cor_releve_plot = DB.relationship(
         "TRelevePlot", backref='t_base_visits')
 
