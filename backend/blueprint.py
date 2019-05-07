@@ -36,7 +36,6 @@ def get_all_sites():
     Retourne tous les sites
     '''
     parameters = request.args
-    print('params', parameters)
 
     q = (
         DB.session.query(
@@ -282,7 +281,6 @@ def get_visitById(id_visit):
     if data:
         visit = data.as_dict(True)
         for releve in visit['cor_releve_plot']:
-            print('releve', releve)
             plot_data = dict()
             plot_data['excretes_presence'] = releve['excretes_presence']
             plot_data['taxons_releve'] = releve['cor_releve_taxons']
@@ -362,21 +360,19 @@ def patch_visit(id_visit):
     for releve in tab_releve_plots:
         if 'plot_data' in releve:
             releve['excretes_presence'] = releve['plot_data']['excretes_presence']
-            tab_plot_data = releve.pop('plot_data')
+            tab_plot_data = releve.pop('plot_data')           
         releve_plot = TRelevePlot(**releve)
         for strat in tab_plot_data['strates_releve']:
             strat_item = CorRelevePlotStrat(**strat)
             releve_plot.cor_releve_strats.append(strat_item)
-        for taxon in tab_plot_data['taxons_releve']:
+        for taxon in tab_plot_data['taxons_releve']:                
             taxon_item = CorRelevePlotTaxon(**taxon)
             releve_plot.cor_releve_taxons.append(taxon_item)
-
         visit.cor_releve_plot.append(releve_plot)
 
     DB.session.query(CorTransectVisitPerturbation).filter_by(
         id_base_visit=id_visit).delete()
     for per in tab_perturbations:
-        print('perturb', per)
         visit_per = CorTransectVisitPerturbation(**per)
         visit.cor_visit_perturbation.append(visit_per)
     observers = DB.session.query(User).filter(
@@ -384,7 +380,6 @@ def patch_visit(id_visit):
     ).all()
     for o in observers:
         visit.observers.append(o)
-    print('visit', visit.as_dict(recursif=True))
     mergeVisit = DB.session.merge(visit)
 
     DB.session.commit()
