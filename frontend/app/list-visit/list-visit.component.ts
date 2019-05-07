@@ -18,10 +18,34 @@ import { FormService } from "../services/form.service";
 })
 export class ListVisitComponent implements OnInit, OnDestroy {
 
-  public site: ISite;;
+  public site: ISite;
+  sites = [
+    {
+      base_site_code: "TESTSHS1",
+      base_site_description: "Aucune description",
+      base_site_name: "HAB",
+      cd_hab: 16265,
+      id_base_site: 4,
+      id_nomenclature_plot_position: 1228,
+      id_transect: 1,
+      nom_commune: "Saint-Étienne-de-Tinée",
+      nom_habitat: "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
+    },
+    {
+      base_site_code: "TESTSHS1",
+      base_site_description: "Aucune description",
+      base_site_name: "Site2",
+      cd_hab: 16265,
+      id_base_site: 5,
+      id_nomenclature_plot_position: 1228,
+      id_transect: 1,
+      nom_commune: "Saint-Étienne-de-Tinée",
+      nom_habitat: "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
+    }
+  ]
   public show = true;
   public idSite;
-  public disabledForm = true;
+  public disabledForm = false;
   public rows = [];
   public page = new Page();
   public paramApp = this.storeService.queryString.append(
@@ -51,7 +75,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.formTransect = this.formService.initFormTransect();
-    this.getSiteByID();
+    this.getTtransectByIdSite();
+    this._api.getHabitatsList(ModuleConfig.id_bib_list_habitat).subscribe(
+      (data) => console.log('habitatsList', data)
+    )
   }
 
   getVisits() {
@@ -84,8 +111,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       }
     );
   }
-  getSiteByID() {
-    this._api.getSiteByID(this.idSite).subscribe(
+  getTtransectByIdSite() {
+    this._api.getTtransectByIdSite(this.idSite).subscribe(
       (site) => {
         this.site = site;
         this.storeService.setCurrentSite(this.site)
@@ -104,7 +131,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       }
     )
   }
-
+  
 
   pachForm() {
     this.formTransect.patchValue({
@@ -113,7 +140,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       geom_end_lat: this.site.geometry.coordinates[1][0],
       geom_end_long: this.site.geometry.coordinates[1][1],
       position_plot: this.site.properties.position_plot,
-      plot_size: this.site.properties.plot_size
+      plot_size: this.site.properties.plot_size,
+      sites: this.sites[0].id_base_site
     });
   }
 
@@ -122,13 +150,16 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   onNewVisit() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.properties.id_base_site}/new_visit`]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.site.properties.id_base_site}/new_visit`]);
   }
   onVisitDetails(idVisit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/site/${this.site.properties.id_base_site}/visit/`, idVisit]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.site.properties.id_base_site}/visit/`, idVisit]);
   }
 
-
+  onAddPlot(){
+    this.site.properties.plots.unshift({code_plot: "Qu5555"})
+    //this.formTransect.geom = 'SRID=4326;POINT(' + this.formTransect.value.lng + ' ' + this.formTransect.value.lat + ')';
+  }
 
 
 

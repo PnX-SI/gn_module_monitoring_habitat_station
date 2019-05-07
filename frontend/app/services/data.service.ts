@@ -9,18 +9,17 @@ export class DataService {
   constructor(private _http: HttpClient) { }
 
 
-  getSiteByID(idSite) {
-    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/site/${idSite}`)
+  getTtransectByIdSite(idSite) {
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/transects/${idSite}`)
   }
 
-  getAllSites(params?) {
-    console.log('params', params);
+  getAllTransects(params?) {
     let myParams = new HttpParams();
     for (let key in params) {
       if(params[key])
         myParams = myParams.set(key, params[key]);
     }
-    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`, {
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/transects`, {
       params: myParams
     })
   }
@@ -44,6 +43,11 @@ export class DataService {
   getVisitByID(id_visit) {
     return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit/${id_visit}`)
   }
+
+  getHabitatsList(id_list) {
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/habitats/${id_list}`)
+  }
+
 
   getDefaultVisit(): IVisit {
     return {

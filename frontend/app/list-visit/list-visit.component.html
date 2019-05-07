@@ -11,71 +11,95 @@
             </button>
         </div>
         <div class="card-body">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab">
-                        <i class="fa fa-info-circle"> </i> Informations Générales </a>
-                </li>
-                <li class="nav-item" *ngIf="show">
-                    <a class="nav-link" data-toggle="tab" href="#details" role="tab">
-                        <i class="fa fa-search police"> </i> Détails </a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div class="tab-pane active modal-header " id="infoGen" role="tabpanel">
-                    <p> <span> Code site : </span> <span class="strong "> {{ site.properties.base_site_code }} </span>
-                    </p>
-                    <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ site.properties.nom_habitat }}">
-                            {{ site.properties.nom_habitat }}
-                        </span></p>
-                    <p> <span> Commune : </span> <span class="strong"> {{ site.properties.nom_commune}} </span></p>
-                </div>
-
-                <div class="tab-pane modal-header" id="details" role="tabpanel">
-                    <p> <span> Nom du site : </span> <span class="strong"> {{ site.properties.transect_label }} </span>
-                    </p>
-                    <p> <span> Organisme : </span> <span class="strong"> {{ site.properties.organisme }} </span></p>
-                    <p> <span> Description du site : </span> <span class="strong">
-                            {{ site.properties.base_site_description }} </span></p>
-                </div>
-            </div>
             <form>
-                <fieldset [disabled]="disabledForm">
+                <fieldset>
                     <legend>
-                        <b>Coordonnées géographiques</b>
+                        Site Informations
                     </legend>
-                    <div class="form-group">
-                        <div class="form-group">
-                            <label>coord GPS départ</label>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_start_lat" max="90" min="-90"
-                                        step="0.001" placeholder="latitude">
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_start_long" placeholder="longitude"
-                                        max="180" min="-180" step="0.001">
-                                </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Code Site :</small>
+                                <select class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.sites">
+                                    <option [ngValue]=null> -- Sélectionnez un site -- </option>
+                                    <option *ngFor="let site of sites" [ngValue]="site.id_base_site"
+                                        [innerHTML]="site.base_site_name">
+                                    </option>
+                                </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>coord GPS arrivée</label>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_end_lat" max="90" min="-90"
-                                        step="0.001" placeholder="latitude">
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_end_long" placeholder="longitude"
-                                        max="180" min="-180" step="0.001">
-                                </div>
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Commune :</small>
+                                <input value="{{site.properties.nom_commune}}" class="form-control form-control-sm">
                             </div>
                         </div>
                     </div>
+                </fieldset>
+                <br>
+                <fieldset [disabled]="disabledForm">
+                    <legend>
+                        Transect Informations
+                    </legend>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Transect Label :</small>
+                                <input class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Habitat :</small>
+                                <select class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.sites">
+                                    <option [ngValue]=null> -- Sélectionnez un habitat -- </option>
+                                    <option *ngFor="let site of sites" [ngValue]="site.id_base_site"
+                                        [innerHTML]="site.base_site_name">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-0"><i class="material-icons gps-icon">location_on</i>Point de départ : </h6>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <small>Latitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_start_lat" max="90" min="-90" step="0.001"
+                                    placeholder="latitude">
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <small>Longitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_start_long" placeholder="longitude"
+                                    max="180" min="-180" step="0.001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-0"><i class="material-icons  gps-icon">location_on</i>Point d'arrivée :</h6>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <small>Latitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_end_lat" max="90" min="-90" step="0.001"
+                                    placeholder="latitude">
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <small>Longitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_end_long" placeholder="longitude"
+                                    max="180" min="-180" step="0.001">
+                            </div>
+                        </div>
+                    </div>
+
+
                     <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
                         <button class="btn btn-warning" data-toggle="button">
                             <i class="fa fa-edit" aria-hidden="true"> </i>
@@ -86,29 +110,35 @@
                 <br>
                 <fieldset [disabled]="disabledForm">
                     <legend>
-                        <b>Informations placette</b>
+                        Placettes informations 
                     </legend>
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-sm-12 col-md-6">
-                                <div class="form-group">
-                                    <label> Position des placettes : </label>
-                                    <div class="" id="newPerturs">
-                                        <pnx-nomenclature [parentFormControl]="formTransect.controls.position_plot"
-                                            keyValue="id_nomenclature" [bindAllItem]="true" keyLabel="label_default"
-                                            [disabled]="disabledForm" codeNomenclatureType="TYPE_PERTURBATION">
-                                        </pnx-nomenclature>
-                                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small> Position des placettes : </small>
+                                <div class="" id="newPerturs">
+                                    <pnx-nomenclature [parentFormControl]="formTransect.controls.position_plot"
+                                        keyValue="id_nomenclature" [bindAllItem]="true" keyLabel="label_default"
+                                        [disabled]="disabledForm" codeNomenclatureType="TYPE_PERTURBATION">
+                                    </pnx-nomenclature>
                                 </div>
                             </div>
-                            <div class="col-sm-12 col-md-6">
-                                <label> Taille des placettes ( {{ storeService.shsConfig.plot_size_unite }} ) </label>
-                                <input class="form-control" type="number" placeholder="Taille des placettes" />
-                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6">
+                            <small> Taille des placettes ( {{ storeService.shsConfig.plot_size_unite }} ) </small>
+                            <input class="form-control form-control-sm" type="number"
+                                placeholder="Taille des placettes" />
                         </div>
                     </div>
-                    <hr>
-                    <label> Liste des placettes :</label>
+                    <small> Liste des placettes :</small>
+                    <div class="input-group my-2" [style.display]="disabledForm ? 'none' : 'flex'">
+                        <input type="text" class="form-control form-control-sm" placeholder="code placette"
+                            aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-success" type="button" (click)="onAddPlot()">
+                                <i class="fa fa-plus-circle" aria-hidden="true"> </i> Ajouter</button>
+                        </div>
+                    </div>
                     <ul class="list-group list-group-flush">
                         <li *ngFor="let plot of site.properties.plots" class="list-group-item">
                             <span>code placette : </span> {{ plot.code_plot }}

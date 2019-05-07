@@ -104,7 +104,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onChargeList(params?) {
-    this._api.getAllSites(params).subscribe(
+    this._api.getAllTransects(params).subscribe(
       data => {
         this.sites = data[1];
         this.page.totalElements = data[0].totalItmes;
@@ -220,7 +220,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onInfo(id_base_site) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/site`,
+      `${ModuleConfig.MODULE_URL}/transects`,
       id_base_site
     ]);
   }
@@ -272,6 +272,11 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 100);
   }
 
+  onNewTransect(){
+    this.router.navigate([
+      `${ModuleConfig.MODULE_URL}/transects/new_transect`,
+    ]);
+  }
 
   closeFix(event, datePicker) {
     if (event.target.offsetParent == null)

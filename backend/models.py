@@ -56,6 +56,19 @@ class HabrefSHS(DB.Model):
 
 
 @serializable
+class CorListHabitat(DB.Model):
+    __tablename__ = 'cor_list_habitat'
+    __table_args__ = {'schema': 'ref_habitat'}
+
+    id_cor_list = DB.Column(DB.Integer, primary_key=True,
+                            server_default=DB.FetchedValue())
+    id_list = DB.Column(DB.ForeignKey(
+        'ref_habitat.habref.bib_list_habitat', onupdate='CASCADE'), nullable=False)
+    cd_hab = DB.Column(DB.ForeignKey(
+        'ref_habitat.habref.cd_hab', onupdate='CASCADE'), nullable=False)
+
+
+@serializable
 class TNomencla(DB.Model):
     __tablename__ = 't_nomenclatures'
     __table_args__ = {'schema': 'ref_nomenclatures', 'extend_existing': True}

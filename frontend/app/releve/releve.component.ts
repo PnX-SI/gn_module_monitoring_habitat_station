@@ -60,7 +60,7 @@ export class ReleveComponent implements OnInit {
         if (!this.currentSite) {
             forkJoin([
                 this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, { orderby: 'label_default' }),
-                this._api.getSiteByID(this.idSite)
+                this._api.getTtransectByIdSite(this.idSite)
             ])
                 .subscribe(results => {
                     this.strates = results[0].values;
@@ -167,7 +167,7 @@ export class ReleveComponent implements OnInit {
     }
 
     backToVisites() {
-        this.router.navigate([`${ModuleConfig.MODULE_URL}/site`, this.id_base_site]);
+        this.router.navigate([`${ModuleConfig.MODULE_URL}/transects`, this.id_base_site]);
     }
 
     onChangePlot(plot) {

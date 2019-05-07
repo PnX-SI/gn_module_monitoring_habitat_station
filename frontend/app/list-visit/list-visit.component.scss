@@ -9,7 +9,6 @@
 }
 
 .list-group-item {
-  background-color: #e9ecef;
   color: #181818;
 }
 
@@ -28,7 +27,7 @@
 fieldset {
   padding: 0.35em 0.625em 0.75em !important;
   border: 1px solid silver !important;
-  margin: 0 2px !important;
+  margin: 0 2px ;
   border-radius: 3px;
   // background-color: #f3f3f3;
 }
@@ -36,6 +35,7 @@ fieldset {
 legend {
   width: auto;
   font-size: inherit;
+  color: black !important;
 }
 
 .wrapper {
@@ -57,4 +57,10 @@ fieldset:disabled {
 
 .box-shadow {
   box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.gps-icon{
+  font-size: 20px;
+  color: #4084cc;
+  vertical-align: text-bottom;
 }

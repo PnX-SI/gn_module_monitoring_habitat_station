@@ -29,7 +29,8 @@ export class FormService {
         geom_start_long: [null, Validators.required],
         plot_size: null,
         position_plot: null,
-        transect_label: null
+        transect_label: null,
+        sites: null
       });
       return formTransect;
     }
