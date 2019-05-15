@@ -35,10 +35,16 @@ export class PlotReleveComponent implements OnInit, OnChanges {
             this.id_releve_plot = this.data.id_releve_plot;
             this.patchForm();
         }
+<<<<<<< HEAD
         if (this.disabledForm)
             this.plotForm.disable();
         else
             this.plotForm.enable();
+=======
+        else {
+            this.id_releve_plot = null;
+        }
+>>>>>>> dee1b110b22c4ce5f31c471530521b9092b97a26
         this.onChanges();
     }
 
@@ -110,11 +116,15 @@ export class PlotReleveComponent implements OnInit, OnChanges {
         _.map(this.plotForm.value.strates_releve, (strate) => {
             if (this.id_releve_plot)
                 strate.id_releve_plot = this.id_releve_plot;
+            if (!strate.id_releve_plot_strat)
+                delete strate.id_releve_plot_strat
             delete strate.label_default;
         });
         _.map(this.plotForm.value.taxons_releve, (taxon) => {
             if (this.id_releve_plot)
                 taxon.id_releve_plot = this.id_releve_plot;
+            if (!taxon.id_cor_releve_plot_taxon)
+                delete taxon.id_cor_releve_plot_taxon
             delete taxon.nom_complet
         });
         if (this.id_releve_plot)
