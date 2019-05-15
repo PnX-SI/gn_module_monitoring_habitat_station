@@ -1,8 +1,9 @@
 <div id="cover-spin" *ngIf="!dataLoaded"></div>
-<div class="row row-0" *ngIf="dataLoaded">
+<div class="row row-0 justify-content-md-center" *ngIf="dataLoaded">
     <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
         <div class="card-header">
-            <h4 class="card-title"> Consultation du transect {{ site.properties.transect_label }} </h4>
+            <h4  class="card-title"> {{ transect_title }}
+            </h4>
         </div>
         <div>
             <button type="button" class="btn btn-link btn-sm back-button" (click)="backToSites()">
@@ -10,9 +11,22 @@
                 Retour à la liste des transects
             </button>
         </div>
+        <div class="transect-edit">
+            <button *ngIf="(!disabledForm && upIsAllowed) || (!disabledForm && addIsAllowed)" type="submit" class="btn btn-success btn-sm ml-3 pull-right box-shadow"
+                (click)="onSubmitTransect()">
+                <i class="material-icons">
+                    save
+                </i> Enregister
+            </button>
+            <button *ngIf="!isNew && upIsAllowed" class="btn btn-sm pull-right box-shadow" [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'"
+                (click)="onEdit()">
+                <i *ngIf="disabledForm" class="fa fa-edit" aria-hidden="true"> </i>
+                {{edit_btn}}
+            </button>
+        </div>
         <div class="card-body">
             <form>
-                <fieldset>
+                <fieldset [disabled]="disabledForm">
                     <legend>
                         Site Informations
                     </legend>
@@ -21,7 +35,7 @@
                             <div class="form-group">
                                 <small>Code Site :</small>
                                 <select class="form-control form-control-sm"
-                                    [formControl]="formTransect.controls.sites">
+                                    [formControl]="formTransect.controls.id_base_site">
                                     <option [ngValue]=null> -- Sélectionnez un site -- </option>
                                     <option *ngFor="let site of sites" [ngValue]="site.id_base_site"
                                         [innerHTML]="site.base_site_name">
@@ -29,10 +43,11 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-6">
+                        <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <small>Commune :</small>
-                                <input value="{{site.properties.nom_commune}}" class="form-control form-control-sm">
+                                <input value="{{currentSite.properties.nom_commune}}"
+                                    class="form-control form-control-sm">
                             </div>
                         </div>
                     </div>
@@ -46,17 +61,18 @@
                         <div class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <small>Transect Label :</small>
-                                <input class="form-control form-control-sm">
+                                <input class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.transect_label">
                             </div>
                         </div>
                         <div class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <small>Habitat :</small>
                                 <select class="form-control form-control-sm"
-                                    [formControl]="formTransect.controls.sites">
+                                    [formControl]="formTransect.controls.cd_hab">
                                     <option [ngValue]=null> -- Sélectionnez un habitat -- </option>
-                                    <option *ngFor="let site of sites" [ngValue]="site.id_base_site"
-                                        [innerHTML]="site.base_site_name">
+                                    <option *ngFor="let habitat of habitats" [ngValue]="habitat.cd_hab"
+                                        [innerHTML]="habitat.nom_complet">
                                     </option>
                                 </select>
                             </div>
@@ -67,16 +83,16 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col-sm-12 col-md-6">
-                                <small>Latitude :</small>
-                                <input type="number" class="form-control form-control-sm"
-                                    [formControl]="formTransect.controls.geom_start_lat" max="90" min="-90" step="0.001"
-                                    placeholder="latitude">
-                            </div>
-                            <div class="col-sm-12 col-md-6">
                                 <small>Longitude :</small>
                                 <input type="number" class="form-control form-control-sm"
                                     [formControl]="formTransect.controls.geom_start_long" placeholder="longitude"
                                     max="180" min="-180" step="0.001">
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <small>Latitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_start_lat" max="90" min="-90" step="0.001"
+                                    placeholder="latitude">
                             </div>
                         </div>
                     </div>
@@ -85,86 +101,73 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col-sm-12 col-md-6">
-                                <small>Latitude :</small>
-                                <input type="number" class="form-control form-control-sm"
-                                    [formControl]="formTransect.controls.geom_end_lat" max="90" min="-90" step="0.001"
-                                    placeholder="latitude">
-                            </div>
-                            <div class="col-sm-12 col-md-6">
                                 <small>Longitude :</small>
                                 <input type="number" class="form-control form-control-sm"
                                     [formControl]="formTransect.controls.geom_end_long" placeholder="longitude"
                                     max="180" min="-180" step="0.001">
                             </div>
+                            <div class="col-sm-12 col-md-6">
+                                <small>Latitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_end_lat" max="90" min="-90" step="0.001"
+                                    placeholder="latitude">
+                            </div>
                         </div>
-                    </div>
-
-
-                    <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
-                        <button class="btn btn-warning" data-toggle="button">
-                            <i class="fa fa-edit" aria-hidden="true"> </i>
-                            Modifier
-                        </button>
                     </div>
                 </fieldset>
                 <br>
                 <fieldset [disabled]="disabledForm">
                     <legend>
-                        Placettes informations 
+                        Placettes informations
                     </legend>
                     <div class="row">
                         <div class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <small> Position des placettes : </small>
                                 <div class="" id="newPerturs">
-                                    <pnx-nomenclature [parentFormControl]="formTransect.controls.position_plot"
-                                        keyValue="id_nomenclature" [bindAllItem]="true" keyLabel="label_default"
-                                        [disabled]="disabledForm" codeNomenclatureType="TYPE_PERTURBATION">
-                                    </pnx-nomenclature>
+                                    <select class="form-control form-control-sm"
+                                        [formControl]="formTransect.controls.id_nomenclature_plot_position">
+                                        <option [ngValue]=null> -- Sélectionnez une position -- </option>
+                                        <option *ngFor="let position of plot_position"
+                                            [ngValue]="position.id_nomenclature">{{position.label_default}}
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-12 col-md-6">
                             <small> Taille des placettes ( {{ storeService.shsConfig.plot_size_unite }} ) </small>
-                            <input class="form-control form-control-sm" type="number"
-                                placeholder="Taille des placettes" />
+                            <input class="form-control form-control-sm" [formControl]="formTransect.controls.plot_size"
+                                type="number" placeholder="Taille des placettes" />
                         </div>
                     </div>
                     <small> Liste des placettes :</small>
-                    <div class="input-group my-2" [style.display]="disabledForm ? 'none' : 'flex'">
-                        <input type="text" class="form-control form-control-sm" placeholder="code placette"
+                    <div *ngIf="!disabledForm" class="input-group my-2">
+                        <input #addPlot  type="text" class="form-control form-control-sm" placeholder="Code placette"
                             aria-describedby="basic-addon2">
                         <div class="input-group-append">
-                            <button class="btn btn-sm btn-outline-success" type="button" (click)="onAddPlot()">
+                            <button class="btn btn-sm btn-outline-success" type="button" (click)="onAddPlot(addPlot)">
                                 <i class="fa fa-plus-circle" aria-hidden="true"> </i> Ajouter</button>
                         </div>
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <li *ngFor="let plot of site.properties.plots" class="list-group-item">
-                            <span>code placette : </span> {{ plot.code_plot }}
+                    <ul class="list-group">
+                        <li *ngFor="let plot of plots" class="list-group-item">
+                            <span>Code placette : </span> {{ plot.code_plot }}
                         </li>
                     </ul>
-                    <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
-                        <button class="btn btn-warning" data-toggle="button">
-                            <i class="fa fa-edit" aria-hidden="true"> </i>
-                            Modifier
-                        </button>
-                    </div>
                 </fieldset>
             </form>
         </div>
-        <div class="card-footer">
-        </div>
     </div>
-    <div class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
+    <div *ngIf="!isNew"  class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Relevés</h4>
+                <h4 class="card-title">Liste des visites</h4>
             </div>
             <div class="card-body">
                 <ngx-datatable class="material" [columnMode]="'force'" [rows]="rows" [headerHeight]="50"
                     [footerHeight]="50" [rowHeight]="'auto'" [messages]="storeService.shsConfig.list_visit_message"
-                    [offset]="page.pageNumber" [limit]="page.size">
+                    [offset]="page.pageNumber" [limit]="page.size"  [selectionType]="'single'" (select)="onRowSelect($event)">
                     <ngx-datatable-column *ngFor="let col of storeService.shsConfig.default_list_visit_columns"
                         [name]="col.name" [prop]="col.prop" maxWidth="col.maxWidth">
                     </ngx-datatable-column>
@@ -178,12 +181,12 @@
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-between">
-                    <pnx-modal-download labelButton='Télécharger ces relevés' [pathDownload]='storeService.urlLoad'>
+                    <pnx-modal-download labelButton='Télécharger ces visites' [pathDownload]='storeService.urlLoad'>
                     </pnx-modal-download>
                     <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
                         iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
                     </modal-shs> -->
-                    <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewVisit()">
+                    <button *ngIf="addVisitIsAllowed" class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewVisit()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
                         Ajouter une nouvelle visite
                     </button>
@@ -191,5 +194,4 @@
             </div>
         </div>
     </div>
-
 </div>

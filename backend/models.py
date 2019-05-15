@@ -79,6 +79,21 @@ class TNomencla(DB.Model):
     label_default = DB.Column(DB.String(255), nullable=False)
 
 
+
+@serializable
+class TPlot(DB.Model):
+    __tablename__ = 't_plots'
+    __table_args__ = {'schema': 'pr_monitoring_habitat_station'}
+
+    id_plot = DB.Column(DB.Integer, primary_key=True,
+                        server_default=DB.FetchedValue())
+    id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
+                                          ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    code_plot = DB.Column(DB.String(50))
+
+    #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
+
+
 @serializable
 class TTransect(DB.Model):
     __tablename__ = 't_transects'
@@ -98,6 +113,7 @@ class TTransect(DB.Model):
 
     # habref = DB.relationship('HabrefSHS', primaryjoin='TTransect.cd_hab == HabrefSHS.cd_hab', backref='t_transects')
     t_base_site = DB.relationship('TBaseSites')
+    cor_plots = DB.relationship("TPlot", backref='t_plots')
 
     def get_geofeature(self, recursif=False):
         line = self.points_to_linestring()
@@ -116,18 +132,6 @@ class TTransect(DB.Model):
         return LineString([point1, point2])
 
 
-@serializable
-class TPlot(DB.Model):
-    __tablename__ = 't_plots'
-    __table_args__ = {'schema': 'pr_monitoring_habitat_station'}
-
-    id_plot = DB.Column(DB.Integer, primary_key=True,
-                        server_default=DB.FetchedValue())
-    id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
-                                          ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    code_plot = DB.Column(DB.String(50))
-
-    #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
 @serializable

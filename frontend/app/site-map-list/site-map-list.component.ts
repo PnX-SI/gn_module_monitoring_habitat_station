@@ -11,6 +11,7 @@ import { MapListService } from "@geonature_common/map-list/map-list.service";
 
 import { DataService, Habitat } from "../services/data.service";
 import { StoreService } from "../services/store.service";
+import { UserService } from "../services/user.service";
 import { ModuleConfig } from "../module.config";
 import * as _ from 'lodash'
 
@@ -64,6 +65,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public sites;
   public filteredData = [];
   public tabHab: Habitat[] = [];
+  public addIsAllowed: boolean =false;
   public dataLoaded = false;
   public center;
   public zoom;
@@ -78,6 +80,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     public mapService: MapService,
     private _api: DataService,
+    private userService: UserService,
     public dateParser: NgbDateParserFormatter,
     datePickerConfig: NgbDatepickerConfig,
     public storeService: StoreService,
@@ -92,10 +95,11 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.onChargeList();
+    this.checkPermission();
+    this.getTransects();
     this.center = this.storeService.shsConfig.zoom_center;
     this.zoom = this.storeService.shsConfig.zoom;
-    this.initFilterForm();
+    this.initFilters();
   }
 
   ngAfterViewInit() {
@@ -103,7 +107,14 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.addCustomControl();
   }
 
-  onChargeList(params?) {
+  checkPermission() {
+    this.userService.check_user_cruved_visit('C').subscribe(ucruved => {
+      this.addIsAllowed = ucruved;
+    })
+  }
+
+
+  getTransects(params?) {
     this._api.getAllTransects(params).subscribe(
       data => {
         this.sites = data[1];
@@ -131,21 +142,14 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (error.status == 403) {
           msg = "Vous n'êtes pas autorisé à afficher ces données.";
         } else {
-          this.toastr.error(
-            msg,
-            "",
-            {
-              positionClass: "toast-top-right"
-            }
-          );
-          console.log("error getsites: ", error);
+          this.toastr.error(msg, "", { positionClass: "toast-top-right" });
         }
         this.dataLoaded = true;
       }
     );
   }
 
-  initFilterForm() {
+  initFilters() {
     this.filterForm = this._fb.group({
       date_low: null,
       date_up: null,
@@ -173,7 +177,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.page.pageNumber = pageInfo.offset;
     if (this.storeService.shsConfig.pagination_serverside) {
       this.onSetParams("page", pageInfo.offset + 1);
-      this.onChargeList(this.storeService.queryString.toString());
+      this.getTransects(this.storeService.queryString.toString());
     }
   }
   // Map-list
@@ -255,24 +259,23 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFilter() {
-    console.log('onFilter');
     let filter = _.clone(this.filterForm.value);
     filter.date_low = this.dateParser.format(this.filterForm.value.date_low);
     filter.date_up = this.dateParser.format(this.filterForm.value.date_up);
-    this.onChargeList(filter);
-  
+    this.getTransects(filter);
+
   }
 
   resetFilters() {
     this.filterForm.reset();
-    this.onChargeList();
+    this.getTransects();
     this.resetMinMaxDate();
     setTimeout(() => {
       this._map.setView(this.center, this.zoom);
     }, 100);
   }
 
-  onNewTransect(){
+  onNewTransect() {
     this.router.navigate([
       `${ModuleConfig.MODULE_URL}/transects/new_transect`,
     ]);

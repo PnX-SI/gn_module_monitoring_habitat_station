@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, Input, EventEmitter, OnChanges } from "@angular/core";
-import { FormGroup, FormBuilder, FormArray } from "@angular/forms";
+import { FormGroup, FormBuilder, FormArray ,Validators} from "@angular/forms";
 import * as _ from 'lodash';
 
 @Component({
@@ -14,6 +14,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     @Input() strates: any[];
     @Input() id_plot: number;
     @Input() data: any = null;
+    @Input() disabledForm;
     @Input() plot_title: string;
     @Output() plotReleve = new EventEmitter();
     public plotForm: FormGroup;
@@ -34,6 +35,10 @@ export class PlotReleveComponent implements OnInit, OnChanges {
             this.id_releve_plot = this.data.id_releve_plot;
             this.patchForm();
         }
+        if (this.disabledForm)
+            this.plotForm.disable();
+        else
+            this.plotForm.enable();
         this.onChanges();
     }
 
@@ -94,7 +99,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
                 this._fb.group({
                     id_nomenclature_strate: [strate.id_nomenclature_strate],
                     id_releve_plot_strat: [null],
-                    cover_pourcentage: [null],
+                    cover_pourcentage: [null,Validators.compose([Validators.min(0),Validators.max(100)])],
                     label_default: [strate.label_default]
                 })
             );

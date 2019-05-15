@@ -19,8 +19,8 @@ import { PlotReleveComponent } from "./plot_relev/plot_relev.component";
 // my module routing
 const routes: Routes = [
   { path: "", component: SiteMapListComponent },
-  { path: 'transects/:idSite', component: ListVisitComponent },
   { path: 'transects/new_transect', component: ListVisitComponent },
+  { path: 'transects/:idSite', component: ListVisitComponent },
   { path: 'transects/:idSite/visit/:idVisit', component: ReleveComponent },
   { path: 'transects/:idSite/new_visit', component: ReleveComponent }
 ];

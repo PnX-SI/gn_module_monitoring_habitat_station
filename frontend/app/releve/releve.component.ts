@@ -10,6 +10,7 @@ import { ToastrService } from "ngx-toastr";
 import * as _ from 'lodash';
 
 import { DataFormService } from "@geonature_common/form/data-form.service";
+import { UserService } from "../services/user.service";
 
 @Component({
     selector: "releve",
@@ -38,6 +39,10 @@ export class ReleveComponent implements OnInit {
     submit_label: string;
     selectedPolt;
     spinner: boolean;
+    public disabledForm: boolean = true;
+    public edit_btn: string = 'Editer';
+    public updateIsAllowed: boolean = false;
+    public addIsAllowed: boolean = false;
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -47,7 +52,8 @@ export class ReleveComponent implements OnInit {
         private storeService: StoreService,
         private _api: DataService,
         private toastr: ToastrService,
-        private nomenclatureServ: DataFormService
+        private nomenclatureServ: DataFormService,
+        private userService: UserService,
     ) {
     }
 
@@ -67,8 +73,8 @@ export class ReleveComponent implements OnInit {
                     this.renameKey(this.strates);
                     this.currentSite = results[1];
                     this.id_base_site = this.currentSite.properties.id_base_site;
-                    this.id_plot = this.currentSite.properties.plots[0].id_plot;
-                    this.plot_title = this.currentSite.properties.plots[0].code_plot;
+                    this.id_plot = this.currentSite.properties.cor_plots[0].id_plot;
+                    this.plot_title = this.currentSite.properties.cor_plots[0].code_plot;
                     this._api.getTaxonsByHabitat(this.currentSite.properties.cd_hab).subscribe(
                         (taxons) => {
                             this.taxons = taxons;
@@ -77,17 +83,24 @@ export class ReleveComponent implements OnInit {
                                 this.submit_label = 'Modifier la visite';
                             }
                             else {
+                                this.userService.check_user_cruved_visit('C', this.visit).subscribe(ucruved => {
+                                    this.addIsAllowed = ucruved;
+                                })
+                                this.disabledForm = false;
                                 this.visit = this._api.getDefaultVisit();
                                 this.submit_label = 'Enregistrer la visite';
                                 this.loadForm = true;
                             }
                         }
                     )
-                });
+                },
+                    (error) => {
+                        this.toastr.error("Une erreur est survenue lors de la récupération des informations sur le serveur.", "", { positionClass: "toast-top-right" });
+                    });
         }
         else {
-            this.id_plot = this.currentSite.properties.plots[0].id_plot;
-            this.plot_title = this.currentSite.properties.plots[0].code_plot;
+            this.id_plot = this.currentSite.properties.cor_plots[0].id_plot;
+            this.plot_title = this.currentSite.properties.cor_plots[0].code_plot;
             this.id_base_site = this.currentSite.properties.id_base_site;
             forkJoin([
                 this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, { orderby: 'label_default' }),
@@ -102,11 +115,18 @@ export class ReleveComponent implements OnInit {
                         this.submit_label = 'Modifier la visite';
                     }
                     else {
+                        this.userService.check_user_cruved_visit('C', this.visit).subscribe(ucruved => {
+                            this.addIsAllowed = ucruved;
+                        })
+                        this.disabledForm = false;
                         this.visit = this._api.getDefaultVisit();
                         this.submit_label = 'Enregistrer la visite';
                         this.loadForm = true;
                     }
-                });
+                },
+                    (error) => {
+                        this.toastr.error("Une erreur est survenue lors de la récupération des informations sur le serveur.", "", { positionClass: "toast-top-right" });
+                    });
         }
 
     }
@@ -118,10 +138,14 @@ export class ReleveComponent implements OnInit {
         }
     }
 
+
     getVisit() {
         this._api.getVisitByID(this.idVisit).subscribe(
             data => {
                 this.visit = data;
+                this.userService.check_user_cruved_visit('U', this.visit).subscribe(ucruved => {
+                    this.updateIsAllowed = ucruved;
+                })
                 if (this.visit.cor_visit_perturbation)
                     this.visit.cor_visit_perturbation.forEach(element => {
                         element.label_default = element.t_nomenclature.label_default
@@ -134,28 +158,32 @@ export class ReleveComponent implements OnInit {
                 this.selectedPolt = this.visit.cor_releve_plot.find((plot) => {
                     return plot.id_plot == this.id_plot
                 });
+                this.currentSite.properties.cor_plots.map(
+                    (plotlist) => {
+                        if (!this.visit.cor_releve_plot.find((plot) => {
+                            return plot.id_plot == plotlist.id_plot
+                        }))
+                            plotlist.isEmpty = true;
+                    }
+                )
                 this.visit_name = "Visite N°" + this.visit.id_base_visit;
             },
             error => {
                 if (error.status != 404) {
-                    this.toastr.error(
-                        "Une erreur est survenue lors du chargement de votre relevé",
-                        "",
-                        {
-                            positionClass: "toast-top-right"
-                        }
-                    );
+                    this.toastr.error("Une erreur est survenue lors du chargement de votre relevé", "", { positionClass: "toast-top-right" });
                 }
             },
         );
     }
 
     getPlotReleve(plotReleve) {
-        this.currentSite.properties.plots.map(
+        this.currentSite.properties.cor_plots.map(
             (plot) => {
                 if (plot.id_plot == plotReleve[0].id_plot)
-                    if (plotReleve[1] == true)
-                        plot.isModifided = plotReleve[1]
+                    if (plotReleve[1] == true) {
+                        plot.isModifided = plotReleve[1];
+                        plot.isEmpty = false;
+                    }
             }
         )
         let index = _.findIndex(this.plots, { id_plot: plotReleve[0].id_plot });
@@ -173,7 +201,7 @@ export class ReleveComponent implements OnInit {
     onChangePlot(plot) {
         this.spinner = true;
         this.id_plot = plot.id_plot;
-        this.plot_title = this.currentSite.properties.plots.find((plot) => {
+        this.plot_title = this.currentSite.properties.cor_plots.find((plot) => {
             return plot.id_plot == this.id_plot
         }).code_plot;
         this.selectedPolt = this.plots.find((plot) => {
@@ -234,26 +262,17 @@ export class ReleveComponent implements OnInit {
         this._api.postVisit(this.visitForm.value).subscribe(
             () => {
                 this.visitForm.reset();
-                this.toastr.success(
-                    "la visite est enregitrée avec succès",
-                    "",
-                    {
-                        positionClass: "toast-top-right"
-                    }
-                );
+                this.toastr.success("la visite est enregitrée avec succès", "", { positionClass: "toast-top-right" });
                 this.backToVisites()
             },
             error => {
+                let msg = "Une erreur est survenue lors de la création de la visite";
                 if (error.status == 403 && error.error.raisedError == "PostYearError") {
                     this.visitForm.controls['visit_date_min'].setErrors({ dateExisit: true });
-                    this.toastr.error(
-                        "Une existe déja pour cette année",
-                        "",
-                        {
-                            positionClass: "toast-top-right"
-                        }
-                    );
+                    msg = "Une existe déja pour cette année";
                 }
+                this.toastr.error(msg, "", { positionClass: "toast-top-right" });
+
             }
         )
     }
@@ -273,19 +292,24 @@ export class ReleveComponent implements OnInit {
                 this.backToVisites()
             },
             error => {
+                let msg = "Une erreur est survenue lors de la modification de la visite";
                 if (error.status == 403 && error.error.raisedError == "PostYearError") {
                     this.visitForm.controls['visit_date_min'].setErrors({ dateExisit: true });
-                    this.toastr.error(
-                        "Une existe déja pour cette année",
-                        "",
-                        {
-                            positionClass: "toast-top-right"
-                        }
-                    );
+                    msg = "Une existe déja pour cette année";
                 }
+                this.toastr.error(msg, "", { positionClass: "toast-top-right" });
             }
         )
     }
+
+    onEdit() {
+        this.disabledForm = !this.disabledForm;
+        if (!this.disabledForm)
+            this.edit_btn = "Annuler"
+        else
+            this.edit_btn = "Editer"
+    }
+
     renameKey(strates) {
         strates.forEach(element => {
             element.id_nomenclature_strate = element.id_nomenclature

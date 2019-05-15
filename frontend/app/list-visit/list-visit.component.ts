@@ -4,12 +4,13 @@ import { ToastrService } from "ngx-toastr";
 import { FormGroup } from "@angular/forms";
 import { Page } from "../shared/page";
 import { MapListService } from "@geonature_common/map-list/map-list.service";
-
+import { forkJoin } from "rxjs/observable/forkJoin";
 import { DataService } from "../services/data.service";
 import { StoreService, ISite } from "../services/store.service";
 import { ModuleConfig } from "../module.config";
 import { FormService } from "../services/form.service";
-
+import { DataFormService } from "@geonature_common/form/data-form.service";
+import { UserService } from "../services/user.service";
 
 @Component({
   selector: "pnx-list-visit",
@@ -18,34 +19,13 @@ import { FormService } from "../services/form.service";
 })
 export class ListVisitComponent implements OnInit, OnDestroy {
 
-  public site: ISite;
-  sites = [
-    {
-      base_site_code: "TESTSHS1",
-      base_site_description: "Aucune description",
-      base_site_name: "HAB",
-      cd_hab: 16265,
-      id_base_site: 4,
-      id_nomenclature_plot_position: 1228,
-      id_transect: 1,
-      nom_commune: "Saint-Étienne-de-Tinée",
-      nom_habitat: "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
-    },
-    {
-      base_site_code: "TESTSHS1",
-      base_site_description: "Aucune description",
-      base_site_name: "Site2",
-      cd_hab: 16265,
-      id_base_site: 5,
-      id_nomenclature_plot_position: 1228,
-      id_transect: 1,
-      nom_commune: "Saint-Étienne-de-Tinée",
-      nom_habitat: "<em>Caricion incurvae</em> Br.-Bl. in Volk 1940",
-    }
-  ]
+  public currentSite: ISite;
+  sites;
+  plots = [];
+  transect_title: string = "Consultation du transect ";
   public show = true;
   public idSite;
-  public disabledForm = false;
+  public disabledForm = true;
   public rows = [];
   public page = new Page();
   public paramApp = this.storeService.queryString.append(
@@ -56,8 +36,12 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public addIsAllowed = false;
   public exportIsAllowed = false;
   public dataLoaded = false;
-
   public formTransect: FormGroup;
+  public edit_btn: string = 'Editer';
+  habitats: any;
+  isNew: boolean;
+  plot_position: any;
+  public addVisitIsAllowed = false;
 
 
   constructor(
@@ -67,18 +51,62 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     public mapListService: MapListService,
     public router: Router,
+    private userService: UserService,
     public formService: FormService,
-
+    private nomenclatureServ: DataFormService
   ) { }
 
   ngOnInit() {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
-    this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
-    this.formTransect = this.formService.initFormTransect();
-    this.getTtransectByIdSite();
-    this._api.getHabitatsList(ModuleConfig.id_bib_list_habitat).subscribe(
-      (data) => console.log('habitatsList', data)
-    )
+    this.isNew = !this.idSite;
+    this.checkPermission();
+    forkJoin([
+      this._api.getSites({'id_base_site': this.idSite,'type': ModuleConfig.site_type}),
+      this._api.getHabitatsList(ModuleConfig.id_bib_list_habitat),
+      this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, { orderby: 'label_default' }),
+    ]).subscribe(results => {
+      this.sites = results[0];
+      this.habitats = results[1];
+      this.plot_position = results[2].values;
+      this.formTransect = this.formService.initFormTransect();
+      if (!this.isNew) {
+        this.getTtransectByIdSite();
+      }
+      else {
+        this.transect_title = "Nouveau transect";
+        this.dataLoaded = true;
+        this.disabledForm = false;
+      }
+    },
+      (error) => {
+        let msg = "";
+        if (error.error == "sites_not_found") {
+          msg = "Aucun site n'est disponible pour ajouter un nouveau transect."
+        } else {
+          msg = "Une erreur est survenue lors de la récupération des informations sur le serveur."
+        }
+        this.toastr.error(msg, "", { positionClass: "toast-top-right" });
+        this.router.navigate([`${ModuleConfig.MODULE_URL}/`])
+      }
+    );
+  }
+  onRowSelect(e){
+    this.onVisitDetails(e.selected[0].id_base_visit)
+  }
+  
+  checkPermission() {
+    this.userService.check_user_cruved_visit('E').subscribe(ucruved => {
+      this.exportIsAllowed = ucruved;
+    })
+    this.userService.check_isAdmin('U').subscribe(ucruved => {
+      this.upIsAllowed = ucruved;
+    })
+    this.userService.check_isAdmin('C').subscribe(ucruved => {
+      this.addIsAllowed = ucruved;
+    })
+    this.userService.check_user_cruved_visit('C').subscribe(ucruved => {
+      this.addVisitIsAllowed = ucruved;
+    })
   }
 
   getVisits() {
@@ -105,17 +133,20 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       },
       error => {
         if (error.status != 404) {
-          this.toastr.error("Une erreur est survenue lors de la modification de votre relevé", "", { positionClass: "toast-top-right" });
+          this.toastr.error("Une erreur est survenue lors de la récupération des informations sur le serveur.", "", { positionClass: "toast-top-right" });
         }
         this.dataLoaded = true;
       }
     );
   }
+
   getTtransectByIdSite() {
     this._api.getTtransectByIdSite(this.idSite).subscribe(
       (site) => {
-        this.site = site;
-        this.storeService.setCurrentSite(this.site)
+        this.currentSite = site;
+        this.plots = this.currentSite.properties.cor_plots;
+        this.transect_title = this.transect_title + this.currentSite.properties.transect_label;
+        this.storeService.setCurrentSite(this.currentSite);
         this.pachForm();
         this.getVisits();
       },
@@ -131,17 +162,19 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       }
     )
   }
-  
 
   pachForm() {
     this.formTransect.patchValue({
-      geom_start_lat: this.site.geometry.coordinates[0][0],
-      geom_start_long: this.site.geometry.coordinates[0][1],
-      geom_end_lat: this.site.geometry.coordinates[1][0],
-      geom_end_long: this.site.geometry.coordinates[1][1],
-      position_plot: this.site.properties.position_plot,
-      plot_size: this.site.properties.plot_size,
-      sites: this.sites[0].id_base_site
+      id_base_site: this.currentSite.properties.id_base_site,
+      id_transect: this.currentSite.properties.id_transect,
+      geom_start_lat: this.currentSite.geometry.coordinates[0][1],
+      geom_start_long: this.currentSite.geometry.coordinates[0][0],
+      geom_end_lat: this.currentSite.geometry.coordinates[1][1],
+      geom_end_long: this.currentSite.geometry.coordinates[1][0],
+      id_nomenclature_plot_position: this.currentSite.properties.plot_position.id_nomenclature,
+      cd_hab: this.currentSite.properties.cd_hab,
+      plot_size: this.currentSite.properties.plot_size,
+      transect_label: this.currentSite.properties.transect_label,
     });
   }
 
@@ -150,22 +183,57 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   onNewVisit() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.site.properties.id_base_site}/new_visit`]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/new_visit`]);
   }
   onVisitDetails(idVisit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.site.properties.id_base_site}/visit/`, idVisit]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/visit/`, idVisit]);
   }
 
-  onAddPlot(){
-    this.site.properties.plots.unshift({code_plot: "Qu5555"})
-    //this.formTransect.geom = 'SRID=4326;POINT(' + this.formTransect.value.lng + ' ' + this.formTransect.value.lat + ')';
+  onAddPlot($addPolt) {
+    this.plots.unshift({ code_plot: $addPolt.value })
   }
 
+  onEdit() {
+    this.disabledForm = !this.disabledForm;
+    if (!this.disabledForm)
+      this.edit_btn = "Annuler"
+    else
+      this.edit_btn = "Editer"
+  }
 
-
+  onSubmitTransect() {
+    let transect = this.formTransect.value;
+    transect.cor_plots = this.plots;
+    transect.geom_start = 'SRID=4326;POINT(' + this.formTransect.value.geom_start_long + ' ' + this.formTransect.value.geom_start_lat + ')';
+    transect.geom_end = 'SRID=4326;POINT(' + this.formTransect.value.geom_end_long + ' ' + this.formTransect.value.geom_end_lat + ')';
+    delete transect.geom_end_long;
+    delete transect.geom_start_long;
+    delete transect.geom_end_lat;
+    delete transect.geom_start_lat;
+    if (this.isNew)
+      this._api.postTransect(transect).subscribe(
+        (data) => {
+          this.toastr.success("Le trasect a été ajouté avec succès","",{positionClass: "toast-top-right"});
+        this.backToSites()
+        },
+        (error) => {
+          this.toastr.error("Une erreur est survenue lors de la création du transect", "", { positionClass: "toast-top-right" });
+          this.backToSites();
+        }
+      )
+    else 
+    this._api.updateTransect(transect).subscribe(
+      (data) => {
+        this.toastr.success("Le trasect a été modifié avec succès","",{positionClass: "toast-top-right"});
+      this.backToSites()
+      },
+      (error) => {
+        this.toastr.error("Une erreur est survenue lors de la modification du transect", "", { positionClass: "toast-top-right" });
+        this.backToSites();
+      }
+    )
+  }
   ngOnDestroy() {
-    this.storeService.queryString = this.storeService.queryString.delete(
-      "id_base_site"
-    );
+
   }
 }

@@ -23,6 +23,13 @@ export class DataService {
       params: myParams
     })
   }
+  postTransect(transect){
+    return this._http.post(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/transect`, transect)
+  }
+
+  updateTransect(transect){
+    return this._http.patch(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/update_transect/${transect.id_transect}`, transect)
+  }
 
   postVisit(visit) {
     return this._http.post(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit`, visit)
@@ -44,10 +51,24 @@ export class DataService {
     return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit/${id_visit}`)
   }
 
+  getSites(params) {
+    let myParams = new HttpParams();
+    for (let key in params) {
+      if(params[key])
+        myParams = myParams.set(key, params[key]);
+    }
+    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`, {
+      params: myParams
+    })
+  }
+
   getHabitatsList(id_list) {
     return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/habitats/${id_list}`)
   }
 
+  getUserCruved() {
+      return this._http.get<any>(`${AppConfig.API_ENDPOINT}/user/cruved`);
+  }
 
   getDefaultVisit(): IVisit {
     return {

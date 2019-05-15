@@ -84,14 +84,8 @@
                     </ngx-datatable-column>
                 </ngx-datatable>
             </div>
-            <div *ngIf="isAllowed" id="end-btn">
-                <pnx-modal-download labelButton='Télécharger les visites' [pathDownload]='storeService.urlLoad'
-                    [exportFormat]='storeService.shsConfig.export_available_format'
-                    [queryString]='storeService.queryString'>
-                </pnx-modal-download>
-            </div>
         </div>
-        <div class="card-footer">
+        <div *ngIf="addIsAllowed" class="card-footer">
                     <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewTransect()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
                         Ajouter un nouveau transect
