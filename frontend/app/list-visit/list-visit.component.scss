@@ -70,7 +70,21 @@ fieldset:disabled {
   box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.gps-icon {
+
+.plot-item{
+  color: #495057;
+  padding-right: 20px;
+  i {
+    font-size: 14px;
+    color: #4084cc;
+    &.gps-icon {
+      font-size: 18px;
+      color: #4084cc;
+      vertical-align: text-bottom;
+    }
+  }
+}
+.location-icon {
   font-size: 20px;
   color: #4084cc;
   vertical-align: text-bottom;
@@ -78,4 +92,13 @@ fieldset:disabled {
 
 /deep/.datatable-row-group {
   cursor: pointer;
+}
+
+/deep/ngb-modal-window{
+  display: flex !important;
+  justify-content: space-around ;
+  flex-direction: column ;
+}
+/deep/.modal-content{
+  min-width: 500px;
 }

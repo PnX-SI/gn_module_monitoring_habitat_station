@@ -2,7 +2,7 @@
 <div class="row row-0 justify-content-md-center" *ngIf="dataLoaded">
     <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
         <div class="card-header">
-            <h4  class="card-title"> {{ transect_title }}
+            <h4 class="card-title"> {{ transect_title }}
             </h4>
         </div>
         <div>
@@ -12,14 +12,14 @@
             </button>
         </div>
         <div class="transect-edit">
-            <button *ngIf="(!disabledForm && upIsAllowed) || (!disabledForm && addIsAllowed)" type="submit" class="btn btn-success btn-sm ml-3 pull-right box-shadow"
-                (click)="onSubmitTransect()">
+            <button *ngIf="(!disabledForm && upIsAllowed) || (!disabledForm && addIsAllowed)" type="submit"
+                class="btn btn-success btn-sm ml-3 pull-right box-shadow" (click)="onSubmitTransect()">
                 <i class="material-icons">
                     save
                 </i> Enregister
             </button>
-            <button *ngIf="!isNew && upIsAllowed" class="btn btn-sm pull-right box-shadow" [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'"
-                (click)="onEdit()">
+            <button *ngIf="!isNew && upIsAllowed" class="btn btn-sm pull-right box-shadow"
+                [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'" (click)="onEdit()">
                 <i *ngIf="disabledForm" class="fa fa-edit" aria-hidden="true"> </i>
                 {{edit_btn}}
             </button>
@@ -79,7 +79,7 @@
                         </div>
                     </div>
 
-                    <h6 class="mb-0"><i class="material-icons gps-icon">location_on</i>Point de départ : </h6>
+                    <h6 class="mb-0"><i class="material-icons location-icon">location_on</i>Point de départ : </h6>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-sm-12 col-md-6">
@@ -97,7 +97,7 @@
                         </div>
                     </div>
 
-                    <h6 class="mb-0"><i class="material-icons  gps-icon">location_on</i>Point d'arrivée :</h6>
+                    <h6 class="mb-0"><i class="material-icons location-icon">location_on</i>Point d'arrivée :</h6>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-sm-12 col-md-6">
@@ -142,24 +142,27 @@
                         </div>
                     </div>
                     <small> Liste des placettes :</small>
-                    <div *ngIf="!disabledForm" class="input-group my-2">
-                        <input #addPlot  type="text" class="form-control form-control-sm" placeholder="Code placette"
-                            aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-sm btn-outline-success" type="button" (click)="onAddPlot(addPlot)">
-                                <i class="fa fa-plus-circle" aria-hidden="true"> </i> Ajouter</button>
-                        </div>
+
+                    <div class="d-flex">
+                        <button *ngIf="!disabledForm" class="btn btn-sm btn-success pull-left box-shadow mx-5 mt-2"
+                            (click)="onAddPlot(content)">
+                            <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+                            Ajouter une placette
+                        </button>
                     </div>
-                    <ul class="list-group">
+                    <ul class="list-group mx-5 mt-3">
                         <li *ngFor="let plot of plots" class="list-group-item">
-                            <span>Code placette : </span> {{ plot.code_plot }}
+                            <span class="plot-item"><i class="fa fa-hashtag"></i> Code placette : {{ plot.code_plot }}
+                            </span>
+                            <span class="plot-item"><i class="material-icons gps-icon">location_on</i> Distance :
+                                {{ plot.distance_plot }} {{storeService.shsConfig.plot_size_unite}}</span>
                         </li>
                     </ul>
                 </fieldset>
             </form>
         </div>
     </div>
-    <div *ngIf="!isNew"  class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
+    <div *ngIf="!isNew" class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">Liste des visites</h4>
@@ -167,7 +170,8 @@
             <div class="card-body">
                 <ngx-datatable class="material" [columnMode]="'force'" [rows]="rows" [headerHeight]="50"
                     [footerHeight]="50" [rowHeight]="'auto'" [messages]="storeService.shsConfig.list_visit_message"
-                    [offset]="page.pageNumber" [limit]="page.size"  [selectionType]="'single'" (select)="onRowSelect($event)">
+                    [offset]="page.pageNumber" [limit]="page.size" [selectionType]="'single'"
+                    (select)="onRowSelect($event)">
                     <ngx-datatable-column *ngFor="let col of storeService.shsConfig.default_list_visit_columns"
                         [name]="col.name" [prop]="col.prop" maxWidth="col.maxWidth">
                     </ngx-datatable-column>
@@ -186,7 +190,8 @@
                     <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
                         iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
                     </modal-shs> -->
-                    <button *ngIf="addVisitIsAllowed" class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewVisit()">
+                    <button *ngIf="addVisitIsAllowed" class="btn btn-sm btn-success pull-right box-shadow"
+                        (click)="onNewVisit()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
                         Ajouter une nouvelle visite
                     </button>
@@ -195,3 +200,15 @@
         </div>
     </div>
 </div>
+
+<ng-template #content let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Ajouter une placette</h5>
+    </div>
+    <div class="modal-body">
+        <p>One fine body&hellip;</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    </div>
+</ng-template>

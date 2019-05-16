@@ -11,7 +11,7 @@ import { ModuleConfig } from "../module.config";
 import { FormService } from "../services/form.service";
 import { DataFormService } from "@geonature_common/form/data-form.service";
 import { UserService } from "../services/user.service";
-
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: "pnx-list-visit",
   templateUrl: "list-visit.component.html",
@@ -50,6 +50,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     public activatedRoute: ActivatedRoute,
     private toastr: ToastrService,
     public mapListService: MapListService,
+    private modalService: NgbModal,
     public router: Router,
     private userService: UserService,
     public formService: FormService,
@@ -189,8 +190,9 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/visit/`, idVisit]);
   }
 
-  onAddPlot($addPolt) {
-    this.plots.unshift({ code_plot: $addPolt.value })
+  onAddPlot(content) {
+    this.modalService.open(content, { centered: true });
+    //this.plots.unshift({ code_plot: $addPolt.value })
   }
 
   onEdit() {

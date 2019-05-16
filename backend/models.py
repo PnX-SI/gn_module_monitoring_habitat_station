@@ -90,7 +90,7 @@ class TPlot(DB.Model):
     id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
                                           ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     code_plot = DB.Column(DB.String(50))
-
+    distance_plot = DB.Column(DB.Integer, nullable=False)
     #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
@@ -206,7 +206,7 @@ class TRelevePlot(DB.Model):
         'CorRelevePlotStrat', backref='id_releve_plot_s')
     cor_releve_taxons = DB.relationship(
         "CorRelevePlotTaxon", backref='id_releve_plot_t')
-    
+
     #t_base_visit = DB.relationship('TBaseVisits', primaryjoin='TRelevePlot.id_base_visit == TBaseVisits.id_base_visit', backref='t_releve_plots')
     #t_plot = DB.relationship('TPlot', primaryjoin='TRelevePlot.id_plot == TPlot.id_plot', backref='t_releve_plots')
 

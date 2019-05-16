@@ -76,7 +76,7 @@
                 {{edit_btn}}
             </button>
             <button *ngIf="!disabledForm && addIsAllowed || !disabledForm && updateIsAllowed" type="submit" class="btn btn-success  ml-3 submit-btn box-shadow"
-                [disabled]="!visitForm.valid" (click)="onSubmitVisit()">
+                [disabled]="!visitForm.valid || !formPoltStaus" (click)="onSubmitVisit()">
                 <i class="material-icons">
                     save
                 </i> {{submit_label}}
