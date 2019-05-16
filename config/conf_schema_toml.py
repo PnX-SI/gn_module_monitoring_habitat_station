@@ -13,6 +13,8 @@ pagination_serverside= False
 items_per_page = 10
 plot_size_unite = "mètre"
 MODULE_CODE = "SUIVI_HAB_STA",
+id_bib_list_habitat = 2,
+site_type = 609,
 
 site_message = {"emptyMessage" : "Aucun site à afficher ", "totalMessage" : "sites(s) au total"}
 list_visit_message = {"emptyMessage" : "Aucune visite sur ce site ", "totalMessage" : "visites au total"}
@@ -45,3 +47,5 @@ class GnModuleSchemaConf(Schema):
     pagination_serverside = fields.Boolean(missing=pagination_serverside)
     items_per_page = fields.Integer(missing=items_per_page)
     plot_size_unite = fields.String(missing=plot_size_unite)
+    id_bib_list_habitat = fields.Integer(missing=id_bib_list_habitat)
+    site_type = fields.Integer(missing=site_type)
