@@ -28,8 +28,9 @@ export class FormService {
         geom_start_lat: [null, Validators.required],
         geom_start_long: [null, Validators.required],
         plot_size: null,
-        position_plot: null,
-        transect_label: null
+        transect_label: null,
+        cd_hab: null,
+        id_nomenclature_plot_position: null
       });
       return formTransect;
     }

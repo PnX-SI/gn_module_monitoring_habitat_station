@@ -1,8 +1,9 @@
 <div id="cover-spin" *ngIf="!dataLoaded"></div>
-<div class="row row-0" *ngIf="dataLoaded">
+<div class="row row-0 justify-content-md-center" *ngIf="dataLoaded">
     <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
         <div class="card-header">
-            <h4 class="card-title"> Consultation du transect {{ site.properties.transect_label }} </h4>
+            <h4 class="card-title"> {{ transect_title }}
+            </h4>
         </div>
         <div>
             <button type="button" class="btn btn-link btn-sm back-button" (click)="backToSites()">
@@ -10,131 +11,167 @@
                 Retour à la liste des transects
             </button>
         </div>
+        <div class="transect-edit">
+            <button *ngIf="(!disabledForm && upIsAllowed) || (!disabledForm && addIsAllowed)" type="submit"
+                class="btn btn-success btn-sm ml-3 pull-right box-shadow" (click)="onSubmitTransect()">
+                <i class="material-icons">
+                    save
+                </i> Enregister
+            </button>
+            <button *ngIf="!isNew && upIsAllowed" class="btn btn-sm pull-right box-shadow"
+                [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'" (click)="onEdit()">
+                <i *ngIf="disabledForm" class="fa fa-edit" aria-hidden="true"> </i>
+                {{edit_btn}}
+            </button>
+        </div>
         <div class="card-body">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab">
-                        <i class="fa fa-info-circle"> </i> Informations Générales </a>
-                </li>
-                <li class="nav-item" *ngIf="show">
-                    <a class="nav-link" data-toggle="tab" href="#details" role="tab">
-                        <i class="fa fa-search police"> </i> Détails </a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div class="tab-pane active modal-header " id="infoGen" role="tabpanel">
-                    <p> <span> Code site : </span> <span class="strong "> {{ site.properties.base_site_code }} </span>
-                    </p>
-                    <p> <span> Habitat : </span> <span class="strong" innerHTML="{{ site.properties.nom_habitat }}">
-                            {{ site.properties.nom_habitat }}
-                        </span></p>
-                    <p> <span> Commune : </span> <span class="strong"> {{ site.properties.nom_commune}} </span></p>
-                </div>
-
-                <div class="tab-pane modal-header" id="details" role="tabpanel">
-                    <p> <span> Nom du site : </span> <span class="strong"> {{ site.properties.transect_label }} </span>
-                    </p>
-                    <p> <span> Organisme : </span> <span class="strong"> {{ site.properties.organisme }} </span></p>
-                    <p> <span> Description du site : </span> <span class="strong">
-                            {{ site.properties.base_site_description }} </span></p>
-                </div>
-            </div>
             <form>
                 <fieldset [disabled]="disabledForm">
                     <legend>
-                        <b>Coordonnées géographiques</b>
+                        Site Informations
                     </legend>
-                    <div class="form-group">
-                        <div class="form-group">
-                            <label>coord GPS départ</label>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_start_lat" max="90" min="-90"
-                                        step="0.001" placeholder="latitude">
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_start_long" placeholder="longitude"
-                                        max="180" min="-180" step="0.001">
-                                </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Code Site :</small>
+                                <select class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.id_base_site">
+                                    <option [ngValue]=null> -- Sélectionnez un site -- </option>
+                                    <option *ngFor="let site of sites" [ngValue]="site.id_base_site"
+                                        [innerHTML]="site.base_site_name">
+                                    </option>
+                                </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>coord GPS arrivée</label>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_end_lat" max="90" min="-90"
-                                        step="0.001" placeholder="latitude">
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <input type="number" class="form-control"
-                                        [formControl]="formTransect.controls.geom_end_long" placeholder="longitude"
-                                        max="180" min="-180" step="0.001">
-                                </div>
+                        <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Commune :</small>
+                                <input value="{{currentSite.properties.nom_commune}}"
+                                    class="form-control form-control-sm">
                             </div>
                         </div>
-                    </div>
-                    <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
-                        <button class="btn btn-warning" data-toggle="button">
-                            <i class="fa fa-edit" aria-hidden="true"> </i>
-                            Modifier
-                        </button>
                     </div>
                 </fieldset>
                 <br>
                 <fieldset [disabled]="disabledForm">
                     <legend>
-                        <b>Informations placette</b>
+                        Transect Informations
                     </legend>
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-sm-12 col-md-6">
-                                <div class="form-group">
-                                    <label> Position des placettes : </label>
-                                    <div class="" id="newPerturs">
-                                        <pnx-nomenclature [parentFormControl]="formTransect.controls.position_plot"
-                                            keyValue="id_nomenclature" [bindAllItem]="true" keyLabel="label_default"
-                                            [disabled]="disabledForm" codeNomenclatureType="TYPE_PERTURBATION">
-                                        </pnx-nomenclature>
-                                    </div>
-                                </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Transect Label :</small>
+                                <input class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.transect_label">
                             </div>
-                            <div class="col-sm-12 col-md-6">
-                                <label> Taille des placettes ( {{ storeService.shsConfig.plot_size_unite }} ) </label>
-                                <input class="form-control" type="number" placeholder="Taille des placettes" />
+                        </div>
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small>Habitat :</small>
+                                <select class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.cd_hab">
+                                    <option [ngValue]=null> -- Sélectionnez un habitat -- </option>
+                                    <option *ngFor="let habitat of habitats" [ngValue]="habitat.cd_hab"
+                                        [innerHTML]="habitat.nom_complet">
+                                    </option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                    <hr>
-                    <label> Liste des placettes :</label>
-                    <ul class="list-group list-group-flush">
-                        <li *ngFor="let plot of site.properties.plots" class="list-group-item">
-                            <span>code placette : </span> {{ plot.code_plot }}
-                        </li>
-                    </ul>
-                    <div *ngIf="upIsAllowed" class="d-flex flex-row-reverse">
-                        <button class="btn btn-warning" data-toggle="button">
-                            <i class="fa fa-edit" aria-hidden="true"> </i>
-                            Modifier
+
+                    <h6 class="mb-0"><i class="material-icons location-icon">location_on</i>Point de départ : </h6>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <small>Longitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_start_long" placeholder="longitude"
+                                    max="180" min="-180" step="0.001">
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <small>Latitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_start_lat" max="90" min="-90" step="0.001"
+                                    placeholder="latitude">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-0"><i class="material-icons location-icon">location_on</i>Point d'arrivée :</h6>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <small>Longitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_end_long" placeholder="longitude"
+                                    max="180" min="-180" step="0.001">
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <small>Latitude :</small>
+                                <input type="number" class="form-control form-control-sm"
+                                    [formControl]="formTransect.controls.geom_end_lat" max="90" min="-90" step="0.001"
+                                    placeholder="latitude">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <br>
+                <fieldset [disabled]="disabledForm">
+                    <legend>
+                        Placettes informations
+                    </legend>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="form-group">
+                                <small> Position des placettes : </small>
+                                <div class="" id="newPerturs">
+                                    <select class="form-control form-control-sm"
+                                        [formControl]="formTransect.controls.id_nomenclature_plot_position">
+                                        <option [ngValue]=null> -- Sélectionnez une position -- </option>
+                                        <option *ngFor="let position of plot_position"
+                                            [ngValue]="position.id_nomenclature">{{position.label_default}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6">
+                            <small> Taille des placettes ( {{ storeService.shsConfig.plot_size_unite }} ) </small>
+                            <input class="form-control form-control-sm" [formControl]="formTransect.controls.plot_size"
+                                type="number" placeholder="Taille des placettes" />
+                        </div>
+                    </div>
+                    <small> Liste des placettes :</small>
+
+                    <div class="d-flex">
+                        <button *ngIf="!disabledForm" class="btn btn-sm btn-success pull-left box-shadow mx-5 mt-2"
+                            (click)="onAddPlot(content)">
+                            <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+                            Ajouter une placette
                         </button>
                     </div>
+                    <ul class="list-group mx-5 mt-3">
+                        <li *ngFor="let plot of plots" class="list-group-item">
+                            <span class="plot-item"><i class="fa fa-hashtag"></i> Code placette : {{ plot.code_plot }}
+                            </span>
+                            <span class="plot-item"><i class="material-icons gps-icon">location_on</i> Distance :
+                                {{ plot.distance_plot }} {{storeService.shsConfig.plot_size_unite}}</span>
+                        </li>
+                    </ul>
                 </fieldset>
             </form>
         </div>
-        <div class="card-footer">
-        </div>
     </div>
-    <div class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
+    <div *ngIf="!isNew" class=" col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm list-shs">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Relevés</h4>
+                <h4 class="card-title">Liste des visites</h4>
             </div>
             <div class="card-body">
                 <ngx-datatable class="material" [columnMode]="'force'" [rows]="rows" [headerHeight]="50"
                     [footerHeight]="50" [rowHeight]="'auto'" [messages]="storeService.shsConfig.list_visit_message"
-                    [offset]="page.pageNumber" [limit]="page.size">
+                    [offset]="page.pageNumber" [limit]="page.size" [selectionType]="'single'"
+                    (select)="onRowSelect($event)">
                     <ngx-datatable-column *ngFor="let col of storeService.shsConfig.default_list_visit_columns"
                         [name]="col.name" [prop]="col.prop" maxWidth="col.maxWidth">
                     </ngx-datatable-column>
@@ -148,12 +185,13 @@
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-between">
-                    <pnx-modal-download labelButton='Télécharger ces relevés' [pathDownload]='storeService.urlLoad'>
+                    <pnx-modal-download labelButton='Télécharger ces visites' [pathDownload]='storeService.urlLoad'>
                     </pnx-modal-download>
                     <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
                         iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
                     </modal-shs> -->
-                    <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewVisit()">
+                    <button *ngIf="addVisitIsAllowed" class="btn btn-sm btn-success pull-right box-shadow"
+                        (click)="onNewVisit()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
                         Ajouter une nouvelle visite
                     </button>
@@ -161,5 +199,16 @@
             </div>
         </div>
     </div>
-
 </div>
+
+<ng-template #content let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Ajouter une placette</h5>
+    </div>
+    <div class="modal-body">
+        <p>One fine body&hellip;</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    </div>
+</ng-template>

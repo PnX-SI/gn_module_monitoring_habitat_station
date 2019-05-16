@@ -17,23 +17,23 @@ from geonature.utils.utilsgeometry import FionaShapeService
 from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
-from geonature.core.gn_monitoring.models import corVisitObserver, corSiteArea, corSiteModule, TBaseVisits
+from geonature.core.gn_monitoring.models import corVisitObserver, corSiteArea, corSiteModule, TBaseVisits, TBaseSites
 from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 
 
 from .repositories import check_user_cruved_visit, check_year_visit
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon
+from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
 
 
-@blueprint.route('/sites', methods=['GET'])
+@blueprint.route('/transects', methods=['GET'])
 @json_resp
-def get_all_sites():
+def get_all_transects():
     '''
-    Retourne tous les sites
+    Retourne tous les transects
     '''
     parameters = request.args
 
@@ -67,7 +67,7 @@ def get_all_sites():
     if 'filterHab' in parameters:
         q = q.filter(TTransect.cd_hab == parameters['filterHab'])
 
-    if ('date_low' in parameters) and ('date_up' in parameters)  :
+    if ('date_low' in parameters) and ('date_up' in parameters):
         q_date = (
             DB.session.query(
                 TTransect.id_base_site,
@@ -131,11 +131,11 @@ def get_all_sites():
     return None
 
 
-@blueprint.route('/site/<id_site>', methods=['GET'])
+@blueprint.route('/transects/<id_site>', methods=['GET'])
 @json_resp
-def get_site(id_site):
+def get_transect(id_site):
     '''
-    Retourne un site à l'aide de son id
+    Retourne un transect à l'aide de son id_site
     '''
 
     id_type_commune = blueprint.config['id_type_commune']
@@ -170,9 +170,6 @@ def get_site(id_site):
     ).group_by(TTransect.id_transect, TNomenclatures.id_nomenclature, HabrefSHS.lb_hab_fr_complet
                ).first()
 
-    plots = DB.session.query(TPlot).filter_by(
-        id_transect=TTransect.id_transect)
-
     if data:
         transect = data[0].get_geofeature(True)
         plot_position = data[1].as_dict()
@@ -183,8 +180,6 @@ def get_site(id_site):
             transect['properties']['observers'] = str(data[3])
         if data[4]:
             transect['properties']['nom_habitat'] = str(data[4])
-        if(plots):
-            transect['properties']['plots'] = [p.as_dict() for p in plots]
         base_site_code = transect['properties']['t_base_site']['base_site_code']
         base_site_description = transect['properties']['t_base_site']['base_site_description'] or 'Aucune description'
         base_site_name = transect['properties']['t_base_site']['base_site_name']
@@ -199,7 +194,8 @@ def get_site(id_site):
 
 @blueprint.route('/visit', methods=['POST'])
 @json_resp
-def post_visit():
+@permissions.check_cruved_scope('C', True, module_code="SUIVI_HAB_STA")
+def post_visit(info_role):
     '''
     Poster une nouvelle visite
     '''
@@ -322,7 +318,8 @@ def get_taxa_by_habitats(cd_hab):
 
 @blueprint.route('/update_visit/<id_visit>', methods=['PATCH'])
 @json_resp
-def patch_visit(id_visit):
+@permissions.check_cruved_scope('U', True, module_code="SUIVI_HAB_STA")
+def patch_visit(id_visit,info_role):
     '''
     Mettre à jour une visite
     '''
@@ -385,3 +382,111 @@ def patch_visit(id_visit):
     DB.session.commit()
 
     return mergeVisit.as_dict(recursif=True)
+
+
+@blueprint.route('/sites', methods=['GET'])
+@json_resp
+def get_all_sites():
+    '''
+    Retourne tous les sites qui n'ont pas de transects
+    '''
+    parameters = request.args
+
+    q = DB.session.query(TBaseSites).outerjoin(
+        (TTransect, TBaseSites.id_base_site == TTransect.id_base_site)
+    ).filter(TTransect.id_base_site == None)
+
+    if 'site_type' in parameters:
+        q = q.filter(TBaseSites.id_nomenclature_type_site ==
+                     parameters['site_type'])
+    data = q.all()
+    if 'id_base_site' in parameters:
+        current_site = DB.session.query(TBaseSites).filter(
+            TBaseSites.id_base_site == parameters['id_base_site']).first()
+        if current_site:
+            data.append(current_site)
+    if data:
+        return [d.as_dict() for d in data]
+    return ('sites_not_found'), 404
+
+@blueprint.route('/habitats/<id_list>', methods=['GET'])
+@json_resp
+def get_habitats(id_list):
+    '''
+    Récupère les habitats cor_list_habitat à partir de l'identifiant id_list de la table bib_lis_habitat
+    '''
+    q = DB.session.query(
+        CorListHabitat.cd_hab,
+        CorListHabitat.id_list,
+        HabrefSHS.lb_hab_fr_complet
+    ).join(
+        HabrefSHS, CorListHabitat.cd_hab == HabrefSHS.cd_hab
+    ).filter(
+        CorListHabitat.id_list == id_list
+    ).group_by(CorListHabitat.cd_hab,  HabrefSHS.lb_hab_fr_complet, CorListHabitat.id_list,)
+
+    data = q.all()
+    habitats = []
+
+    if data:
+        for d in data:
+            habitat = dict()
+            habitat['cd_hab'] = d[0]
+            habitat['nom_complet'] = str(d[2])
+            habitats.append(habitat)
+        return habitats
+    return None
+
+
+@blueprint.route('/transect', methods=['POST'])
+@json_resp
+@permissions.check_cruved_scope('C', True, module_code="SUIVI_HAB_STA")
+def post_transect(info_role):
+    '''
+    Poster un nouveau transect
+    '''
+    data = dict(request.get_json())
+    tab_plots = []
+    if 'cor_plots' in data:
+        tab_plots = data.pop('cor_plots')
+    transect = TTransect(**data)
+    for plot in tab_plots:
+        transect_plot = TPlot(**plot)
+        transect.cor_plots.append(transect_plot)
+    transect.as_dict(True)
+    DB.session.add(transect)
+    DB.session.commit()
+    return transect.as_dict(recursif=True)
+
+@blueprint.route('/update_transect/<id_transect>', methods=['PATCH'])
+@json_resp
+@permissions.check_cruved_scope('U', True, module_code="SUIVI_HAB_STA")
+def patch_transect(id_transect,info_role):
+    '''
+    Mettre à jour un transect
+    '''
+    data = dict(request.get_json())
+    print('data', data)
+    tab_plots = []
+    if 'cor_plots' in data:
+        tab_plots = data.pop('cor_plots')
+    transect = TTransect(**data)
+    for plot in tab_plots:
+        transect_plot = TPlot(**plot)
+        transect.cor_plots.append(transect_plot)
+    transect.as_dict(True)
+    DB.session.merge(transect)
+    DB.session.commit()
+    return transect.as_dict(recursif=True)
+
+@blueprint.route('/user/cruved', methods=['GET'])
+@permissions.check_cruved_scope('R', True)
+@json_resp
+def returnUserCruved(info_role):
+    #récupérer le CRUVED complet de l'utilisateur courant
+    user_cruved = get_or_fetch_user_cruved(
+                session=session,
+                id_role=info_role.id_role,
+                module_code=blueprint.config['MODULE_CODE']
+    )
+    return  user_cruved

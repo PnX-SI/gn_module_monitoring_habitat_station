@@ -11,6 +11,8 @@
 .list-group-item {
   background-color: #e9ecef;
   color: #181818;
+  padding: 8px 10px;
+  font-size: 14px
 }
 
 .wrapper {
@@ -28,7 +30,7 @@
 fieldset {
   padding: 0.35em 0.625em 0.75em !important;
   border: 1px solid silver !important;
-  margin: 0 2px !important;
+  margin: 0 2px;
   border-radius: 3px;
   // background-color: #f3f3f3;
 }
@@ -36,6 +38,7 @@ fieldset {
 legend {
   width: auto;
   font-size: inherit;
+  color: black !important;
 }
 
 .wrapper {
@@ -55,6 +58,47 @@ fieldset:disabled {
   margin-bottom: 0;
 }
 
+.transect-edit {
+  padding: 0 1.25rem;
+  .material-icons {
+    vertical-align: text-bottom;
+    font-size: 20px;
+  }
+}
+
 .box-shadow {
   box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+
+.plot-item{
+  color: #495057;
+  padding-right: 20px;
+  i {
+    font-size: 14px;
+    color: #4084cc;
+    &.gps-icon {
+      font-size: 18px;
+      color: #4084cc;
+      vertical-align: text-bottom;
+    }
+  }
+}
+.location-icon {
+  font-size: 20px;
+  color: #4084cc;
+  vertical-align: text-bottom;
+}
+
+/deep/.datatable-row-group {
+  cursor: pointer;
+}
+
+/deep/ngb-modal-window{
+  display: flex !important;
+  justify-content: space-around ;
+  flex-direction: column ;
+}
+/deep/.modal-content{
+  min-width: 500px;
 }

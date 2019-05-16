@@ -56,6 +56,19 @@ class HabrefSHS(DB.Model):
 
 
 @serializable
+class CorListHabitat(DB.Model):
+    __tablename__ = 'cor_list_habitat'
+    __table_args__ = {'schema': 'ref_habitat'}
+
+    id_cor_list = DB.Column(DB.Integer, primary_key=True,
+                            server_default=DB.FetchedValue())
+    id_list = DB.Column(DB.ForeignKey(
+        'ref_habitat.habref.bib_list_habitat', onupdate='CASCADE'), nullable=False)
+    cd_hab = DB.Column(DB.ForeignKey(
+        'ref_habitat.habref.cd_hab', onupdate='CASCADE'), nullable=False)
+
+
+@serializable
 class TNomencla(DB.Model):
     __tablename__ = 't_nomenclatures'
     __table_args__ = {'schema': 'ref_nomenclatures', 'extend_existing': True}
@@ -64,6 +77,21 @@ class TNomencla(DB.Model):
         DB.Integer, primary_key=True, server_default=DB.FetchedValue())
     mnemonique = DB.Column(DB.String(255))
     label_default = DB.Column(DB.String(255), nullable=False)
+
+
+
+@serializable
+class TPlot(DB.Model):
+    __tablename__ = 't_plots'
+    __table_args__ = {'schema': 'pr_monitoring_habitat_station'}
+
+    id_plot = DB.Column(DB.Integer, primary_key=True,
+                        server_default=DB.FetchedValue())
+    id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
+                                          ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    code_plot = DB.Column(DB.String(50))
+    distance_plot = DB.Column(DB.Integer, nullable=False)
+    #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
 @serializable
@@ -85,6 +113,7 @@ class TTransect(DB.Model):
 
     # habref = DB.relationship('HabrefSHS', primaryjoin='TTransect.cd_hab == HabrefSHS.cd_hab', backref='t_transects')
     t_base_site = DB.relationship('TBaseSites')
+    cor_plots = DB.relationship("TPlot", backref='t_plots')
 
     def get_geofeature(self, recursif=False):
         line = self.points_to_linestring()
@@ -103,18 +132,6 @@ class TTransect(DB.Model):
         return LineString([point1, point2])
 
 
-@serializable
-class TPlot(DB.Model):
-    __tablename__ = 't_plots'
-    __table_args__ = {'schema': 'pr_monitoring_habitat_station'}
-
-    id_plot = DB.Column(DB.Integer, primary_key=True,
-                        server_default=DB.FetchedValue())
-    id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
-                                          ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    code_plot = DB.Column(DB.String(50))
-
-    #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
 @serializable
@@ -189,7 +206,7 @@ class TRelevePlot(DB.Model):
         'CorRelevePlotStrat', backref='id_releve_plot_s')
     cor_releve_taxons = DB.relationship(
         "CorRelevePlotTaxon", backref='id_releve_plot_t')
-    
+
     #t_base_visit = DB.relationship('TBaseVisits', primaryjoin='TRelevePlot.id_base_visit == TBaseVisits.id_base_visit', backref='t_releve_plots')
     #t_plot = DB.relationship('TPlot', primaryjoin='TRelevePlot.id_plot == TPlot.id_plot', backref='t_releve_plots')
 

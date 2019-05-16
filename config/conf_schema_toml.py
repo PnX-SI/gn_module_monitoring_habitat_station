@@ -12,6 +12,7 @@ zoom= 10
 pagination_serverside= False
 items_per_page = 10
 plot_size_unite = "mètre"
+MODULE_CODE = "SUIVI_HAB_STA",
 
 site_message = {"emptyMessage" : "Aucun site à afficher ", "totalMessage" : "sites(s) au total"}
 list_visit_message = {"emptyMessage" : "Aucune visite sur ce site ", "totalMessage" : "visites au total"}

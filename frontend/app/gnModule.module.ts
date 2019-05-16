@@ -15,12 +15,14 @@ import { ListVisitComponent } from "./list-visit/list-visit.component";
 import { ReleveComponent } from "./releve/releve.component";
 import { PlotReleveComponent } from "./plot_relev/plot_relev.component";
 
+
 // my module routing
 const routes: Routes = [
   { path: "", component: SiteMapListComponent },
-  { path: 'site/:idSite', component: ListVisitComponent },
-  { path: 'site/:idSite/visit/:idVisit', component: ReleveComponent },
-  { path: 'site/:idSite/new_visit', component: ReleveComponent }
+  { path: 'transects/new_transect', component: ListVisitComponent },
+  { path: 'transects/:idSite', component: ListVisitComponent },
+  { path: 'transects/:idSite/visit/:idVisit', component: ReleveComponent },
+  { path: 'transects/:idSite/new_visit', component: ReleveComponent }
 ];
 
 @NgModule({
@@ -28,7 +30,7 @@ const routes: Routes = [
     SiteMapListComponent,
     ListVisitComponent,
     ReleveComponent,
-    PlotReleveComponent
+    PlotReleveComponent,
   ],
   imports: [
     GN2CommonModule,
