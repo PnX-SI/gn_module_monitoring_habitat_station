@@ -24,7 +24,7 @@ from geonature.core.users.models import BibOrganismes
 
 from .repositories import check_user_cruved_visit, check_year_visit
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat
+from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
 
@@ -490,3 +490,94 @@ def returnUserCruved(info_role):
                 module_code=blueprint.config['MODULE_CODE']
     )
     return  user_cruved
+
+@blueprint.route('/export_visit', methods=['GET'])
+@permissions.check_cruved_scope('E', True)
+def export_visit(info_role=None):
+    '''
+    Télécharge les données d'une visite (ou des visites )
+    '''
+
+    parameters = request.args
+    export_format = parameters['export_format'] if 'export_format' in request.args else 'shapefile'
+
+    file_name = datetime.datetime.now().strftime('%Y_%m_%d_%Hh%Mm%S')
+    q = (DB.session.query(ExportVisits))
+
+    if 'id_base_visit' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.idbvisit == parameters['id_base_visit'])
+             )
+    if 'id_releve_plot' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.idbvisit == parameters['id_releve_plot'])
+             )
+    elif 'id_base_site' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.idbsite == parameters['id_base_site'])
+             )
+    elif 'organisme' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.organisme == parameters['organisme'])
+             )
+    elif 'year' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(func.date_part('year', ExportVisits.visitdate) == parameters['year'])
+             )
+    elif 'cd_hab' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.cd_hab == parameters['cd_hab'])
+             )
+
+    data = q.all()
+    features = []
+
+    taxons = []
+    strates = []
+    tab_header = []
+    export_columns = ExportVisits.__table__.columns._data.keys()
+    export_columns.remove('covstrate')
+    export_columns.remove('covtaxons')
+
+    tab_visit = []
+
+
+    for d in data:
+        visit = d.as_dict()
+
+        if visit['covstrate']:
+            for strate, cover in visit['covstrate'].items():
+                # Use with shape file ?
+                #strate = ''.join(filter(str.isalnum, strate))
+                if strate not in strates:
+                    strates.append(strate)
+                #visit[strate[0:8]] = cover #slice str
+                visit[strate] = cover
+            visit.pop('covstrate')
+
+        if visit['covtaxons']:
+            for taxon, cover in visit['covtaxons'].items():
+                # Use with shape file ?
+                #taxon = ''.join(filter(str.isalnum, taxon))
+                if taxon not in taxons:
+                    taxons.append(taxon)
+                #visit[taxon[0:8]] = cover #slice str
+                visit[taxon] = cover
+            visit.pop('covtaxons')
+
+        geomstart_wkt = to_shape(d.geomstart)
+        visit['geomstart'] = geomstart_wkt
+        geomend_wkt = to_shape(d.geomend)
+        visit['geomend'] = geomend_wkt
+
+        tab_visit.append(visit)
+
+    tab_header = export_columns + taxons + strates
+
+    return to_csv_resp(
+        file_name,
+        tab_visit,
+        tab_header,
+        ';'
+
+    )

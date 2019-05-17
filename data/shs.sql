@@ -146,5 +146,95 @@ ALTER TABLE ONLY cor_hab_taxon
 ----------
 --EXPORT--
 ----------
+--Créer la vue pour exporter les visites
 
+CREATE OR REPLACE VIEW pr_monitoring_habitat_station.export_visits AS WITH
+observers AS(
+    SELECT
+        v.id_base_visit,
+        string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs,
+        roles.id_organisme AS organisme
+    FROM gn_monitoring.t_base_visits v
+    JOIN gn_monitoring.cor_visit_observer observer ON observer.id_base_visit = v.id_base_visit
+    JOIN utilisateurs.t_roles roles ON roles.id_role = observer.id_role
+    GROUP BY v.id_base_visit, roles.id_organisme
+),
+perturbations AS(
+    SELECT
+        v.id_base_visit,
+        string_agg(n.label_default, ',') AS label_perturbation
+    FROM gn_monitoring.t_base_visits v
+    JOIN pr_monitoring_habitat_station.cor_transect_visit_perturbation p ON v.id_base_visit = p.id_base_visit
+    JOIN ref_nomenclatures.t_nomenclatures n ON p.id_nomenclature_perturb = n.id_nomenclature
+    GROUP BY v.id_base_visit
+),
+taxons AS (
+    SELECT id_base_visit,
+        id_releve_plot,
+         id_plot,
+        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) cover_taxon
+    FROM (
+        SELECT v.id_base_visit, tr.lb_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
+            FROM gn_monitoring.t_base_visits v
+        JOIN pr_monitoring_habitat_station.t_releve_plots r ON r.id_base_visit = v.id_base_visit
+        JOIN pr_monitoring_habitat_station.cor_releve_plot_taxons t ON t.id_releve_plot = r.id_releve_plot
+            JOIN pr_monitoring_habitat_station.cor_hab_taxon cht ON cht.id_cor_hab_taxon = t.id_cor_hab_taxon
+        JOIN taxonomie.taxref tr ON tr.cd_nom = cht.cd_nom
+            WHERE t.cover_pourcentage IS NOT NULL
+            GROUP BY v.id_base_visit, tr.lb_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
+    ) s
+    GROUP BY id_base_visit, id_plot, id_releve_plot
+    ORDER BY id_base_visit
+),
+strates AS (
+    SELECT id_base_visit,
+	    id_releve_plot,
+	    id_plot,
+       json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate
+   FROM (
+     SELECT v.id_base_visit, n.label_default, t.cover_pourcentage, r.id_releve_plot, r.id_plot
+        FROM gn_monitoring.t_base_visits v
+	JOIN pr_monitoring_habitat_station.t_releve_plots r ON r.id_base_visit = v.id_base_visit
+        JOIN pr_monitoring_habitat_station.cor_releve_plot_strats t ON t.id_releve_plot = r.id_releve_plot
+        JOIN ref_nomenclatures.t_nomenclatures n ON n.id_nomenclature = t.id_nomenclature_strate
+        WHERE t.cover_pourcentage IS NOT NULL
+        GROUP BY v.id_base_visit,n.label_default, t.cover_pourcentage, r.id_releve_plot
+   ) s
+  GROUP BY id_base_visit, id_releve_plot, id_plot
+  ORDER BY id_base_visit
+)
 
+-- toutes les transects, plots et leur visites
+SELECT sites.id_base_site AS idbsite,
+	visits.id_base_visit AS idbvisit,
+	visits.id_digitiser AS iddigit,
+	visits.visit_date_min AS visitdate,
+	releve.id_releve_plot AS idreleve,
+	releve.excretes_presence AS crotte,
+	plot.code_plot AS codeplot,
+	visits.uuid_base_visit AS uuidbvisit,
+	per.label_perturbation AS lbperturb,
+	obs.observateurs AS observers,
+	obs.organisme,
+	tax.cover_taxon AS covtaxons,
+	strate.cover_strate AS covstrate,
+	habref.lb_hab_fr_complet AS lbhab,
+	habref.cd_hab,
+    transect.transect_label AS transectlab,
+    transect.geom_start AS geomstart,
+    transect.geom_end AS geomend,
+    transect.plot_size AS plotsize,
+    nomenclature.label_default AS plotpos
+
+FROM gn_monitoring.t_base_sites sites
+JOIN gn_monitoring.t_base_visits visits ON sites.id_base_site = visits.id_base_site
+JOIN observers obs ON obs.id_base_visit = visits.id_base_visit
+LEFT JOIN perturbations per ON per.id_base_visit = visits.id_base_visit
+JOIN pr_monitoring_habitat_station.t_transects transect ON transect.id_base_site = sites.id_base_site
+JOIN pr_monitoring_habitat_station.t_releve_plots releve ON releve.id_base_visit= visits.id_base_visit
+LEFT JOIN taxons tax ON tax.id_releve_plot = releve.id_releve_plot
+LEFT JOIN strates strate ON strate.id_releve_plot = releve.id_releve_plot
+JOIN pr_monitoring_habitat_station.t_plots plot ON plot.id_plot = releve.id_plot
+JOIN ref_habitat.habref habref ON habref.cd_hab = transect.cd_hab
+JOIN ref_nomenclatures.t_nomenclatures nomenclature ON nomenclature.id_nomenclature = transect.id_nomenclature_plot_position
+ORDER BY visits.id_base_visit;

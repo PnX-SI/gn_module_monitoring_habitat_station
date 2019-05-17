@@ -90,7 +90,7 @@ class TPlot(DB.Model):
     id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
                                           ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     code_plot = DB.Column(DB.String(50))
-    distance_plot = DB.Column(DB.Integer, nullable=False)
+    #distance_plot = DB.Column(DB.Integer, nullable=False)
     #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
@@ -266,4 +266,35 @@ class TVisitSHS(TBaseVisits):
             corVisitObserver.c.id_role
         ]
     )
+
+@serializable
+@geoserializable
+@shapeserializable
+class ExportVisits(DB.Model):
+    __tablename__ = 'export_visits'
+    __table_args__ = {
+        'schema': 'pr_monitoring_habitat_station',
+    }
+    idreleve= DB.Column(
+        DB.Integer,
+        primary_key=True
+    )
+    idbvisit= DB.Column(DB.Integer)
+    idbsite = DB.Column(DB.Integer)
+    uuidbvisit = DB.Column(UUID(as_uuid=True))
+    geomstart = DB.Column(Geometry('GEOMETRY', 4326))
+    geomend = DB.Column(Geometry('GEOMETRY', 4326))
+    visitdate = DB.Column(DB.DateTime)
+    lbperturb = DB.Column(DB.Unicode)
+    observers = DB.Column(DB.Unicode)
+    organisme = DB.Column(DB.Unicode)
+    codeplot = DB.Column(DB.Unicode)
+    lbhab = DB.Column(DB.Unicode)
+    cd_hab = DB.Column(DB.Integer)
+    plotsize = DB.Column(DB.Integer)
+    plotpos = DB.Column(DB.Integer)
+    transectlab = DB.Column(DB.Unicode)
+    crotte = DB.Column(DB.Boolean)
+    covtaxons = DB.Column(DB.Unicode)
+    covstrate = DB.Column(DB.Unicode)
 
