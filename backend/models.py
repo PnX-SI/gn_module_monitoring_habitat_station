@@ -241,6 +241,7 @@ class Taxonomie(DB.Model):
         primary_key=True
     )
     nom_complet = DB.Column(DB.Unicode)
+    lb_nom = DB.Column(DB.Unicode)
 
 
 @serializable

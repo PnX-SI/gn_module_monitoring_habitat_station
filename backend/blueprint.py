@@ -22,7 +22,7 @@ from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 
 
-from .repositories import check_user_cruved_visit, check_year_visit
+from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab
 
 from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
 
@@ -508,9 +508,9 @@ def export_visit(info_role=None):
         q = (DB.session.query(ExportVisits)
              .filter(ExportVisits.idbvisit == parameters['id_base_visit'])
              )
-    if 'id_releve_plot' in parameters:
+    elif 'id_releve_plot' in parameters:
         q = (DB.session.query(ExportVisits)
-             .filter(ExportVisits.idbvisit == parameters['id_releve_plot'])
+             .filter(ExportVisits.idreleve == parameters['id_releve_plot'])
              )
     elif 'id_base_site' in parameters:
         q = (DB.session.query(ExportVisits)
@@ -532,7 +532,9 @@ def export_visit(info_role=None):
     data = q.all()
     features = []
 
-    taxons = []
+    cor_hab_taxon = []
+    flag_cdhab = 0
+
     strates = []
     tab_header = []
     export_columns = ExportVisits.__table__.columns._data.keys()
@@ -544,7 +546,12 @@ def export_visit(info_role=None):
 
     for d in data:
         visit = d.as_dict()
-
+        # Get list hab/taxon
+        cd_hab = visit['cd_hab']
+        if flag_cdhab !=  cd_hab:
+            cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
+            flag_cdhab = cd_hab
+            print("cor_hab_taxon: ", cor_hab_taxon)
         if visit['covstrate']:
             for strate, cover in visit['covstrate'].items():
                 # Use with shape file ?
@@ -559,8 +566,8 @@ def export_visit(info_role=None):
             for taxon, cover in visit['covtaxons'].items():
                 # Use with shape file ?
                 #taxon = ''.join(filter(str.isalnum, taxon))
-                if taxon not in taxons:
-                    taxons.append(taxon)
+                if taxon not in cor_hab_taxon:
+                    visit[taxon] = null
                 #visit[taxon[0:8]] = cover #slice str
                 visit[taxon] = cover
             visit.pop('covtaxons')
@@ -572,7 +579,7 @@ def export_visit(info_role=None):
 
         tab_visit.append(visit)
 
-    tab_header = export_columns + taxons + strates
+    tab_header = export_columns + cor_hab_taxon + strates
 
     return to_csv_resp(
         file_name,
