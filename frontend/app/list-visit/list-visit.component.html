@@ -185,7 +185,9 @@
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-between">
-                    <pnx-modal-download labelButton='Télécharger ces visites' [pathDownload]='storeService.urlLoad'>
+                    <pnx-modal-download labelButton='Télécharger ces visites' [pathDownload]='storeService.urlLoad'
+                    [exportFormat]='storeService.shsConfig.export_available_format'
+                    [queryString]='storeService.queryString' >
                     </pnx-modal-download>
                     <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
                         iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
