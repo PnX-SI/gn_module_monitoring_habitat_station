@@ -12,7 +12,7 @@
   background-color: #e9ecef;
   color: #181818;
   padding: 8px 10px;
-  font-size: 14px
+  font-size: 14px;
 }
 
 .wrapper {
@@ -70,8 +70,7 @@ fieldset:disabled {
   box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-
-.plot-item{
+.plot-item {
   color: #495057;
   padding-right: 20px;
   i {
@@ -94,11 +93,20 @@ fieldset:disabled {
   cursor: pointer;
 }
 
-/deep/ngb-modal-window{
+/deep/ngb-modal-window {
   display: flex !important;
-  justify-content: space-around ;
-  flex-direction: column ;
+  justify-content: space-around;
+  flex-direction: column;
 }
-/deep/.modal-content{
+/deep/.modal-content {
   min-width: 500px;
+}
+
+.modal-header {
+  background-color: #dce3e7;
+  padding: 10px 16px;
+}
+
+form.ng-invalid {
+  border: none !important;
 }

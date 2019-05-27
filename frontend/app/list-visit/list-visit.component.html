@@ -25,7 +25,7 @@
             </button>
         </div>
         <div class="card-body">
-            <form>
+            <form [formGroup]="formTransect">
                 <fieldset [disabled]="disabledForm">
                     <legend>
                         Site Informations
@@ -187,9 +187,6 @@
                 <div class="d-flex justify-content-between">
                     <pnx-modal-download labelButton='Télécharger ces visites' [pathDownload]='storeService.urlLoad'>
                     </pnx-modal-download>
-                    <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
-                        iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
-                    </modal-shs> -->
                     <button *ngIf="addVisitIsAllowed" class="btn btn-sm btn-success pull-right box-shadow"
                         (click)="onNewVisit()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
@@ -201,14 +198,28 @@
     </div>
 </div>
 
-<ng-template #content let-modal>
+<ng-template #content let-d="dismiss">
     <div class="modal-header">
         <h5 class="modal-title">Ajouter une placette</h5>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
     <div class="modal-body">
-        <p>One fine body&hellip;</p>
+        <form [formGroup]="formPlot">
+            <div class="form-group">
+                <small>Code placette :</small>
+                <input class="form-control form-control-sm" [formControl]="formPlot.controls.code_plot">
+            </div>
+            <div class="form-group">
+                <small>Distance ( {{ storeService.shsConfig.plot_size_unite }} ) : </small>
+                <input type="number" class="form-control form-control-sm" [formControl]="formPlot.controls.distance_plot">
+            </div>
+        </form>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+        <button type="button" class="btn btn-default btn-sm" (click)="d('Close click')"> Fermer </button>
+        <button type="button" class="btn btn-success btn-sm" [disabled]="formPlot.invalid" (click)="onSavePlot()"> Enregistrer </button>
     </div>
+
 </ng-template>
