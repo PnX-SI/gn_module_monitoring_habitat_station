@@ -285,6 +285,7 @@ class ExportVisits(DB.Model):
     uuidbvisit = DB.Column(UUID(as_uuid=True))
     geomstart = DB.Column(Geometry('GEOMETRY', 4326))
     geomend = DB.Column(Geometry('GEOMETRY', 4326))
+    geom = DB.Column(Geometry('GEOMETRY', 2154))
     visitdate = DB.Column(DB.DateTime)
     lbperturb = DB.Column(DB.Unicode)
     observers = DB.Column(DB.Unicode)

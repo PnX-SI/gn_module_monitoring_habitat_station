@@ -224,7 +224,8 @@ SELECT sites.id_base_site AS idbsite,
     transect.geom_start AS geomstart,
     transect.geom_end AS geomend,
     transect.plot_size AS plotsize,
-    nomenclature.label_default AS plotpos
+    nomenclature.label_default AS plotpos,
+    sites.geom
 
 FROM gn_monitoring.t_base_sites sites
 JOIN gn_monitoring.t_base_visits visits ON sites.id_base_site = visits.id_base_site

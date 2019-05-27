@@ -532,59 +532,96 @@ def export_visit(info_role=None):
     data = q.all()
     features = []
 
-    cor_hab_taxon = []
-    flag_cdhab = 0
+    if export_format == 'geojson':
 
-    strates = []
-    tab_header = []
-    export_columns = ExportVisits.__table__.columns._data.keys()
-    export_columns.remove('covstrate')
-    export_columns.remove('covtaxons')
+        for d in data:
+            feature = d.as_geofeature('geom', 'idbsite', False)
+            features.append(feature)
+        result = FeatureCollection(features)
 
-    tab_visit = []
+        return to_json_resp(
+            result,
+            as_file=True,
+            filename=file_name,
+            indent=4
+        )
 
+    elif export_format == 'csv':
 
-    for d in data:
-        visit = d.as_dict()
-        # Get list hab/taxon
-        cd_hab = visit['cd_hab']
-        if flag_cdhab !=  cd_hab:
-            cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
-            flag_cdhab = cd_hab
-            print("cor_hab_taxon: ", cor_hab_taxon)
-        if visit['covstrate']:
-            for strate, cover in visit['covstrate'].items():
-                # Use with shape file ?
-                #strate = ''.join(filter(str.isalnum, strate))
-                if strate not in strates:
-                    strates.append(strate)
-                #visit[strate[0:8]] = cover #slice str
-                visit[strate] = cover
-            visit.pop('covstrate')
+        cor_hab_taxon = []
+        flag_cdhab = 0
 
-        if visit['covtaxons']:
-            for taxon, cover in visit['covtaxons'].items():
-                # Use with shape file ?
-                #taxon = ''.join(filter(str.isalnum, taxon))
-                if taxon not in cor_hab_taxon:
-                    visit[taxon] = null
-                #visit[taxon[0:8]] = cover #slice str
-                visit[taxon] = cover
-            visit.pop('covtaxons')
+        strates = []
+        tab_header = []
+        export_columns = ExportVisits.__table__.columns._data.keys()
+        export_columns.remove('covstrate')
+        export_columns.remove('covtaxons')
 
-        geomstart_wkt = to_shape(d.geomstart)
-        visit['geomstart'] = geomstart_wkt
-        geomend_wkt = to_shape(d.geomend)
-        visit['geomend'] = geomend_wkt
+        tab_visit = []
 
-        tab_visit.append(visit)
+        for d in data:
+            visit = d.as_dict()
+            # Get list hab/taxon
+            cd_hab = visit['cd_hab']
+            if flag_cdhab !=  cd_hab:
+                cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
+                flag_cdhab = cd_hab
+                print("cor_hab_taxon: ", cor_hab_taxon)
+            if visit['covstrate']:
+                for strate, cover in visit['covstrate'].items():
+                    # Use with shape file ?
+                    #strate = ''.join(filter(str.isalnum, strate))
+                    if strate not in strates:
+                        strates.append(strate)
+                    #visit[strate[0:8]] = cover #slice str
+                    visit[strate] = cover
+                visit.pop('covstrate')
 
-    tab_header = export_columns + cor_hab_taxon + strates
+            if visit['covtaxons']:
+                for taxon, cover in visit['covtaxons'].items():
+                    # Use with shape file ?
+                    #taxon = ''.join(filter(str.isalnum, taxon))
+                    if taxon not in cor_hab_taxon:
+                        visit[taxon] = null
+                    #visit[taxon[0:8]] = cover #slice str
+                    visit[taxon] = cover
+                visit.pop('covtaxons')
 
-    return to_csv_resp(
-        file_name,
-        tab_visit,
-        tab_header,
-        ';'
+            geomstart_wkt = to_shape(d.geomstart)
+            visit['geomstart'] = geomstart_wkt
+            geomend_wkt = to_shape(d.geomend)
+            visit['geomend'] = geomend_wkt
 
-    )
+            tab_visit.append(visit)
+
+        tab_header = export_columns + cor_hab_taxon + strates
+
+        return to_csv_resp(
+            file_name,
+            tab_visit,
+            tab_header,
+            ';'
+
+        )
+
+    else:
+
+        dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
+
+        FionaShapeService.create_shapes_struct(
+            db_cols=ExportVisits.__mapper__.c,
+            srid=2154,
+            dir_path=dir_path,
+            file_name=file_name,
+        )
+
+        for row in data:
+            FionaShapeService.create_feature(row.as_dict(), row.geom)
+
+        FionaShapeService.save_and_zip_shapefiles()
+
+        return send_from_directory(
+            dir_path,
+            file_name+'.zip',
+            as_attachment=True
+        )
