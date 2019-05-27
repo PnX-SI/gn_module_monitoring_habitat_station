@@ -4,7 +4,7 @@ import datetime
 from flask import Blueprint, request, session, current_app, send_from_directory, abort, jsonify
 from geojson import FeatureCollection, Feature
 from sqlalchemy.sql.expression import func
-from sqlalchemy import and_, distinct, desc
+from sqlalchemy import and_, distinct, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
 
@@ -319,7 +319,7 @@ def get_taxa_by_habitats(cd_hab):
 @blueprint.route('/update_visit/<id_visit>', methods=['PATCH'])
 @json_resp
 @permissions.check_cruved_scope('U', True, module_code="SUIVI_HAB_STA")
-def patch_visit(id_visit,info_role):
+def patch_visit(id_visit, info_role):
     '''
     Mettre à jour une visite
     '''
@@ -357,12 +357,12 @@ def patch_visit(id_visit,info_role):
     for releve in tab_releve_plots:
         if 'plot_data' in releve:
             releve['excretes_presence'] = releve['plot_data']['excretes_presence']
-            tab_plot_data = releve.pop('plot_data')           
+            tab_plot_data = releve.pop('plot_data')
         releve_plot = TRelevePlot(**releve)
         for strat in tab_plot_data['strates_releve']:
             strat_item = CorRelevePlotStrat(**strat)
             releve_plot.cor_releve_strats.append(strat_item)
-        for taxon in tab_plot_data['taxons_releve']:                
+        for taxon in tab_plot_data['taxons_releve']:
             taxon_item = CorRelevePlotTaxon(**taxon)
             releve_plot.cor_releve_taxons.append(taxon_item)
         visit.cor_releve_plot.append(releve_plot)
@@ -409,6 +409,7 @@ def get_all_sites():
         return [d.as_dict() for d in data]
     return ('sites_not_found'), 404
 
+
 @blueprint.route('/habitats/<id_list>', methods=['GET'])
 @json_resp
 def get_habitats(id_list):
@@ -449,6 +450,16 @@ def post_transect(info_role):
     tab_plots = []
     if 'cor_plots' in data:
         tab_plots = data.pop('cor_plots')
+    site_data = {
+        'id_nomenclature_type_site': blueprint.config['id_nomenclature_type_site'],
+        'base_site_name': 'HAB-SHS-',
+        'first_use_date': datetime.datetime.now(),
+        'geom' : func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
+    }
+    site = TBaseSites(**site_data)
+    DB.session.add(site)
+    DB.session.commit()
+    data['id_base_site']= site.as_dict().get('id_base_site')
     transect = TTransect(**data)
     for plot in tab_plots:
         transect_plot = TPlot(**plot)
@@ -456,12 +467,14 @@ def post_transect(info_role):
     transect.as_dict(True)
     DB.session.add(transect)
     DB.session.commit()
-    return transect.as_dict(recursif=True)
+    
+    return site.as_dict(recursif=True)
+
 
 @blueprint.route('/update_transect/<id_transect>', methods=['PATCH'])
 @json_resp
 @permissions.check_cruved_scope('U', True, module_code="SUIVI_HAB_STA")
-def patch_transect(id_transect,info_role):
+def patch_transect(id_transect, info_role):
     '''
     Mettre à jour un transect
     '''
@@ -479,14 +492,15 @@ def patch_transect(id_transect,info_role):
     DB.session.commit()
     return transect.as_dict(recursif=True)
 
+
 @blueprint.route('/user/cruved', methods=['GET'])
 @permissions.check_cruved_scope('R', True)
 @json_resp
 def returnUserCruved(info_role):
-    #récupérer le CRUVED complet de l'utilisateur courant
+    # récupérer le CRUVED complet de l'utilisateur courant
     user_cruved = get_or_fetch_user_cruved(
-                session=session,
-                id_role=info_role.id_role,
-                module_code=blueprint.config['MODULE_CODE']
+        session=session,
+        id_role=info_role.id_role,
+        module_code=blueprint.config['MODULE_CODE']
     )
-    return  user_cruved
+    return user_cruved
