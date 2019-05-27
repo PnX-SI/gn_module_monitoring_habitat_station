@@ -102,30 +102,6 @@ WHERE module_code ILIKE 'SUIVI_HAB_STA'
 SELECT ti.id_base_site, id_module.id_module
 FROM pr_monitoring_habitat_station.t_transects ti, id_module;
 
-------------------
--- Insérer geom --
-------------------
-
--- parametrer ref_geo.bib_areas_types --
--- ? POLYGONE
-/*INSERT INTO ref_geo.bib_areas_types (type_name, type_code, type_desc)
-VALUES ('TransectSHS', 'TSHS', 'Transect Suivi Habitat Station');*/
-
---insérer les transects dans l_areas
--- ERREUR: Geometry type (LineString) does not match column type (MultiPolygon)
---État SQL :22023
-/*INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, source)
-SELECT ref_geo.get_id_area_type('TSHS'), base_site_name, base_site_name, ST_TRANSFORM(ST_SetSRID(geom,  MY_SRID_WORLD), MY_SRID_LOCAL), ST_TRANSFORM(ST_SetSRID(ST_CENTROID(geom),  MY_SRID_WORLD), MY_SRID_LOCAL), 'CBNA'
-FROM gn_monitoring.t_base_sites
-WHERE base_site_name LIKE 'HAB-SHS-%';
-
--- insérer les transects dans li_grids
-INSERT INTO ref_geo.li_grids
-SELECT area_code, id_area, ST_XMin(ST_Extent(geom)), ST_XMax(ST_Extent(geom)), ST_YMin(ST_Extent(geom)),ST_YMax(ST_Extent(geom))
-FROM ref_geo.l_areas
-WHERE id_type=ref_geo.get_id_area_type('TSHS')
-GROUP by area_code, id_area;*/
-
 
 ----------------------
 -- Insérer les espèces
