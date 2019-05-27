@@ -22,7 +22,7 @@ from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 
 
-from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab
+from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot
 
 from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
 
@@ -278,13 +278,16 @@ def get_visitById(id_visit):
         visit = data.as_dict(True)
         for releve in visit['cor_releve_plot']:
             plot_data = dict()
-            plot_data['excretes_presence'] = releve['excretes_presence']
-            plot_data['taxons_releve'] = releve['cor_releve_taxons']
-            plot_data['strates_releve'] = releve['cor_releve_strats']
+            if 'excretes_presence' in releve:
+                plot_data['excretes_presence'] = releve['excretes_presence']
+                del releve['excretes_presence']
+            if 'cor_releve_taxons' in releve:
+                plot_data['taxons_releve'] = releve['cor_releve_taxons']
+                del releve['cor_releve_taxons']
+            if 'cor_releve_strats' in releve:
+                plot_data['strates_releve'] = releve['cor_releve_strats']
+                del releve['cor_releve_strats']
             releve['plot_data'] = plot_data
-            del releve['excretes_presence']
-            del releve['cor_releve_taxons']
-            del releve['cor_releve_strats']
         return visit
     return None
 
@@ -557,6 +560,8 @@ def export_visit(info_role=None):
         export_columns.remove('covstrate')
         export_columns.remove('covtaxons')
 
+        strates_list = get_stratelist_plot()
+
         tab_visit = []
 
         for d in data:
@@ -566,35 +571,30 @@ def export_visit(info_role=None):
             if flag_cdhab !=  cd_hab:
                 cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
                 flag_cdhab = cd_hab
-                print("cor_hab_taxon: ", cor_hab_taxon)
+
             if visit['covstrate']:
                 for strate, cover in visit['covstrate'].items():
-                    # Use with shape file ?
-                    #strate = ''.join(filter(str.isalnum, strate))
-                    if strate not in strates:
-                        strates.append(strate)
-                    #visit[strate[0:8]] = cover #slice str
                     visit[strate] = cover
+            if 'covstrate' in visit:
                 visit.pop('covstrate')
 
             if visit['covtaxons']:
                 for taxon, cover in visit['covtaxons'].items():
                     # Use with shape file ?
                     #taxon = ''.join(filter(str.isalnum, taxon))
-                    if taxon not in cor_hab_taxon:
-                        visit[taxon] = null
                     #visit[taxon[0:8]] = cover #slice str
                     visit[taxon] = cover
+            if 'covtaxons' in visit:
                 visit.pop('covtaxons')
 
-            geomstart_wkt = to_shape(d.geomstart)
-            visit['geomstart'] = geomstart_wkt
-            geomend_wkt = to_shape(d.geomend)
-            visit['geomend'] = geomend_wkt
+            geom_wkt = to_shape(d.geom)
+            visit['geom'] = geom_wkt
 
             tab_visit.append(visit)
 
-        tab_header = export_columns + cor_hab_taxon + strates
+        tab_header = export_columns + strates_list + cor_hab_taxon
+        print('tab_header: ', tab_header)
+        print('tab_visit: ', tab_visit)
 
         return to_csv_resp(
             file_name,

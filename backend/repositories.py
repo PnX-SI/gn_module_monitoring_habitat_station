@@ -7,6 +7,7 @@ from geonature.utils.errors import GeonatureApiError
 from geonature.core.gn_monitoring.models import TBaseVisits
 from geonature.utils.env import DB, ROOT_DIR
 from .models import Taxonomie, CorHabTaxon
+from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 
 
 class PostYearError (GeonatureApiError):
@@ -95,4 +96,19 @@ def get_taxonlist_by_cdhab(cdhab):
         for d in data:
             taxons.append( str(d[1]) )
         return taxons
+    return None
+
+
+def get_stratelist_plot():
+    q = DB.session.query(
+        TNomenclatures.label_default
+        ).join(BibNomenclaturesTypes, BibNomenclaturesTypes.id_type == TNomenclatures.id_type)
+
+    q = q.filter(BibNomenclaturesTypes.mnemonique == 'STRATE_PLACETTE')
+    data = q.all()
+    strates = []
+    if data:
+        for d in data:
+            strates.append( str(d[0]) )
+        return strates
     return None
