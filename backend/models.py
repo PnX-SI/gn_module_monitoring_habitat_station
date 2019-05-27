@@ -276,27 +276,25 @@ class ExportVisits(DB.Model):
     __table_args__ = {
         'schema': 'pr_monitoring_habitat_station',
     }
+
+    idbsite = DB.Column(DB.Integer)
+    transectlab = DB.Column(DB.Unicode)
+    visitdate = DB.Column(DB.DateTime)
+    idbvisit= DB.Column(DB.Integer)
     idreleve= DB.Column(
         DB.Integer,
         primary_key=True
     )
-    idbvisit= DB.Column(DB.Integer)
-    idbsite = DB.Column(DB.Integer)
-    uuidbvisit = DB.Column(UUID(as_uuid=True))
-    geomstart = DB.Column(Geometry('GEOMETRY', 4326))
-    geomend = DB.Column(Geometry('GEOMETRY', 4326))
-    geom = DB.Column(Geometry('GEOMETRY', 2154))
-    visitdate = DB.Column(DB.DateTime)
-    lbperturb = DB.Column(DB.Unicode)
+    codeplot = DB.Column(DB.Unicode)
+    plotpos = DB.Column(DB.Integer)
+    plotsize = DB.Column(DB.Integer)
     observers = DB.Column(DB.Unicode)
     organisme = DB.Column(DB.Unicode)
-    codeplot = DB.Column(DB.Unicode)
     lbhab = DB.Column(DB.Unicode)
     cd_hab = DB.Column(DB.Integer)
-    plotsize = DB.Column(DB.Integer)
-    plotpos = DB.Column(DB.Integer)
-    transectlab = DB.Column(DB.Unicode)
+    geom = DB.Column(Geometry('GEOMETRY', 2154))
+    lbperturb = DB.Column(DB.Unicode)
     crotte = DB.Column(DB.Boolean)
-    covtaxons = DB.Column(DB.Unicode)
     covstrate = DB.Column(DB.Unicode)
+    covtaxons = DB.Column(DB.Unicode)
 
