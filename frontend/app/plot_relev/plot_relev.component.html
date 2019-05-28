@@ -44,7 +44,7 @@
                 <td>{{taxon.controls.nom_complet.value}}</td>
                 <td>
                     <div class="input-group">
-                        <input type="number" min="1" max="100" class="form-control" [formControl]=taxon.controls.cover_pourcentage
+                        <input type="number" min="0" max="100" class="form-control" [formControl]=taxon.controls.cover_pourcentage
                             (blur)="onBlurMethod()">
                         <div class="input-group-append">
                             <span class="input-group-text">%</span>
