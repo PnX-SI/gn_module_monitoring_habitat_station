@@ -89,7 +89,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
                 this._fb.group({
                     id_cor_releve_plot_taxon: [null],
                     id_cor_hab_taxon: [taxon.id_cor_hab_taxon],
-                    cover_pourcentage: [null],
+                    cover_pourcentage: ['', Validators.compose([Validators.min(0), Validators.max(100)])],
                     nom_complet: [taxon.nom_complet]
                 })
             );
