@@ -63,6 +63,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
 
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.isNew = !this.idSite;
+    this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.checkPermission();
     forkJoin([
       this._api.getSites({ 'id_base_site': this.idSite, 'type': ModuleConfig.site_type }),
@@ -258,6 +259,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-
+    this.storeService.queryString = this.storeService.queryString.delete(
+      "id_base_site"
+    );
   }
 }

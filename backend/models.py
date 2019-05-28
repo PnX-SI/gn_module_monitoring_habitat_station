@@ -58,7 +58,7 @@ class HabrefSHS(DB.Model):
 @serializable
 class CorListHabitat(DB.Model):
     __tablename__ = 'cor_list_habitat'
-    __table_args__ = {'schema': 'ref_habitat'}
+    __table_args__ = {'schema': 'ref_habitat', 'extend_existing': True}
 
     id_cor_list = DB.Column(DB.Integer, primary_key=True,
                             server_default=DB.FetchedValue())
@@ -241,6 +241,7 @@ class Taxonomie(DB.Model):
         primary_key=True
     )
     nom_complet = DB.Column(DB.Unicode)
+    lb_nom = DB.Column(DB.Unicode)
 
 
 @serializable
@@ -266,4 +267,34 @@ class TVisitSHS(TBaseVisits):
             corVisitObserver.c.id_role
         ]
     )
+
+@serializable
+@geoserializable
+@shapeserializable
+class ExportVisits(DB.Model):
+    __tablename__ = 'export_visits'
+    __table_args__ = {
+        'schema': 'pr_monitoring_habitat_station',
+    }
+
+    idbsite = DB.Column(DB.Integer)
+    transectlab = DB.Column(DB.Unicode)
+    visitdate = DB.Column(DB.DateTime)
+    idbvisit= DB.Column(DB.Integer)
+    idreleve= DB.Column(
+        DB.Integer,
+        primary_key=True
+    )
+    codeplot = DB.Column(DB.Unicode)
+    plotpos = DB.Column(DB.Integer)
+    plotsize = DB.Column(DB.Integer)
+    observers = DB.Column(DB.Unicode)
+    organisme = DB.Column(DB.Unicode)
+    lbhab = DB.Column(DB.Unicode)
+    cd_hab = DB.Column(DB.Integer)
+    geom = DB.Column(Geometry('GEOMETRY', 2154))
+    lbperturb = DB.Column(DB.Unicode)
+    crotte = DB.Column(DB.Boolean)
+    covstrate = DB.Column(DB.Unicode)
+    covtaxons = DB.Column(DB.Unicode)
 

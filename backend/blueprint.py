@@ -22,9 +22,9 @@ from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 
 
-from .repositories import check_user_cruved_visit, check_year_visit
+from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot, clean_string
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat
+from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
 
@@ -278,13 +278,16 @@ def get_visitById(id_visit):
         visit = data.as_dict(True)
         for releve in visit['cor_releve_plot']:
             plot_data = dict()
-            plot_data['excretes_presence'] = releve['excretes_presence']
-            plot_data['taxons_releve'] = releve['cor_releve_taxons']
-            plot_data['strates_releve'] = releve['cor_releve_strats']
+            if 'excretes_presence' in releve:
+                plot_data['excretes_presence'] = releve['excretes_presence']
+                del releve['excretes_presence']
+            if 'cor_releve_taxons' in releve:
+                plot_data['taxons_releve'] = releve['cor_releve_taxons']
+                del releve['cor_releve_taxons']
+            if 'cor_releve_strats' in releve:
+                plot_data['strates_releve'] = releve['cor_releve_strats']
+                del releve['cor_releve_strats']
             releve['plot_data'] = plot_data
-            del releve['excretes_presence']
-            del releve['cor_releve_taxons']
-            del releve['cor_releve_strats']
         return visit
     return None
 
@@ -503,4 +506,134 @@ def returnUserCruved(info_role):
         id_role=info_role.id_role,
         module_code=blueprint.config['MODULE_CODE']
     )
-    return user_cruved
+    return  user_cruved
+
+@blueprint.route('/export_visit', methods=['GET'])
+@permissions.check_cruved_scope('E', True)
+def export_visit(info_role=None):
+    '''
+    Télécharge les données d'une visite (ou des visites )
+    '''
+
+    parameters = request.args
+    export_format = parameters['export_format'] if 'export_format' in request.args else 'shapefile'
+
+    file_name = datetime.datetime.now().strftime('%Y_%m_%d_%Hh%Mm%S')
+    q = (DB.session.query(ExportVisits))
+
+    if 'id_base_visit' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.idbvisit == parameters['id_base_visit'])
+             )
+    elif 'id_releve_plot' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.idreleve == parameters['id_releve_plot'])
+             )
+    elif 'id_base_site' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.idbsite == parameters['id_base_site'])
+             )
+    elif 'organisme' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.organisme == parameters['organisme'])
+             )
+    elif 'year' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(func.date_part('year', ExportVisits.visitdate) == parameters['year'])
+             )
+    elif 'cd_hab' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.cd_hab == parameters['cd_hab'])
+             )
+
+    data = q.all()
+    features = []
+
+    if export_format == 'geojson':
+
+        for d in data:
+            feature = d.as_geofeature('geom', 'idbsite', False)
+            features.append(feature)
+        result = FeatureCollection(features)
+
+        return to_json_resp(
+            result,
+            as_file=True,
+            filename=file_name,
+            indent=4
+        )
+
+    elif export_format == 'csv':
+
+        cor_hab_taxon = []
+        flag_cdhab = 0
+
+        strates = []
+        tab_header = []
+        export_columns = ExportVisits.__table__.columns._data.keys()
+        export_columns.remove('covstrate')
+        export_columns.remove('covtaxons')
+
+        strates_list = get_stratelist_plot()
+
+        tab_visit = []
+
+        for d in data:
+            visit = d.as_dict()
+            # Get list hab/taxon
+            cd_hab = visit['cd_hab']
+            if flag_cdhab !=  cd_hab:
+                cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
+                flag_cdhab = cd_hab
+
+            if visit['covstrate']:
+                for strate, cover in visit['covstrate'].items():
+                    visit[strate] = cover
+            if 'covstrate' in visit:
+                visit.pop('covstrate')
+
+            if visit['covtaxons']:
+                for taxon, cover in visit['covtaxons'].items():
+                    # Use with shape file ?
+                    #taxon = ''.join(filter(str.isalnum, taxon))
+                    #visit[taxon[0:8]] = cover #slice str
+                    visit[taxon] = cover
+            if 'covtaxons' in visit:
+                visit.pop('covtaxons')
+
+            geom_wkt = to_shape(d.geom)
+            visit['geom'] = geom_wkt
+
+            tab_visit.append(visit)
+
+        tab_header = export_columns + [clean_string(x) for x in strates_list] + [clean_string(x) for x in cor_hab_taxon]
+
+        return to_csv_resp(
+            file_name,
+            tab_visit,
+            tab_header,
+            ';'
+
+        )
+
+    else:
+
+        dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
+
+        FionaShapeService.create_shapes_struct(
+            db_cols=ExportVisits.__mapper__.c,
+            srid=2154,
+            dir_path=dir_path,
+            file_name=file_name,
+        )
+
+        for row in data:
+            FionaShapeService.create_feature(row.as_dict(), row.geom)
+
+        FionaShapeService.save_and_zip_shapefiles()
+
+        return send_from_directory(
+            dir_path,
+            file_name+'.zip',
+            as_attachment=True
+        )

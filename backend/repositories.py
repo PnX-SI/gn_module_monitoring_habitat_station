@@ -6,6 +6,8 @@ from pypnusershub.db.tools import InsufficientRightsError
 from geonature.utils.errors import GeonatureApiError
 from geonature.core.gn_monitoring.models import TBaseVisits
 from geonature.utils.env import DB, ROOT_DIR
+from .models import Taxonomie, CorHabTaxon
+from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 
 
 class PostYearError (GeonatureApiError):
@@ -77,3 +79,45 @@ def check_year_visit(id_base_site, new_visit_date):
                 ('Maille {} has already been visited in {} ')
                 .format(id_base_site, year_old_visit),
                 403)
+
+def get_taxonlist_by_cdhab(cdhab):
+    q = DB.session.query(
+    CorHabTaxon.id_cor_hab_taxon,
+    Taxonomie.lb_nom
+    ).join(
+        Taxonomie, CorHabTaxon.cd_nom == Taxonomie.cd_nom
+    ).group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxonomie.lb_nom)
+
+    q = q.filter(CorHabTaxon.id_habitat == cdhab)
+    data = q.all()
+
+    taxons = []
+    if data:
+        for d in data:
+            taxons.append( str(d[1]) )
+        return taxons
+    return None
+
+
+def get_stratelist_plot():
+    q = DB.session.query(
+        TNomenclatures.label_default
+        ).join(BibNomenclaturesTypes, BibNomenclaturesTypes.id_type == TNomenclatures.id_type)
+
+    q = q.filter(BibNomenclaturesTypes.mnemonique == 'STRATE_PLACETTE')
+    data = q.all()
+    strates = []
+    if data:
+        for d in data:
+            strates.append( str(d[0]) )
+        return strates
+    return None
+
+
+def clean_string(my_string):
+    my_string = my_string.strip()
+    chars_to_remove =  ";,"
+    for c in chars_to_remove:
+        my_string = my_string.replace(c, "-")
+
+    return my_string
