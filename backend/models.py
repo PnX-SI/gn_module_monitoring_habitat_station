@@ -90,7 +90,7 @@ class TPlot(DB.Model):
     id_transect = DB.Column(DB.ForeignKey('pr_monitoring_habitat_station.t_transects.id_transect',
                                           ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     code_plot = DB.Column(DB.String(50))
-    distance_plot = DB.Column(DB.Integer, nullable=False)
+    distance_plot = DB.Column(DB.Integer)
     #t_transect = DB.relationship('TTransect', primaryjoin='TPlot.id_transect == TTransect.id_transect', backref='t_plots')
 
 
