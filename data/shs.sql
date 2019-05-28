@@ -32,7 +32,8 @@ COMMENT ON TABLE pr_monitoring_habitat_station.t_transects IS 'Extension de t_ba
 CREATE TABLE t_plots (
     id_plot serial NOT NULL,
     id_transect integer NOT NULL,
-    code_plot character varying(50)
+    code_plot character varying(50),
+    distance_plot integer
 );
 COMMENT ON TABLE pr_monitoring_habitat_station.t_plots IS 'Placettes associées au transect';
 

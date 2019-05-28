@@ -25,38 +25,27 @@
             </button>
         </div>
         <div class="card-body">
-            <form>
-                <fieldset [disabled]="disabledForm">
-                    <legend>
-                        Site Informations
-                    </legend>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-6">
-                            <div class="form-group">
-                                <small>Code Site :</small>
-                                <select class="form-control form-control-sm"
-                                    [formControl]="formTransect.controls.id_base_site">
-                                    <option [ngValue]=null> -- Sélectionnez un site -- </option>
-                                    <option *ngFor="let site of sites" [ngValue]="site.id_base_site"
-                                        [innerHTML]="site.base_site_name">
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
-                            <div class="form-group">
-                                <small>Commune :</small>
-                                <input value="{{currentSite.properties.nom_commune}}"
-                                    class="form-control form-control-sm">
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-                <br>
+            <form [formGroup]="formTransect">
                 <fieldset [disabled]="disabledForm">
                     <legend>
                         Transect Informations
                     </legend>
+                    <div class="row">
+                            <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
+                                <div class="form-group">
+                                    <small>Identifiant :</small>
+                                    <input value="{{currentSite.properties.id_base_site}}"
+                                        class="form-control form-control-sm">
+                                </div>
+                            </div>
+                            <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
+                                <div class="form-group">
+                                    <small>Commune :</small>
+                                    <input value="{{currentSite.properties.nom_commune}}"
+                                        class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-6">
                             <div class="form-group">
@@ -78,7 +67,12 @@
                             </div>
                         </div>
                     </div>
-
+                </fieldset>
+                <br>
+                <fieldset [disabled]="disabledForm">
+                    <legend>
+                        Coordonnées géographiques
+                    </legend>
                     <h6 class="mb-0"><i class="material-icons location-icon">location_on</i>Point de départ : </h6>
                     <div class="form-group">
                         <div class="row">
@@ -129,7 +123,8 @@
                                         [formControl]="formTransect.controls.id_nomenclature_plot_position">
                                         <option [ngValue]=null> -- Sélectionnez une position -- </option>
                                         <option *ngFor="let position of plot_position"
-                                            [ngValue]="position.id_nomenclature">{{position.label_default}}
+                                            [ngValue]="position.id_nomenclature">
+                                            {{position.label_default}}
                                         </option>
                                     </select>
                                 </div>
@@ -187,9 +182,6 @@
                 <div class="d-flex justify-content-between">
                     <pnx-modal-download labelButton='Télécharger ces visites' [pathDownload]='storeService.urlLoad'>
                     </pnx-modal-download>
-                    <!-- <modal-shs classStyle="btn btn-sm btn-success pull-right" labelButton='Ajouter une nouvelle visite'
-                        iconStyle="fa fa-plus-circle" (visitsUp)='getVisits()' >
-                    </modal-shs> -->
                     <button *ngIf="addVisitIsAllowed" class="btn btn-sm btn-success pull-right box-shadow"
                         (click)="onNewVisit()">
                         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
@@ -201,14 +193,30 @@
     </div>
 </div>
 
-<ng-template #content let-modal>
+<ng-template #content let-d="dismiss">
     <div class="modal-header">
         <h5 class="modal-title">Ajouter une placette</h5>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
     <div class="modal-body">
-        <p>One fine body&hellip;</p>
+        <form [formGroup]="formPlot">
+            <div class="form-group">
+                <small>Code placette :</small>
+                <input class="form-control form-control-sm" [formControl]="formPlot.controls.code_plot">
+            </div>
+            <div class="form-group">
+                <small>Distance ( {{ storeService.shsConfig.plot_size_unite }} ) : </small>
+                <input type="number" class="form-control form-control-sm"
+                    [formControl]="formPlot.controls.distance_plot">
+            </div>
+        </form>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+        <button type="button" class="btn btn-default btn-sm" (click)="d('Close click')"> Fermer </button>
+        <button type="button" class="btn btn-success btn-sm" [disabled]="formPlot.invalid" (click)="onSavePlot()">
+            Enregistrer </button>
     </div>
+
 </ng-template>

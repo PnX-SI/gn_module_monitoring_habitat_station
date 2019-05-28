@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ToastrService } from "ngx-toastr";
-import { FormGroup } from "@angular/forms";
+import { FormGroup, FormBuilder, Validators } from "@angular/forms";
 import { Page } from "../shared/page";
 import { MapListService } from "@geonature_common/map-list/map-list.service";
 import { forkJoin } from "rxjs/observable/forkJoin";
@@ -11,7 +11,7 @@ import { ModuleConfig } from "../module.config";
 import { FormService } from "../services/form.service";
 import { DataFormService } from "@geonature_common/form/data-form.service";
 import { UserService } from "../services/user.service";
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: "pnx-list-visit",
   templateUrl: "list-visit.component.html",
@@ -42,7 +42,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   isNew: boolean;
   plot_position: any;
   public addVisitIsAllowed = false;
-
+  formPlot: FormGroup;
+  modalRef: NgbModalRef;
 
   constructor(
     public storeService: StoreService,
@@ -54,15 +55,17 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     public router: Router,
     private userService: UserService,
     public formService: FormService,
-    private nomenclatureServ: DataFormService
+    private nomenclatureServ: DataFormService,
+    private _fb: FormBuilder,
   ) { }
 
   ngOnInit() {
+
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.isNew = !this.idSite;
     this.checkPermission();
     forkJoin([
-      this._api.getSites({'id_base_site': this.idSite,'type': ModuleConfig.site_type}),
+      this._api.getSites({ 'id_base_site': this.idSite, 'type': ModuleConfig.site_type }),
       this._api.getHabitatsList(ModuleConfig.id_bib_list_habitat),
       this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, { orderby: 'label_default' }),
     ]).subscribe(results => {
@@ -91,10 +94,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       }
     );
   }
-  onRowSelect(e){
+  onRowSelect(e) {
     this.onVisitDetails(e.selected[0].id_base_visit)
   }
-  
+
   checkPermission() {
     this.userService.check_user_cruved_visit('E').subscribe(ucruved => {
       this.exportIsAllowed = ucruved;
@@ -145,7 +148,13 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this._api.getTtransectByIdSite(this.idSite).subscribe(
       (site) => {
         this.currentSite = site;
-        this.plots = this.currentSite.properties.cor_plots;
+        if (! this.currentSite.properties.cor_plots) {
+          let msg = "Ajouter des placettes à votre transect pour y associer des visites.";
+          this.toastr.error(msg, "", { positionClass: "toast-top-right" });
+          this.addVisitIsAllowed = false
+        } else {
+          this.plots = _.cloneDeep(this.currentSite.properties.cor_plots);
+        }
         this.transect_title = this.transect_title + this.currentSite.properties.transect_label;
         this.storeService.setCurrentSite(this.currentSite);
         this.pachForm();
@@ -191,16 +200,28 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   onAddPlot(content) {
-    this.modalService.open(content, { centered: true });
-    //this.plots.unshift({ code_plot: $addPolt.value })
+    this.formPlot = this._fb.group({
+      code_plot: [null, Validators.required],
+      distance_plot: [null, Validators.required],
+    });
+    this.modalRef = this.modalService.open(content, { centered: true });
+
+  }
+  onSavePlot() {
+    this.plots.push(this.formPlot.value);
+    this.modalRef.close()
   }
 
   onEdit() {
     this.disabledForm = !this.disabledForm;
-    if (!this.disabledForm)
+    if (!this.disabledForm) {
       this.edit_btn = "Annuler"
-    else
-      this.edit_btn = "Editer"
+    }
+    else {
+      this.plots = this.currentSite.properties.cor_plots;
+      this.pachForm();
+      this.edit_btn = "Editer";
+    }
   }
 
   onSubmitTransect() {
@@ -215,26 +236,27 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     if (this.isNew)
       this._api.postTransect(transect).subscribe(
         (data) => {
-          this.toastr.success("Le trasect a été ajouté avec succès","",{positionClass: "toast-top-right"});
-        this.backToSites()
+          this.toastr.success("Le trasect a été ajouté avec succès", "", { positionClass: "toast-top-right" });
+          this.backToSites()
         },
         (error) => {
           this.toastr.error("Une erreur est survenue lors de la création du transect", "", { positionClass: "toast-top-right" });
           this.backToSites();
         }
       )
-    else 
-    this._api.updateTransect(transect).subscribe(
-      (data) => {
-        this.toastr.success("Le trasect a été modifié avec succès","",{positionClass: "toast-top-right"});
-      this.backToSites()
-      },
-      (error) => {
-        this.toastr.error("Une erreur est survenue lors de la modification du transect", "", { positionClass: "toast-top-right" });
-        this.backToSites();
-      }
-    )
+    else
+      this._api.updateTransect(transect).subscribe(
+        (data) => {
+          this.toastr.success("Le trasect a été modifié avec succès", "", { positionClass: "toast-top-right" });
+          this.backToSites()
+        },
+        (error) => {
+          this.toastr.error("Une erreur est survenue lors de la modification du transect", "", { positionClass: "toast-top-right" });
+          this.backToSites();
+        }
+      )
   }
+
   ngOnDestroy() {
 
   }
