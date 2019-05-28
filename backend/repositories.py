@@ -112,3 +112,12 @@ def get_stratelist_plot():
             strates.append( str(d[0]) )
         return strates
     return None
+
+
+def clean_string(my_string):
+    my_string = my_string.strip()
+    chars_to_remove =  ";,"
+    for c in chars_to_remove:
+        my_string = my_string.replace(c, "-")
+
+    return my_string

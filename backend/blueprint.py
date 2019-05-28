@@ -22,7 +22,7 @@ from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 
 
-from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot
+from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot, clean_string
 
 from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
 
@@ -592,9 +592,7 @@ def export_visit(info_role=None):
 
             tab_visit.append(visit)
 
-        tab_header = export_columns + strates_list + cor_hab_taxon
-        print('tab_header: ', tab_header)
-        print('tab_visit: ', tab_visit)
+        tab_header = export_columns + [clean_string(x) for x in strates_list] + [clean_string(x) for x in cor_hab_taxon]
 
         return to_csv_resp(
             file_name,
