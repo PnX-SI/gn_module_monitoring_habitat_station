@@ -148,7 +148,13 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this._api.getTtransectByIdSite(this.idSite).subscribe(
       (site) => {
         this.currentSite = site;
-        this.plots = _.cloneDeep(this.currentSite.properties.cor_plots);
+        if (! this.currentSite.properties.cor_plots) {
+          let msg = "Ajouter des placettes à votre transect pour y associer des visites.";
+          this.toastr.error(msg, "", { positionClass: "toast-top-right" });
+          this.addVisitIsAllowed = false
+        } else {
+          this.plots = _.cloneDeep(this.currentSite.properties.cor_plots);
+        }
         this.transect_title = this.transect_title + this.currentSite.properties.transect_label;
         this.storeService.setCurrentSite(this.currentSite);
         this.pachForm();
