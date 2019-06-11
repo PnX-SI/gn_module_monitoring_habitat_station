@@ -134,7 +134,7 @@ def get_base_column_name():
     mapping column name / label column
 
     "idbsite": "Identifiant site",
-    "transectlab": "Label transect",
+    "transectlb": "Label transect",
     "visitdate": "Date visite",
     "idbvisit": "Identifiant visite",
     "idreleve": Identifiant relevé",
@@ -171,19 +171,19 @@ def get_pro_column_name():
     mapping column name / label column
     "cd_hab": "cdhab",
     "covcdnom" : "covcdnom",
-    "covidstrate": "covidstrate"
+    "covidstra": "covidstra"
     """
     return [
         "cdhab",
         "covcdnom",
-        "covidstrate",
+        "covidstra",
         "idperturb"
         ]
 
 def get_mapping_columns():
     return {
         "idbsite": "Identifiant site",
-        "transectlab": "Label transect",
+        "transectlb": "Label transect",
         "visitdate": "Date visite",
         "idbvisit": "Identifiant visite",
         "idreleve": "Identifiant relevé",
@@ -202,6 +202,6 @@ def get_mapping_columns():
         "covstrate": "covstrate",
         "covcdnom" : "covcdnom",
         "covtaxons": "covtaxons",
-        "covidstrate": "covidstrate",
+        "covidstra": "covidstra",
         "idperturb": "idperturb"
     }
