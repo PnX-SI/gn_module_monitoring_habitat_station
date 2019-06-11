@@ -11,9 +11,9 @@ zoom_center = [44.863664, 6.268670]
 zoom= 10
 pagination_serverside= False
 items_per_page = 10
-plot_size_unite = "mètre"
+plot_size_unite = "mètres"
 MODULE_CODE = "SUIVI_HAB_STA"
-id_nomenclature_type_site = 690
+id_nomenclature_type_site = 773
 id_bib_list_habitat = 2
 
 site_message = {"emptyMessage" : "Aucun site à afficher ", "totalMessage" : "sites(s) au total"}

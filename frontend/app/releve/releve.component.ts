@@ -43,8 +43,7 @@ export class ReleveComponent implements OnInit {
     public edit_btn: string = 'Editer';
     public updateIsAllowed: boolean = false;
     public addIsAllowed: boolean = false;
-    plots_status: boolean[] = [];
-    public formPoltStaus: boolean = true;
+
     constructor(
         private activatedRoute: ActivatedRoute,
         public router: Router,
@@ -86,11 +85,12 @@ export class ReleveComponent implements OnInit {
                             else {
                                 this.userService.check_user_cruved_visit('C', this.visit).subscribe(ucruved => {
                                     this.addIsAllowed = ucruved;
+                                    this.loadForm = true;
                                 })
                                 this.disabledForm = false;
                                 this.visit = this._api.getDefaultVisit();
                                 this.submit_label = 'Enregistrer la visite';
-                                this.loadForm = true;
+
                             }
                         }
                     )
@@ -118,11 +118,12 @@ export class ReleveComponent implements OnInit {
                     else {
                         this.userService.check_user_cruved_visit('C', this.visit).subscribe(ucruved => {
                             this.addIsAllowed = ucruved;
+                            this.loadForm = true;
                         })
                         this.disabledForm = false;
                         this.visit = this._api.getDefaultVisit();
                         this.submit_label = 'Enregistrer la visite';
-                        this.loadForm = true;
+
                     }
                 },
                     (error) => {
@@ -131,7 +132,7 @@ export class ReleveComponent implements OnInit {
         }
 
     }
-
+    
     ngAfterViewChecked() {
         if (this.loadForm !== false && this.checked == 0) {
             this.checked++;
@@ -180,21 +181,27 @@ export class ReleveComponent implements OnInit {
     getPlotReleve(plotReleve) {
         this.currentSite.properties.cor_plots.map(
             (plot) => {
-                if (plot.id_plot == plotReleve[0].id_plot)
+                if (plot.id_plot == plotReleve[0].id_plot) {
+                    plot.status = plotReleve[0].status;
                     if (plotReleve[1] == true) {
                         plot.isModifided = plotReleve[1];
                         plot.isEmpty = false;
                     }
+                }
             }
         );
-        this.plots_status.push(plotReleve[2]);
-        this.formPoltStaus = !this.plots_status.includes(false);
+
         let index = _.findIndex(this.plots, { id_plot: plotReleve[0].id_plot });
         if (index >= 0) {
             this.plots.splice(index, 1, plotReleve[0])
         }
         else
             this.plots.push(plotReleve[0])
+
+        if (_.find(this.plots, (plot) => { return plot.status == false; }))
+            this.visitForm.controls['plots'].setErrors({ 'incorrect': true })
+        else
+            this.visitForm.controls['plots'].setErrors(null)
     }
 
     backToVisites() {
@@ -225,7 +232,9 @@ export class ReleveComponent implements OnInit {
             visit_date_min: [null, Validators.required],
             observers: [null, Validators.required],
             perturbations: new Array(),
+            plots: null
         });
+        this.visitForm.controls['plots'].statusChanges.subscribe((status) => { })
     }
 
     patchForm() {
@@ -238,7 +247,7 @@ export class ReleveComponent implements OnInit {
     }
 
     onSubmitVisit() {
-        if (this.visitForm.valid && this.formPoltStaus) {
+        if (this.visitForm.valid) {
             this.visitForm.value["observers"] = this.visitForm.value["observers"].map(
                 obs => { return obs.id_role }
             );
@@ -252,8 +261,11 @@ export class ReleveComponent implements OnInit {
                     }
                 );
             this.visitForm.value["visit_date_min"] = this.dateParser.format(this.visitForm.value["visit_date_min"]);
-            this.visitForm.value["plots"] = this.plots;
             this.visitForm.value["id_base_site"] = this.id_base_site;
+            this.plots.map((plot) => {
+                delete plot.status;
+            });
+            this.visitForm.value["plots"] = this.plots;
             if (this.isNew)
                 this.postVisit()
             else
@@ -311,7 +323,6 @@ export class ReleveComponent implements OnInit {
             this.edit_btn = "Annuler";
         }
         else {
-            this.formPoltStaus = true;
             this.visitForm.reset();
             this.plots = _.clone(this.visit.cor_releve_plot);
             this.currentSite.properties.cor_plots.map(
@@ -334,6 +345,8 @@ export class ReleveComponent implements OnInit {
             delete element.id_nomenclature
         });
     }
-
+    resizeCard() {
+        return (this.updateIsAllowed || this.addIsAllowed);
+    }
 
 }

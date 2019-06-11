@@ -104,6 +104,7 @@ export interface Plot {
   code_plot?: string,
   id_plot?: number,
   plot_data?: PlotData,
+  status?: boolean
 }
 
 export interface PlotData {
