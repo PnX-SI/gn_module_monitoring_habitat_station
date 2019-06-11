@@ -89,8 +89,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
                 this._fb.group({
                     id_cor_releve_plot_taxon: [null],
                     id_cor_hab_taxon: [taxon.id_cor_hab_taxon],
-                    //cover_pourcentage: ['', Validators.compose([Validators.min(0), Validators.max(100)])],
-                    cover_pourcentage: [null],
+                    cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
                     nom_complet: [taxon.nom_complet]
                 })
             );
@@ -103,8 +102,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
                 this._fb.group({
                     id_nomenclature_strate: [strate.id_nomenclature_strate],
                     id_releve_plot_strat: [null],
-                    //cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
-                    cover_pourcentage: [null],
+                    cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
                     label_default: [strate.label_default]
                 })
             );
@@ -127,9 +125,9 @@ export class PlotReleveComponent implements OnInit, OnChanges {
             delete taxon.nom_complet
         });
         if (this.id_releve_plot)
-            this.plotReleve.emit([{ id_plot: this.id_plot, id_releve_plot: this.id_releve_plot, plot_data: this.plotForm.value }, this.isModifeded, this.plotForm.valid]);
+            this.plotReleve.emit([{ id_plot: this.id_plot, id_releve_plot: this.id_releve_plot, plot_data: this.plotForm.value, status: this.plotForm.valid }, this.isModifeded]);
         else
-            this.plotReleve.emit([{ id_plot: this.id_plot, plot_data: this.plotForm.value }, this.isModifeded, this.plotForm.valid]);
+            this.plotReleve.emit([{ id_plot: this.id_plot, plot_data: this.plotForm.value, status: this.plotForm.valid }, this.isModifeded]);
         this.isModifeded = false
     }
 
