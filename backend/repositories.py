@@ -2,6 +2,7 @@ from flask import Blueprint, request, session, current_app
 
 from sqlalchemy.sql.expression import func
 from pypnusershub.db.tools import InsufficientRightsError
+import re
 
 from geonature.utils.errors import GeonatureApiError
 from geonature.core.gn_monitoring.models import TBaseVisits
@@ -121,3 +122,86 @@ def clean_string(my_string):
         my_string = my_string.replace(c, "-")
 
     return my_string
+
+
+def striphtml(data):
+    p = re.compile(r'<.*?>')
+    return p.sub('', data)
+
+
+def get_base_column_name():
+    """
+    mapping column name / label column
+
+    "idbsite": "Identifiant site",
+    "transectlab": "Label transect",
+    "visitdate": "Date visite",
+    "idbvisit": "Identifiant visite",
+    "idreleve": Identifiant relevé",
+    "codeplot": "Code placette",
+    "plotpos": "Position placette",
+    "plotsize": "Taille placette mètres",
+    "observers": "Observateurs",
+    "organisme" : "Organisme",
+    "lbhab": "Habitat",
+    "geom": "Points de départ et arrivée",
+    "lbperturb": "Perturbation",
+    "crotte": "Présence de crottes"
+
+    """
+    return [
+            "Identifiant site",
+            "Label transect",
+            "Date visite",
+            "Identifiant visite",
+            "Identifiant relevé",
+            "Code placette",
+            "Position placette",
+            "Taille placette mètres",
+            "Observateurs",
+            "Organisme",
+            "Habitat",
+            "Points de départ et arrivée",
+            "Perturbation",
+            "Présence de crottes"
+        ]
+
+def get_pro_column_name():
+    """
+    mapping column name / label column
+    "cd_hab": "cdhab",
+    "covcdnom" : "covcdnom",
+    "covidstrate": "covidstrate"
+    """
+    return [
+        "cdhab",
+        "covcdnom",
+        "covidstrate",
+        "idperturb"
+        ]
+
+def get_mapping_columns():
+    return {
+        "idbsite": "Identifiant site",
+        "transectlab": "Label transect",
+        "visitdate": "Date visite",
+        "idbvisit": "Identifiant visite",
+        "idreleve": "Identifiant relevé",
+        "codeplot": "Code placette",
+        "plotpos": "Position placette",
+        "plotsize": "Taille placette mètres",
+        "observers": "Observateurs",
+        "organisme" : "Organisme",
+        "lbhab": "Habitat",
+        "geom_start": "geom_start",
+        "geom_end": "geom_end",
+        "lbperturb": "Perturbation",
+        "crotte": "Présence de crottes",
+        "cd_hab": "cdhab",
+        "geom": "Points de départ et arrivée",
+        "covstrate": "covstrate",
+        "covcdnom" : "covcdnom",
+        "covtaxons": "covtaxons",
+        "covidstrate": "covidstrate",
+        "idperturb": "idperturb"
+    }
