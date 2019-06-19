@@ -457,12 +457,12 @@ def post_transect(info_role):
         'id_nomenclature_type_site': blueprint.config['id_nomenclature_type_site'],
         'base_site_name': 'HAB-SHS-',
         'first_use_date': datetime.datetime.now(),
-        'geom' : func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
+        'geom': func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
     }
     site = TBaseSites(**site_data)
     DB.session.add(site)
     DB.session.commit()
-    data['id_base_site']= site.as_dict().get('id_base_site')
+    data['id_base_site'] = site.as_dict().get('id_base_site')
     transect = TTransect(**data)
     for plot in tab_plots:
         transect_plot = TPlot(**plot)
@@ -470,7 +470,7 @@ def post_transect(info_role):
     transect.as_dict(True)
     DB.session.add(transect)
     DB.session.commit()
-    
+
     return site.as_dict(recursif=True)
 
 
@@ -482,7 +482,11 @@ def patch_transect(id_transect, info_role):
     Mettre à jour un transect
     '''
     data = dict(request.get_json())
-    print('data', data)
+    site_data = {
+        'geom': func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
+    }
+    q = DB.session.query(TBaseSites).update(site_data, synchronize_session='fetch')
+    #DB.session.commit()
     tab_plots = []
     if 'cor_plots' in data:
         tab_plots = data.pop('cor_plots')
@@ -506,7 +510,8 @@ def returnUserCruved(info_role):
         id_role=info_role.id_role,
         module_code=blueprint.config['MODULE_CODE']
     )
-    return  user_cruved
+    return user_cruved
+
 
 @blueprint.route('/export_visit', methods=['GET'])
 @permissions.check_cruved_scope('E', True)
@@ -582,7 +587,7 @@ def export_visit(info_role=None):
             visit = d.as_dict()
             # Get list hab/taxon
             cd_hab = visit['cd_hab']
-            if flag_cdhab !=  cd_hab:
+            if flag_cdhab != cd_hab:
                 cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
                 flag_cdhab = cd_hab
 
@@ -596,7 +601,7 @@ def export_visit(info_role=None):
                 for taxon, cover in visit['covtaxons'].items():
                     # Use with shape file ?
                     #taxon = ''.join(filter(str.isalnum, taxon))
-                    #visit[taxon[0:8]] = cover #slice str
+                    # visit[taxon[0:8]] = cover #slice str
                     visit[taxon] = cover
             if 'covtaxons' in visit:
                 visit.pop('covtaxons')
@@ -606,7 +611,9 @@ def export_visit(info_role=None):
 
             tab_visit.append(visit)
 
-        tab_header = export_columns + [clean_string(x) for x in strates_list] + [clean_string(x) for x in cor_hab_taxon]
+        tab_header = export_columns + \
+            [clean_string(x) for x in strates_list] + [clean_string(x)
+                                                       for x in cor_hab_taxon]
 
         return to_csv_resp(
             file_name,
