@@ -576,8 +576,10 @@ def export_visit(info_role=None):
 
         # remove geom Type
         geom_wkt = to_shape(d.geom)
-        geom_arrray = array(geom_wkt)
-        visit['geom'] = str(geom_arrray[0]) + " / " + str(geom_arrray[1])
+        geom_array = array(geom_wkt)
+        visit['geom'] = d.geom
+        if geom_wkt.type == 'LINESTRING':
+            visit['geom'] = str(geom_array[0]) + " / " + str(geom_array[1])
         if export_format == 'geojson':
             visit['geom_wkt'] = geom_wkt
 
@@ -601,8 +603,7 @@ def export_visit(info_role=None):
         if 'covtaxons' in visit:
             visit.pop('covtaxons')
 
-
-    tab_visit.append(visit)
+        tab_visit.append(visit)
 
 
     if export_format == 'geojson':
