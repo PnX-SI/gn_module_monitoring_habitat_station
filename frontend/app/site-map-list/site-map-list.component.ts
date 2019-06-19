@@ -5,6 +5,7 @@ import { ToastrService } from "ngx-toastr";
 import { FormGroup, FormBuilder } from "@angular/forms";
 import { Page } from "../shared/page";
 import * as L from "leaflet";
+  import "Leaflet.Deflate";
 
 import { MapService } from "@geonature_common/map/map.service";
 import { MapListService } from "@geonature_common/map-list/map-list.service";
@@ -74,7 +75,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public page = new Page();
   minDate: any;
   maxDate: any;
-
+  
 
 
   constructor(
@@ -103,7 +104,16 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+
+   var iconMarker = L.icon({
+      iconSize: [25, 41],
+      iconAnchor: [13, 41],
+      iconUrl: './external_assets/suivi_hab_sta/marker-icon.png',
+      shadowUrl: './external_assets/suivi_hab_sta/marker-shadow.png'
+    })
     this._map = this.mapService.getMap();
+    this._deflate_features = L.deflate({minSize: 10, markerOptions: {icon: iconMarker}});
+    this._deflate_features.addTo(this._map);
     this.addCustomControl();
   }
 
@@ -196,6 +206,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.onMapClick(feature.id);
       }
     });
+    layer.addTo(this._deflate_features);
   }
 
   onMapClick(id): void {
