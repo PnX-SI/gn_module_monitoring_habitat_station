@@ -8,6 +8,7 @@ from sqlalchemy import and_, distinct, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
 from numpy import array
+from shapely.geometry import *
 
 from pypnusershub.db.tools import InsufficientRightsError
 from pypnnomenclature.models import TNomenclatures
@@ -574,14 +575,17 @@ def export_visit(info_role=None):
             flag_cdhab = cd_hab
 
         # remove geom Type
-        geom_wkt = array(to_shape(d.geom))
-        visit['geom'] = str(geom_wkt[0]) + " / " + str(geom_wkt[1])
+        geom_wkt = to_shape(d.geom)
+        geom_arrray = array(geom_wkt)
+        visit['geom'] = str(geom_arrray[0]) + " / " + str(geom_arrray[1])
+        if export_format == 'geojson':
+            visit['geom_wkt'] = geom_wkt
 
         # remove html tag
         visit['lbhab'] = striphtml( visit['lbhab'])
 
         # Translate label column
-        visit = dict((mapping_columns[key], value) for (key, value) in visit.items())
+        visit = dict((mapping_columns[key], value) for (key, value) in visit.items() if key in mapping_columns)
 
         # pivot strate
         if visit['covstrate']:
@@ -597,20 +601,18 @@ def export_visit(info_role=None):
         if 'covtaxons' in visit:
             visit.pop('covtaxons')
 
-        # TODO: use tab_visit with shapefile ?? buggy
-        if export_format == 'shapefile':
-            # clean data key
-            visit = dict((''.join(filter(str.isalnum, key[0:9])), value) for (key, value) in visit.items())
-
 
     tab_visit.append(visit)
 
 
     if export_format == 'geojson':
 
-        for d in data:
-            feature = d.as_geofeature('geom', 'idbsite', False)
+        for d in tab_visit:
+            feature = mapping(d['geom_wkt'])
+            d.pop('geom_wkt', None)
+            properties = d
             features.append(feature)
+            features.append(properties)
         result = FeatureCollection(features)
 
         return to_json_resp(

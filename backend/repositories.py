@@ -199,6 +199,7 @@ def get_mapping_columns():
         "crotte": "Présence de crottes",
         "cd_hab": "cdhab",
         "geom": "Points de départ et arrivée",
+        "geom_wkt": "geom_wkt",
         "covstrate": "covstrate",
         "covcdnom" : "covcdnom",
         "covtaxons": "covtaxons",
