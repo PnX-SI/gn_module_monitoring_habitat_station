@@ -577,11 +577,13 @@ def export_visit(info_role):
         # remove geom Type
         geom_wkt = to_shape(d.geom)
         geom_array = array(geom_wkt)
-        visit['geom'] = d.geom
-        if geom_wkt.type == 'LINESTRING':
-            visit['geom'] = str(geom_array[0]) + " / " + str(geom_array[1])
         if export_format == 'geojson':
             visit['geom_wkt'] = geom_wkt
+        elif export_format == 'csv' or export_format == 'shapefile':
+            visit['geom'] = d.geom
+            if geom_wkt.type.lower() == 'linestring':
+                visit['geom'] = str(geom_array[0]) + " / " + str(geom_array[1])
+
 
         # remove html tag
         visit['lbhab'] = striphtml( visit['lbhab'])
