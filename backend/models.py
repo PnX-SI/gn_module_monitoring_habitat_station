@@ -300,6 +300,4 @@ class ExportVisits(DB.Model):
     covstrate = DB.Column(DB.Unicode)
     covtaxons = DB.Column(DB.Unicode)
     covcdnom = DB.Column(DB.Unicode)
-    covidstra = DB.Column(DB.Unicode)
-    idperturb = DB.Column(DB.Unicode)
 

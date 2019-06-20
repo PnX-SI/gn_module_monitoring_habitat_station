@@ -170,14 +170,11 @@ def get_pro_column_name():
     """
     mapping column name / label column
     "cd_hab": "cdhab",
-    "covcdnom" : "covcdnom",
-    "covidstra": "covidstra"
+    "covcdnom" : "covcdnom"
     """
     return [
         "cdhab",
-        "covcdnom",
-        "covidstra",
-        "idperturb"
+        "covcdnom"
         ]
 
 def get_mapping_columns():
@@ -202,7 +199,5 @@ def get_mapping_columns():
         "geom_wkt": "geom_wkt",
         "covstrate": "covstrate",
         "covcdnom" : "covcdnom",
-        "covtaxons": "covtaxons",
-        "covidstra": "covidstra",
-        "idperturb": "idperturb"
+        "covtaxons": "covtaxons"
     }
