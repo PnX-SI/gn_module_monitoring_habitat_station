@@ -8,6 +8,7 @@ from sqlalchemy import and_, distinct, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
 from numpy import array
+from shapely.geometry import *
 
 from pypnusershub.db.tools import InsufficientRightsError
 from pypnnomenclature.models import TNomenclatures
@@ -458,12 +459,12 @@ def post_transect(info_role):
         'id_nomenclature_type_site': blueprint.config['id_nomenclature_type_site'],
         'base_site_name': 'HAB-SHS-',
         'first_use_date': datetime.datetime.now(),
-        'geom' : func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
+        'geom': func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
     }
     site = TBaseSites(**site_data)
     DB.session.add(site)
     DB.session.commit()
-    data['id_base_site']= site.as_dict().get('id_base_site')
+    data['id_base_site'] = site.as_dict().get('id_base_site')
     transect = TTransect(**data)
     for plot in tab_plots:
         transect_plot = TPlot(**plot)
@@ -471,7 +472,7 @@ def post_transect(info_role):
     transect.as_dict(True)
     DB.session.add(transect)
     DB.session.commit()
-    
+
     return site.as_dict(recursif=True)
 
 
@@ -483,7 +484,11 @@ def patch_transect(id_transect, info_role):
     Mettre à jour un transect
     '''
     data = dict(request.get_json())
-    print('data', data)
+    site_data = {
+        'geom': func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
+    }
+    q = DB.session.query(TBaseSites).update(site_data, synchronize_session='fetch')
+    #DB.session.commit()
     tab_plots = []
     if 'cor_plots' in data:
         tab_plots = data.pop('cor_plots')
@@ -507,11 +512,12 @@ def returnUserCruved(info_role):
         id_role=info_role.id_role,
         module_code=blueprint.config['MODULE_CODE']
     )
-    return  user_cruved
+    return user_cruved
+
 
 @blueprint.route('/export_visit', methods=['GET'])
 @permissions.check_cruved_scope('E', True)
-def export_visit(info_role=None):
+def export_visit(info_role):
     '''
     Télécharge les données d'une visite (ou des visites )
     '''
@@ -574,14 +580,21 @@ def export_visit(info_role=None):
             flag_cdhab = cd_hab
 
         # remove geom Type
-        geom_wkt = array(to_shape(d.geom))
-        visit['geom'] = str(geom_wkt[0]) + " / " + str(geom_wkt[1])
+        geom_wkt = to_shape(d.geom)
+        geom_array = array(geom_wkt)
+        if export_format == 'geojson':
+            visit['geom_wkt'] = geom_wkt
+        elif export_format == 'csv' or export_format == 'shapefile':
+            visit['geom'] = d.geom
+            if geom_wkt.type.lower() == 'linestring':
+                visit['geom'] = str(geom_array[0]) + " / " + str(geom_array[1])
+
 
         # remove html tag
         visit['lbhab'] = striphtml( visit['lbhab'])
 
         # Translate label column
-        visit = dict((mapping_columns[key], value) for (key, value) in visit.items())
+        visit = dict((mapping_columns[key], value) for (key, value) in visit.items() if key in mapping_columns)
 
         # pivot strate
         if visit['covstrate']:
@@ -597,20 +610,17 @@ def export_visit(info_role=None):
         if 'covtaxons' in visit:
             visit.pop('covtaxons')
 
-        # TODO: use tab_visit with shapefile ?? buggy
-        if export_format == 'shapefile':
-            # clean data key
-            visit = dict((''.join(filter(str.isalnum, key[0:9])), value) for (key, value) in visit.items())
-
-
-    tab_visit.append(visit)
+        tab_visit.append(visit)
 
 
     if export_format == 'geojson':
 
-        for d in data:
-            feature = d.as_geofeature('geom', 'idbsite', False)
+        for d in tab_visit:
+            feature = mapping(d['geom_wkt'])
+            d.pop('geom_wkt', None)
+            properties = d
             features.append(feature)
+            features.append(properties)
         result = FeatureCollection(features)
 
         return to_json_resp(

@@ -163,8 +163,7 @@ observers AS(
 perturbations AS(
     SELECT
         v.id_base_visit,
-        string_agg(n.label_default, ',') AS label_perturbation,
-        string_agg(p.id_nomenclature_perturb::text, ',') AS id_perturbation
+        string_agg(n.label_default, ',') AS label_perturbation
     FROM gn_monitoring.t_base_visits v
     JOIN pr_monitoring_habitat_station.cor_transect_visit_perturbation p ON v.id_base_visit = p.id_base_visit
     JOIN ref_nomenclatures.t_nomenclatures n ON p.id_nomenclature_perturb = n.id_nomenclature
@@ -193,8 +192,7 @@ strates AS (
     SELECT id_base_visit,
 	    id_releve_plot,
 	    id_plot,
-        json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate,
-        json_object_agg( id_nomenclature_strate, cover_pourcentage ORDER BY id_nomenclature_strate)  cover_idstrate
+        json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate
    FROM (
      SELECT v.id_base_visit, n.label_default, t.id_nomenclature_strate, t.cover_pourcentage, r.id_releve_plot, r.id_plot
         FROM gn_monitoring.t_base_visits v
@@ -216,13 +214,11 @@ SELECT sites.id_base_site AS idbsite,
 	releve.excretes_presence AS crotte,
 	plot.code_plot AS codeplot,
 	per.label_perturbation AS lbperturb,
-    per.id_perturbation AS idperturb,
 	obs.observateurs AS observers,
 	obs.organisme,
 	tax.cover_taxon AS covtaxons,
     tax.cover_cdnom AS covcdnom,
 	strate.cover_strate AS covstrate,
-    strate.cover_idstrate AS covidstra,
 	habref.lb_hab_fr AS lbhab,
 	habref.cd_hab,
     transect.transect_label AS transectlb,
