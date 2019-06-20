@@ -237,7 +237,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     if (this.isNew)
       this._api.postTransect(transect).subscribe(
         (data) => {
-          this.toastr.success("Le trasect a été ajouté avec succès", "", { positionClass: "toast-top-right" });
+          this.toastr.success("Le transect a été ajouté avec succès", "", { positionClass: "toast-top-right" });
           this.backToSites()
         },
         (error) => {
@@ -248,7 +248,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     else
       this._api.updateTransect(transect).subscribe(
         (data) => {
-          this.toastr.success("Le trasect a été modifié avec succès", "", { positionClass: "toast-top-right" });
+          this.toastr.success("Le transect a été modifié avec succès", "", { positionClass: "toast-top-right" });
           this.backToSites()
         },
         (error) => {

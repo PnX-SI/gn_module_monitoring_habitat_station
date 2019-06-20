@@ -163,7 +163,8 @@ observers AS(
 perturbations AS(
     SELECT
         v.id_base_visit,
-        string_agg(n.label_default, ',') AS label_perturbation
+        string_agg(n.label_default, ',') AS label_perturbation,
+        string_agg(p.id_nomenclature_perturb::text, ',') AS id_perturbation
     FROM gn_monitoring.t_base_visits v
     JOIN pr_monitoring_habitat_station.cor_transect_visit_perturbation p ON v.id_base_visit = p.id_base_visit
     JOIN ref_nomenclatures.t_nomenclatures n ON p.id_nomenclature_perturb = n.id_nomenclature
@@ -172,17 +173,18 @@ perturbations AS(
 taxons AS (
     SELECT id_base_visit,
         id_releve_plot,
-         id_plot,
-        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) cover_taxon
+        id_plot,
+        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) cover_taxon,
+        json_object_agg( cd_nom, cover_pourcentage ORDER BY cd_nom) cover_cdnom
     FROM (
-        SELECT v.id_base_visit, tr.lb_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
+        SELECT v.id_base_visit, tr.lb_nom, tr.cd_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
             FROM gn_monitoring.t_base_visits v
         JOIN pr_monitoring_habitat_station.t_releve_plots r ON r.id_base_visit = v.id_base_visit
         JOIN pr_monitoring_habitat_station.cor_releve_plot_taxons t ON t.id_releve_plot = r.id_releve_plot
             JOIN pr_monitoring_habitat_station.cor_hab_taxon cht ON cht.id_cor_hab_taxon = t.id_cor_hab_taxon
         JOIN taxonomie.taxref tr ON tr.cd_nom = cht.cd_nom
             WHERE t.cover_pourcentage IS NOT NULL
-            GROUP BY v.id_base_visit, tr.lb_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
+            GROUP BY v.id_base_visit, tr.lb_nom, tr.cd_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
     ) s
     GROUP BY id_base_visit, id_plot, id_releve_plot
     ORDER BY id_base_visit
@@ -191,15 +193,16 @@ strates AS (
     SELECT id_base_visit,
 	    id_releve_plot,
 	    id_plot,
-       json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate
+        json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate,
+        json_object_agg( id_nomenclature_strate, cover_pourcentage ORDER BY id_nomenclature_strate)  cover_idstrate
    FROM (
-     SELECT v.id_base_visit, n.label_default, t.cover_pourcentage, r.id_releve_plot, r.id_plot
+     SELECT v.id_base_visit, n.label_default, t.id_nomenclature_strate, t.cover_pourcentage, r.id_releve_plot, r.id_plot
         FROM gn_monitoring.t_base_visits v
 	JOIN pr_monitoring_habitat_station.t_releve_plots r ON r.id_base_visit = v.id_base_visit
         JOIN pr_monitoring_habitat_station.cor_releve_plot_strats t ON t.id_releve_plot = r.id_releve_plot
         JOIN ref_nomenclatures.t_nomenclatures n ON n.id_nomenclature = t.id_nomenclature_strate
         WHERE t.cover_pourcentage IS NOT NULL
-        GROUP BY v.id_base_visit,n.label_default, t.cover_pourcentage, r.id_releve_plot
+        GROUP BY v.id_base_visit,n.label_default, t.id_nomenclature_strate,t.cover_pourcentage, r.id_releve_plot
    ) s
   GROUP BY id_base_visit, id_releve_plot, id_plot
   ORDER BY id_base_visit
@@ -213,15 +216,20 @@ SELECT sites.id_base_site AS idbsite,
 	releve.excretes_presence AS crotte,
 	plot.code_plot AS codeplot,
 	per.label_perturbation AS lbperturb,
+    per.id_perturbation AS idperturb,
 	obs.observateurs AS observers,
 	obs.organisme,
 	tax.cover_taxon AS covtaxons,
+    tax.cover_cdnom AS covcdnom,
 	strate.cover_strate AS covstrate,
+    strate.cover_idstrate AS covidstra,
 	habref.lb_hab_fr AS lbhab,
 	habref.cd_hab,
-    transect.transect_label AS transectlab,
+    transect.transect_label AS transectlb,
     transect.plot_size AS plotsize,
     nomenclature.label_default AS plotpos,
+    transect.geom_start,
+    transect.geom_end,
     sites.geom
 
 FROM gn_monitoring.t_base_sites sites

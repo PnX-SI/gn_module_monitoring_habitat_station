@@ -278,7 +278,7 @@ class ExportVisits(DB.Model):
     }
 
     idbsite = DB.Column(DB.Integer)
-    transectlab = DB.Column(DB.Unicode)
+    transectlb = DB.Column(DB.Unicode)
     visitdate = DB.Column(DB.DateTime)
     idbvisit= DB.Column(DB.Integer)
     idreleve= DB.Column(
@@ -291,10 +291,15 @@ class ExportVisits(DB.Model):
     observers = DB.Column(DB.Unicode)
     organisme = DB.Column(DB.Unicode)
     lbhab = DB.Column(DB.Unicode)
-    cd_hab = DB.Column(DB.Integer)
-    geom = DB.Column(Geometry('GEOMETRY', 2154))
+    geom_start = DB.Column(Geometry('GEOMETRY', 4326))
+    geom_end = DB.Column(Geometry('GEOMETRY', 4326))
     lbperturb = DB.Column(DB.Unicode)
     crotte = DB.Column(DB.Boolean)
+    cd_hab = DB.Column(DB.Integer)
+    geom = DB.Column(Geometry('GEOMETRY', 2154))
     covstrate = DB.Column(DB.Unicode)
     covtaxons = DB.Column(DB.Unicode)
+    covcdnom = DB.Column(DB.Unicode)
+    covidstra = DB.Column(DB.Unicode)
+    idperturb = DB.Column(DB.Unicode)
 

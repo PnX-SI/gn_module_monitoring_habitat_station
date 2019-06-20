@@ -7,6 +7,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy import and_, distinct, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
+from numpy import array
 
 from pypnusershub.db.tools import InsufficientRightsError
 from pypnnomenclature.models import TNomenclatures
@@ -22,7 +23,7 @@ from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 
 
-from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot, clean_string
+from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot, clean_string, striphtml, get_base_column_name, get_pro_column_name, get_mapping_columns
 
 from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
 
@@ -554,6 +555,62 @@ def export_visit(info_role=None):
     data = q.all()
     features = []
 
+    # formate data
+    cor_hab_taxon = []
+    flag_cdhab = 0
+
+    strates = []
+    tab_header = []
+    column_name = get_base_column_name()
+    column_name_pro = get_pro_column_name()
+    mapping_columns = get_mapping_columns()
+
+    strates_list = get_stratelist_plot()
+
+    tab_visit = []
+
+    for d in data:
+        visit = d.as_dict()
+
+        # Get list hab/taxon
+        cd_hab = visit['cd_hab']
+        if flag_cdhab !=  cd_hab:
+            cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
+            flag_cdhab = cd_hab
+
+        # remove geom Type
+        geom_wkt = array(to_shape(d.geom))
+        visit['geom'] = str(geom_wkt[0]) + " / " + str(geom_wkt[1])
+
+        # remove html tag
+        visit['lbhab'] = striphtml( visit['lbhab'])
+
+        # Translate label column
+        visit = dict((mapping_columns[key], value) for (key, value) in visit.items())
+
+        # pivot strate
+        if visit['covstrate']:
+            for strate, cover in visit['covstrate'].items():
+                visit[strate] = " % " + str(cover)
+        if 'covstrate' in visit:
+            visit.pop('covstrate')
+
+        # pivot taxons
+        if visit['covtaxons']:
+            for taxon, cover in visit['covtaxons'].items():
+                visit[taxon] = " % " + str(cover)
+        if 'covtaxons' in visit:
+            visit.pop('covtaxons')
+
+        # TODO: use tab_visit with shapefile ?? buggy
+        if export_format == 'shapefile':
+            # clean data key
+            visit = dict((''.join(filter(str.isalnum, key[0:9])), value) for (key, value) in visit.items())
+
+
+    tab_visit.append(visit)
+
+
     if export_format == 'geojson':
 
         for d in data:
@@ -570,57 +627,13 @@ def export_visit(info_role=None):
 
     elif export_format == 'csv':
 
-        cor_hab_taxon = []
-        flag_cdhab = 0
-
-        strates = []
-        tab_header = []
-        export_columns = ExportVisits.__table__.columns._data.keys()
-        export_columns.remove('covstrate')
-        export_columns.remove('covtaxons')
-
-        strates_list = get_stratelist_plot()
-
-        tab_visit = []
-
-        for d in data:
-            visit = d.as_dict()
-            # Get list hab/taxon
-            cd_hab = visit['cd_hab']
-            if flag_cdhab != cd_hab:
-                cor_hab_taxon = get_taxonlist_by_cdhab(cd_hab)
-                flag_cdhab = cd_hab
-
-            if visit['covstrate']:
-                for strate, cover in visit['covstrate'].items():
-                    visit[strate] = cover
-            if 'covstrate' in visit:
-                visit.pop('covstrate')
-
-            if visit['covtaxons']:
-                for taxon, cover in visit['covtaxons'].items():
-                    # Use with shape file ?
-                    #taxon = ''.join(filter(str.isalnum, taxon))
-                    # visit[taxon[0:8]] = cover #slice str
-                    visit[taxon] = cover
-            if 'covtaxons' in visit:
-                visit.pop('covtaxons')
-
-            geom_wkt = to_shape(d.geom)
-            visit['geom'] = geom_wkt
-
-            tab_visit.append(visit)
-
-        tab_header = export_columns + \
-            [clean_string(x) for x in strates_list] + [clean_string(x)
-                                                       for x in cor_hab_taxon]
+        tab_header = column_name + [clean_string(x) for x in strates_list] + [clean_string(x) for x in cor_hab_taxon] + column_name_pro
 
         return to_csv_resp(
             file_name,
             tab_visit,
             tab_header,
             ';'
-
         )
 
     else:
