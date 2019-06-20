@@ -512,7 +512,7 @@ def returnUserCruved(info_role):
 
 @blueprint.route('/export_visit', methods=['GET'])
 @permissions.check_cruved_scope('E', True)
-def export_visit(info_role=None):
+def export_visit(info_role):
     '''
     Télécharge les données d'une visite (ou des visites )
     '''
