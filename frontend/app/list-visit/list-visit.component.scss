@@ -1,0 +1,112 @@
+.box-shadow {
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.list-shs {
+  max-height: 94vh;
+  overflow-y: auto;
+  padding-bottom: 5px;
+}
+
+.list-group-item {
+  background-color: #e9ecef;
+  color: #181818;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.wrapper {
+  margin-bottom: 18px;
+}
+
+.back-button {
+  text-align: left;
+}
+
+.box-shadow {
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+fieldset {
+  padding: 0.35em 0.625em 0.75em !important;
+  border: 1px solid silver !important;
+  margin: 0 2px;
+  border-radius: 3px;
+  // background-color: #f3f3f3;
+}
+
+legend {
+  width: auto;
+  font-size: inherit;
+  color: black !important;
+}
+
+.wrapper {
+  margin-bottom: 18px;
+}
+
+fieldset:disabled {
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.card-header {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-title {
+  margin-bottom: 0;
+}
+
+.transect-edit {
+  padding: 0 1.25rem;
+  .material-icons {
+    vertical-align: text-bottom;
+    font-size: 20px;
+  }
+}
+
+.box-shadow {
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.plot-item {
+  color: #495057;
+  padding-right: 20px;
+  i {
+    font-size: 14px;
+    color: #4084cc;
+    &.gps-icon {
+      font-size: 18px;
+      color: #4084cc;
+      vertical-align: text-bottom;
+    }
+  }
+}
+.location-icon {
+  font-size: 20px;
+  color: #4084cc;
+  vertical-align: text-bottom;
+}
+
+/deep/.datatable-row-group {
+  cursor: pointer;
+}
+
+/deep/ngb-modal-window {
+  display: flex !important;
+  justify-content: space-around;
+  flex-direction: column;
+}
+/deep/.modal-content {
+  min-width: 500px;
+}
+
+.modal-header {
+  background-color: #dce3e7;
+  padding: 10px 16px;
+}
+
+form.ng-invalid {
+  border: none !important;
+}

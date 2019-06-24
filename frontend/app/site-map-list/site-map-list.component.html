@@ -1,0 +1,101 @@
+<div id="cover-spin" *ngIf="!dataLoaded"></div>
+<div class="row row-0">
+    <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
+        <div class="card-header">
+            <h4 class="card-title">Liste des transects</h4>
+        </div>
+        <div class="card-body">
+            <fieldset>
+                <legend class="filters-legend">
+                    <h6><i class="fa fa-filter"></i> Filtres</h6>
+                </legend>
+                <form *ngIf="dataLoaded" class="wrapper wrapper-filter">
+                    <div class="row">
+                        <div class="searchSite col">
+                            <div class="form-row">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 ">
+                                    <small> {{ 'Releve.MinDate' | translate }} : </small>
+                                    <div class="input-group">
+                                        <input [formControl]="filterForm.controls.date_low" [maxDate]="maxDate"
+                                            class="form-control form-control-sm" ngbDatepicker #low="ngbDatepicker"
+                                            (click)="low.toggle(); $event.stopPropagation();"
+                                            (document:click)="closeFix($event, low)">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                (click)="low.toggle();$event.stopPropagation();"
+                                                (document:click)="closeFix($event, low)" type="button">
+                                                <i class="fa fa-calendar"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <small> {{ 'Releve.MaxDate' | translate }} : </small>
+                                    <div class="input-group">
+                                        <input [formControl]="filterForm.controls.date_up" [minDate]="minDate"
+                                            class="form-control form-control-sm" ngbDatepicker #up="ngbDatepicker"
+                                            (click)="up.toggle(); $event.stopPropagation();"
+                                            (document:click)="closeFix($event, up)">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                (click)="up.toggle();$event.stopPropagation();"
+                                                (document:click)="closeFix($event, up)" type="button">
+                                                <i class="fa fa-calendar"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="searchSite col">
+                            <small> Habitat : </small>
+                            <select class="form-control form-control-sm" name="selectHab"
+                                [formControl]="filterForm.controls.filterHab">
+                                <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
+                                <option *ngFor="let hab of tabHab" [ngValue]="hab.cd_hab" [innerHTML]="hab.nom_habitat">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-success pull-right " (click)="onFilter()">Filtrer</button>
+                    <button class="btn btn-sm btn-secodary pull-right mr-3"
+                        (click)="resetFilters()">Réinitialiser</button>
+                </form>
+            </fieldset>
+            <br>
+            <div class="wrapper wrapper-datatable">
+                <ngx-datatable #table class="material" [rows]="filteredData" maxWidth="90" [headerHeight]="50"
+                    [footerHeight]="50" [rowHeight]="'auto'" [columnMode]="'force'"
+                    [selected]="mapListService.selectedRow" [selectionType]="'single'" (select)="onRowSelect($event)"
+                    [rowClass]="mapListService.getRowClass"
+                    [externalPaging]="storeService.shsConfig.pagination_serverside" [count]="page.totalElements"
+                    [offset]="page.pageNumber" [limit]="page.size" (page)='setPage($event)'
+                    [messages]="storeService.shsConfig.site_message">
+                    <ngx-datatable-column *ngFor="let col of storeService.shsConfig.default_site_columns"
+                        [name]="col.name" [prop]="col.prop">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column maxWidth="90">
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                            <button type="button" class="btn btn-lg btn-outline-shadow btn-ghost"
+                                (click)="onInfo(row.id_base_site)" title="Visualiser/Editer">
+                                <i class="fa fa-info-circle"></i>
+                            </button>
+                        </ng-template>
+                    </ngx-datatable-column>
+                </ngx-datatable>
+            </div>
+        </div>
+        <div *ngIf="addIsAllowed" class="card-footer">
+                    <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewTransect()">
+                        <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+                        Ajouter un nouveau transect
+                    </button>
+            </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
+        <pnx-map height="94vh" [center]="center" [zoom]="zoom">
+            <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="sites">
+            </pnx-geojson>
+        </pnx-map>
+    </div>
+</div>
