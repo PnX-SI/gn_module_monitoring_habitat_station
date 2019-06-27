@@ -487,8 +487,8 @@ def patch_transect(id_transect, info_role):
     site_data = {
         'geom': func.ST_MakeLine(data.get('geom_start'), data.get('geom_end'))
     }
-    q = DB.session.query(TBaseSites).update(site_data, synchronize_session='fetch')
-    #DB.session.commit()
+    q = DB.session.query(TBaseSites).filter_by(id_base_site=data.get('id_base_site')).update(site_data, synchronize_session='fetch')
+
     tab_plots = []
     if 'cor_plots' in data:
         tab_plots = data.pop('cor_plots')
