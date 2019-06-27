@@ -12,6 +12,8 @@ import { FormService } from "../services/form.service";
 import { DataFormService } from "@geonature_common/form/data-form.service";
 import { UserService } from "../services/user.service";
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import * as _ from 'lodash';
+
 @Component({
   selector: "pnx-list-visit",
   templateUrl: "list-visit.component.html",
