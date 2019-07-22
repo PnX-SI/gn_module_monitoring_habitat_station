@@ -647,7 +647,7 @@ def export_visit(info_role):
 
         FionaShapeService.create_shapes_struct(
             db_cols=ExportVisits.__mapper__.c,
-            srid=2154,
+            srid=4326,
             dir_path=dir_path,
             file_name=file_name,
         )
