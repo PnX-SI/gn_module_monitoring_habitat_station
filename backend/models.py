@@ -251,7 +251,7 @@ class TVisitSHS(TBaseVisits):
 
     cor_visit_perturbation = DB.relationship(
         'CorTransectVisitPerturbation', backref='t_base_visits')
-    
+
     cor_releve_plot = DB.relationship(
         "TRelevePlot", backref='t_base_visits')
 
@@ -296,8 +296,9 @@ class ExportVisits(DB.Model):
     lbperturb = DB.Column(DB.Unicode)
     crotte = DB.Column(DB.Boolean)
     cd_hab = DB.Column(DB.Integer)
-    geom = DB.Column(Geometry('GEOMETRY', 2154))
+    geom = DB.Column(Geometry('GEOMETRY', 4326))
     covstrate = DB.Column(DB.Unicode)
     covtaxons = DB.Column(DB.Unicode)
     covcdnom = DB.Column(DB.Unicode)
+    covcodestrate = DB.Column(DB.Unicode)
 
