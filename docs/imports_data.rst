@@ -41,14 +41,16 @@ Intégrer la nomenclature  de position des placettes
 ---------------------------------------------------
 * ATTENTION AUX DOUBLONS : Vérifier que la nomenclature de type ``POSITION_PLACETTE`` n'est pas déjà intégré
 
-INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr, source)
-    VALUES ('POSITION_PLACETTE', 'Positions de placette sur un transect', 'Nomenclature de position de placette sur un transect.', 'Position de placette sur un transect', 'Position de placette sur un transect.', 'CBNA');
+.. code:: sql
 
-INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr) VALUES
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pha', 'Position en haut', 'Position en haut', 'Positions de placette sur un transect: Position en haut', 'Position en haut', 'Positions de placette sur un transect: Position en haut'),
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pba', 'Position en bas', 'Position en bas', 'Positions de placette sur un transect: Position en bas', 'Position en bas', 'Positions de placette sur un transect: Position en bas'),
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pdr', 'Position à droite', 'Position à droite', 'Positions de placette sur un transect: Position à droite', 'Position à droite', 'Positions de placette sur un transect: Position à droite'),
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pga', 'Position à gauche', 'Position à gauche', 'Positions de placette sur un transect: Position à gauche', 'Position à gauche', 'Positions de placette sur un transect: Position à gauche');
+    INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr, source)
+        VALUES ('POSITION_PLACETTE', 'Positions de placette sur un transect', 'Nomenclature de position de placette sur un transect.', 'Position de placette sur un transect', 'Position de placette sur un transect.', 'CBNA');
+
+    INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr) VALUES
+    (ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pha', 'Position en haut', 'Position en haut', 'Positions de placette sur un transect: Position en haut', 'Position en haut', 'Positions de placette sur un transect: Position en haut'),
+    (ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pba', 'Position en bas', 'Position en bas', 'Positions de placette sur un transect: Position en bas', 'Position en bas', 'Positions de placette sur un transect: Position en bas'),
+    (ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pdr', 'Position à droite', 'Position à droite', 'Positions de placette sur un transect: Position à droite', 'Position à droite', 'Positions de placette sur un transect: Position à droite'),
+    (ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pga', 'Position à gauche', 'Position à gauche', 'Positions de placette sur un transect: Position à gauche', 'Position à gauche', 'Positions de placette sur un transect: Position à gauche');
 
 
 Intégrer les perturbations
@@ -69,9 +71,10 @@ Le template du CSV pour l'insertion des sites est celui généré par l'export d
 * Importer le CSV dans une table temporaire de la BDD avec QGIS (``pr_monitoring_habitat_station.visits_shs_tmp`` dans cet exemple)
 
 .. code:: sql
-INSERT INTO gn_monitoring.t_base_sites (id_nomenclature_type_site, base_site_name, base_site_description, base_site_code, first_use_date, geom )
-SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'HAB'), identifian, '', '', "date visit", geom
-    FROM pr_monitoring_habitat_station.visits_shs_tmp;
+
+    INSERT INTO gn_monitoring.t_base_sites (id_nomenclature_type_site, base_site_name, base_site_description, base_site_code, first_use_date, geom )
+    SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'HAB'), identifian, '', '', "date visit", geom
+        FROM pr_monitoring_habitat_station.visits_shs_tmp;
 
 
 Intégrer les transects
@@ -83,9 +86,9 @@ Le template du CSV pour l'insertion des transects est celui généré par l'expo
 
 .. code:: sql
 
-ALTER TABLE pr_monitoring_habitat_station.visits_shs_tmp
-    ALTER COLUMN geom TYPE geometry(LineString, 4326)
-    USING ST_GeometryN(geom, 1);
+    ALTER TABLE pr_monitoring_habitat_station.visits_shs_tmp
+        ALTER COLUMN geom TYPE geometry(LineString, 4326)
+        USING ST_GeometryN(geom, 1);
 
 
 * Insérer les transects :
@@ -169,18 +172,17 @@ Le template du CSV pour l'insertion des visites est celui généré par l'export
 
 * Remplissez la table des observations. Vérifiez que la colonne covcdnom et covstrate sontt bien au format JSON et que les clés des JSON sont entourées par des double quotes.
 
--- Transformer les colonnes covcdnom et covstrate en JSON
 
-    .. code:: sql
+.. code:: sql
 
+    -- Transformer les colonnes covcdnom et covstrate en JSON
     ALTER TABLE pr_monitoring_habitat_station.visits_shs_tmp ALTER COLUMN covcdnom TYPE json USING covcdnom::json;
     ALTER TABLE pr_monitoring_habitat_station.visits_shs_tmp ALTER COLUMN covstrate TYPE json USING covstrate::json;
 
 
--- relevés : pr_monitoring_habitat_station.t_releve_plots
+.. code:: sql
 
-    .. code:: sql
-
+    -- relevés : pr_monitoring_habitat_station.t_releve_plots
     INSERT INTO pr_monitoring_habitat_station.t_releve_plots (id_plot, id_base_visit, excretes_presence)
     SELECT p.id_plot, id_base_visit, vs."présence"
     FROM pr_monitoring_habitat_station.visits_shs_tmp vs
@@ -190,10 +192,10 @@ Le template du CSV pour l'insertion des visites est celui généré par l'export
     JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site;
 
 
--- taxons : pr_monitoring_habitat_station.cor_releve_plot_taxons
 
-    .. code:: sql
+.. code:: sql
 
+    -- taxons : pr_monitoring_habitat_station.cor_releve_plot_taxons
     INSERT INTO pr_monitoring_habitat_station.cor_releve_plot_taxons (id_releve_plot, id_cor_hab_taxon, cover_pourcentage)
     WITH mytaxon AS( SELECT (json_each(covcdnom::json)).key AS cdnom, (json_each_text(covcdnom::json)).value AS cover_pourcentage, "label tran" AS label_trans, "code place" AS code_plot,
         identifian AS name  FROM pr_monitoring_habitat_station.visits_shs_tmp )
@@ -205,10 +207,10 @@ Le template du CSV pour l'insertion des visites est celui généré par l'export
     JOIN pr_monitoring_habitat_station.cor_hab_taxon ht ON ht.cd_nom = m.cdnom::int;
 
 
--- strates : pr_monitoring_habitat_station.cor_releve_plot_strats
 
-    .. code:: sql
+.. code:: sql
 
+    -- strates : pr_monitoring_habitat_station.cor_releve_plot_strats
     INSERT INTO pr_monitoring_habitat_station.cor_releve_plot_strats (id_releve_plot, id_nomenclature_strate, cover_pourcentage)
     WITH mytaxon AS( SELECT (json_each_text(covcodestr::json)).key AS label_strate, (json_each_text(covcodestr::json)).value AS cover_pourcentage, "label tran" AS label_trans, "code place" AS code_plot,
             identifian AS name  FROM pr_monitoring_habitat_station.visits_shs_tmp )
@@ -224,10 +226,9 @@ Le template du CSV pour l'insertion des visites est celui généré par l'export
 
 
 
--- perturbations : pr_monitoring_habitat_station.cor_transect_visit_perturbation
+.. code:: sql
 
-    .. code:: sql
-
+    -- perturbations : pr_monitoring_habitat_station.cor_transect_visit_perturbation-- perturbations : pr_monitoring_habitat_station.cor_transect_visit_perturbation
     INSERT INTO pr_monitoring_habitat_station.cor_transect_visit_perturbation (id_base_visit, id_nomenclature_perturb)
     WITH mypertub AS(SELECT unnest(string_to_array(perturbati, ',')) AS label_perturbation,
         identifian, "nom du sit" AS name FROM pr_monitoring_habitat_territory.obs_maille_tmp)
