@@ -174,7 +174,9 @@ def get_pro_column_name():
     """
     return [
         "cdhab",
-        "covcdnom"
+        "covcdnom",
+        "geom_wkt",
+        "covcodestrate"
         ]
 
 def get_mapping_columns():
@@ -198,6 +200,7 @@ def get_mapping_columns():
         "geom": "Points de départ et arrivée",
         "geom_wkt": "geom_wkt",
         "covstrate": "covstrate",
+        "covcodestrate": "covcodestrate",
         "covcdnom" : "covcdnom",
         "covtaxons": "covtaxons"
     }
