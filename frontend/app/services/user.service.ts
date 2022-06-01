@@ -2,8 +2,8 @@ import { Injectable, Inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { AppConfig } from "@geonature_config/app.config";
 import { ModuleConfig } from "../module.config";
-import { Observable, Observer } from "rxjs/Observable";
-
+import { Observable } from "rxjs/Observable";
+import { Observer } from "rxjs/Observer";
 
 @Injectable()
 export class UserService {
@@ -23,7 +23,7 @@ export class UserService {
     if (Object.keys(this._cruved).length == 0)
       return this._http.get<any>(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/user/cruved`);
     else
-      return Observable.create((ucruved: Observer<string>) => ucruved.next(this._cruved));
+      return new Observable(ucruved => ucruved.next(this._cruved))
   }
   // id_digitaliser ?
   check_user_cruved_visit(action, visit?): Observable<any> {

@@ -71,6 +71,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public center;
   public zoom;
   private _map;
+  private _deflate_features;
   public filterForm: FormGroup;
   public page = new Page();
   minDate: any;
