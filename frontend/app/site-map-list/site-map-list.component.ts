@@ -50,6 +50,9 @@ export class CustomDatepickerI18n extends NgbDatepickerI18n {
 }
 @Injectable()
 export class NgbDateCustomParserFormatter extends NgbDateParserFormatter {
+  parse(value: string): NgbDateStruct {
+    throw new Error("Method not implemented.");
+  }
   format(date: NgbDateStruct): string {
     return date ? `${date.day}-${date.month}-${date.year}` : '';
   }

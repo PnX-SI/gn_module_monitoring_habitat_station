@@ -28,7 +28,7 @@ export class UserService {
   // id_digitaliser ?
   check_user_cruved_visit(action, visit?): Observable<any> {
     let isAllowed = false;
-    return Observable.create((observer: Observer<string>) => {
+    return new Observable(observer => {
       this.getUserCruved().subscribe(ucruved => {
         this._cruved = ucruved;
         let user_cruved_level = ucruved[action];
@@ -36,6 +36,8 @@ export class UserService {
           if (user_cruved_level == '1') {
             visit.observers.forEach(role => {
               if (role.id_role == this.currentUser.id_role) {
+                isAllowed = true;
+              } else if (visit.id_digitiser == this.currentUser.id_role) {
                 isAllowed = true;
               }
             })
@@ -45,29 +47,30 @@ export class UserService {
             visit.observers.forEach(role => {
               if (role.id_role == this.currentUser.id_role) {
                 isAllowed = true;
-              }
-              else if (visit.id_organisme == this.currentUser.id_organisme) {
+              } else if (visit.id_digitiser == this.currentUser.id_role) {
+                isAllowed = true;
+              } else if (visit.id_organisme == this.currentUser.id_organisme) {
                 isAllowed = true;
               }
             })
           }
         }
 
-        if (user_cruved_level == '3' || user_cruved_level == '2')
+        if (user_cruved_level == '3' || user_cruved_level == '2') {
           isAllowed = true;
+        }
 
         observer.next(isAllowed);
-
       }, (error) => {
         observer.error("error")
-        console.log("error userCruved: ", error)
+        console.log("Error userCruved: ", error)
       })
     })
   }
 
   check_isAdmin(action): Observable<any> {
     let isAllowed = false;
-    return Observable.create((observer: Observer<string>) => {
+    return new Observable(observer => {
       this.getUserCruved().subscribe(ucruved => {
         this._cruved = ucruved;
         let user_cruved_level = ucruved[action];
