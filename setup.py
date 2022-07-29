@@ -22,7 +22,7 @@ setuptools.setup(
     url="https://github.com/PnX-SI/gn_module_suivi_habitat_station",
     packages=setuptools.find_packages("backend"),
     package_dir={"": "backend"},
-    package_data={"gn_module_monitoring_habitat_station.migrations": ["data/*.sql", "data/*.csv"]},
+    package_data={"gn_module_monitoring_habitat_station.migrations": ["data/*.sql"]},
     install_requires=requirements,
     entry_points={
         "gn_module": [
