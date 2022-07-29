@@ -1,2 +1,2 @@
-MODULE_CODE = "SHS"
+MODULE_CODE = "SUIVI_HAB_STA"
 MODULE_PICTO = "fa-puzzle-piece"
