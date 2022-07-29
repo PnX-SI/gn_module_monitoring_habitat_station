@@ -21,7 +21,7 @@ from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.core.gn_monitoring.models import corVisitObserver, corSiteArea, corSiteModule, TBaseVisits, TBaseSites
 from geonature.core.ref_geo.models import LAreas
-from geonature.core.users.models import BibOrganismes
+from pypnusershub.db.models import Organisme
 
 
 from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot, clean_string, striphtml, get_base_column_name, get_pro_column_name, get_mapping_columns
@@ -45,7 +45,7 @@ def get_all_transects():
             func.max(TBaseVisits.visit_date_min),
             HabrefSHS.lb_hab_fr_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
-            func.string_agg(distinct(BibOrganismes.nom_organisme), ', ')
+            func.string_agg(distinct(Organismes.nom_organisme), ', ')
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
         )
@@ -59,7 +59,7 @@ def get_all_transects():
         ).outerjoin(
             User, User.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
+            Organismes, Organismes.id_organisme == User.id_organisme
         )
         .group_by(
             TTransect, HabrefSHS.lb_hab_fr_complet
@@ -146,7 +146,7 @@ def get_transect(id_site):
         TTransect,
         TNomenclatures,
         func.string_agg(distinct(LAreas.area_name), ', '),
-        func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
+        func.string_agg(distinct(Organismes.nom_organisme), ', '),
         HabrefSHS.lb_hab_fr_complet
     ).filter_by(id_base_site=id_site
                 ).outerjoin(
@@ -162,7 +162,7 @@ def get_transect(id_site):
     ).outerjoin(
         User, User.id_role == corVisitObserver.c.id_role
     ).outerjoin(
-        BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
+        Organismes, Organismes.id_organisme == User.id_organisme
         # get municipalities of a site
     ).outerjoin(
         corSiteArea, corSiteArea.c.id_base_site == TTransect.id_base_site
