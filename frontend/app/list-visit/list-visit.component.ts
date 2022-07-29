@@ -1,23 +1,24 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { ToastrService } from "ngx-toastr";
-import { FormGroup, FormBuilder, Validators } from "@angular/forms";
-import { Page } from "../shared/page";
-import { MapListService } from "@geonature_common/map-list/map-list.service";
-import { forkJoin } from "rxjs/observable/forkJoin";
-import { DataService } from "../services/data.service";
-import { StoreService, ISite } from "../services/store.service";
-import { ModuleConfig } from "../module.config";
-import { FormService } from "../services/form.service";
-import { DataFormService } from "@geonature_common/form/data-form.service";
-import { UserService } from "../services/user.service";
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Page } from '../shared/page';
+import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { forkJoin } from 'rxjs/observable/forkJoin';
+import { DataService } from '../services/data.service';
+import { StoreService, ISite } from '../services/store.service';
+import { ModuleConfig } from '../module.config';
+import { FormService } from '../services/form.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
+import { UserService } from '../services/user.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
 
 @Component({
-  selector: "pnx-list-visit",
-  templateUrl: "list-visit.component.html",
-  styleUrls: ["./list-visit.component.scss"]
+  selector: 'pnx-list-visit',
+  templateUrl: 'list-visit.component.html',
+  styleUrls: ['./list-visit.component.scss']
 })
 export class ListVisitComponent implements OnInit, OnDestroy {
 
