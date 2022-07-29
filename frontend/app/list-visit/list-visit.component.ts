@@ -33,7 +33,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public page = new Page();
   public paramApp = this.storeService.queryString.append(
     "id_application",
-    '' + ModuleConfig.ID_MODULE
+    '' + ModuleConfig.MODULE_CODE
   );
   public upIsAllowed = false;
   public addIsAllowed = false;
