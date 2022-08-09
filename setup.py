@@ -30,7 +30,7 @@ setuptools.setup(
             "picto = gn_module_monitoring_habitat_station:MODULE_PICTO",
             "blueprint = gn_module_monitoring_habitat_station.blueprint:blueprint",
             "config_schema = gn_module_monitoring_habitat_station.conf_schema_toml:GnModuleSchemaConf",
-            # "migrations = gn_module_monitoring_habitat_station:migrations",
+            "migrations = gn_module_monitoring_habitat_station:migrations",
         ],
     },
     classifiers=[
