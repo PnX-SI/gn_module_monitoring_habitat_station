@@ -60,7 +60,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
         this.plotForm.patchValue({
             'excretes_presence': this.data.plot_data.excretes_presence,
         });
-        this.plotForm.get('taxons_releve').controls.forEach(releve => {
+        this.plotForm.get('taxons_releve')['controls'].forEach(releve => {
             this.data.plot_data.taxons_releve.forEach(item => {
                 if (item.id_cor_hab_taxon == releve.value.id_cor_hab_taxon) {
                     releve.patchValue({
@@ -71,7 +71,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
                 }
             })
         })
-        this.plotForm.get('strates_releve').controls.forEach(releve => {
+        this.plotForm.get('strates_releve')['controls'].forEach(releve => {
             this.data.plot_data.strates_releve.forEach(item => {
                 if (item.id_nomenclature_strate == releve.value.id_nomenclature_strate) {
                     releve.patchValue({

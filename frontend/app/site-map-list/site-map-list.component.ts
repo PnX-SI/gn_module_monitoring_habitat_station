@@ -50,6 +50,9 @@ export class CustomDatepickerI18n extends NgbDatepickerI18n {
 }
 @Injectable()
 export class NgbDateCustomParserFormatter extends NgbDateParserFormatter {
+  parse(value: string): NgbDateStruct {
+    throw new Error("Method not implemented.");
+  }
   format(date: NgbDateStruct): string {
     return date ? `${date.day}-${date.month}-${date.year}` : '';
   }
@@ -71,6 +74,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public center;
   public zoom;
   private _map;
+  private _deflate_features;
   public filterForm: FormGroup;
   public page = new Page();
   minDate: any;

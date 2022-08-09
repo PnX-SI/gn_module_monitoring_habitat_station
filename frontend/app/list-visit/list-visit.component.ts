@@ -32,7 +32,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public page = new Page();
   public paramApp = this.storeService.queryString.append(
     "id_application",
-    ModuleConfig.ID_MODULE
+    '' + ModuleConfig.ID_MODULE
   );
   public upIsAllowed = false;
   public addIsAllowed = false;
@@ -68,7 +68,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.checkPermission();
     forkJoin([
-      this._api.getSites({ 'id_base_site': this.idSite, 'type': ModuleConfig.site_type }),
+      this._api.getSites({ 'id_base_site': this.idSite, 'site_type': ModuleConfig.site_type }),
       this._api.getHabitatsList(ModuleConfig.id_bib_list_habitat),
       this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, { orderby: 'label_default' }),
     ]).subscribe(results => {
