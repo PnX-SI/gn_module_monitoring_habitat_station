@@ -5,6 +5,9 @@ Revises: 349fb0607977e059
 Create Date: 2022-08-09 16:09:23.592635
 
 """
+
+import importlib
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -17,8 +20,13 @@ depends_on = None
 
 
 def upgrade():
-    pass
+    operations = text(
+        importlib.resources.read_text(
+            "gn_module_monitoring_habitat_station.migrations.data", "schema.sql"
+        )
+    )
+    op.get_bind().execute(operations)
 
 
 def downgrade():
-    pass
+    op.execute("DROP SCHEMA pr_monitoring_habitat_station CASCADE")
