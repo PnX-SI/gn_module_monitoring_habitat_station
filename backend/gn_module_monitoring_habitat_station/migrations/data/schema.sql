@@ -25,8 +25,8 @@ CREATE TABLE t_transects (
     id_transect serial NOT NULL,
     id_base_site integer NOT NULL,
     transect_label character varying(50),
-    geom_start public.geometry(Point, MY_SRID_WORLD),
-    geom_end public.geometry(Point, MY_SRID_WORLD),
+    geom_start public.geometry(Point, 4326),
+    geom_end public.geometry(Point, 4326),
     id_nomenclature_plot_position integer NOT NULL,
     cd_hab integer NOT NULL,
     plot_size character varying(50)
@@ -116,7 +116,7 @@ ALTER TABLE ONLY cor_transect_visit_perturbation
 ALTER TABLE ONLY t_transects
     ADD CONSTRAINT fk_t_transects_id_base_site FOREIGN KEY (id_base_site) REFERENCES gn_monitoring.t_base_sites (id_base_site) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY t_transects
-    ADD CONSTRAINT fk_t_transects_cd_hab FOREIGN KEY (cd_hab) REFERENCES ref_habitat.habref (cd_hab) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_t_transects_cd_hab FOREIGN KEY (cd_hab) REFERENCES ref_habitats.habref (cd_hab) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY t_plots
     ADD CONSTRAINT fk_t_plots_id_transect FOREIGN KEY (id_transect) REFERENCES pr_monitoring_habitat_station.t_transects (id_transect) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -139,7 +139,7 @@ ALTER TABLE ONLY cor_releve_plot_taxons
 ALTER TABLE ONLY cor_hab_taxon
     ADD CONSTRAINT fk_cor_hab_taxon_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
 ALTER TABLE ONLY cor_hab_taxon
-    ADD CONSTRAINT fk_cor_hab_taxon_id_habitat FOREIGN KEY (id_habitat) REFERENCES ref_habitat.habref (cd_hab) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_hab_taxon_id_habitat FOREIGN KEY (id_habitat) REFERENCES ref_habitats.habref (cd_hab) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY cor_transect_visit_perturbation
     ADD CONSTRAINT fk_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -248,6 +248,6 @@ JOIN pr_monitoring_habitat_station.t_releve_plots releve ON releve.id_base_visit
 LEFT JOIN taxons tax ON tax.id_releve_plot = releve.id_releve_plot
 LEFT JOIN strates strate ON strate.id_releve_plot = releve.id_releve_plot
 JOIN pr_monitoring_habitat_station.t_plots plot ON plot.id_plot = releve.id_plot
-JOIN ref_habitat.habref habref ON habref.cd_hab = transect.cd_hab
+JOIN ref_habitats.habref habref ON habref.cd_hab = transect.cd_hab
 JOIN ref_nomenclatures.t_nomenclatures nomenclature ON nomenclature.id_nomenclature = transect.id_nomenclature_plot_position
 ORDER BY visits.id_base_visit;

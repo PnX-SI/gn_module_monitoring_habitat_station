@@ -30,7 +30,7 @@ from geonature.core.gn_monitoring.models import TBaseSites, TBaseVisits, corVisi
 @serializable
 class TyporefSHS(DB.Model):
     __tablename__ = 'typoref'
-    __table_args__ = {'schema': 'ref_habitat', 'extend_existing': True}
+    __table_args__ = {'schema': 'ref_habitats', 'extend_existing': True}
 
     cd_typo = DB.Column(DB.Integer, primary_key=True,
                         server_default=DB.FetchedValue())
@@ -39,7 +39,7 @@ class TyporefSHS(DB.Model):
 @serializable
 class HabrefSHS(DB.Model):
     __tablename__ = 'habref'
-    __table_args__ = {'schema': 'ref_habitat', 'extend_existing': True}
+    __table_args__ = {'schema': 'ref_habitats', 'extend_existing': True}
 
     cd_hab = DB.Column(DB.Integer, primary_key=True,
                        server_default=DB.FetchedValue())
@@ -58,7 +58,7 @@ class HabrefSHS(DB.Model):
 @serializable
 class CorListHabitat(DB.Model):
     __tablename__ = 'cor_list_habitat'
-    __table_args__ = {'schema': 'ref_habitat', 'extend_existing': True}
+    __table_args__ = {'schema': 'ref_habitats', 'extend_existing': True}
 
     id_cor_list = DB.Column(DB.Integer, primary_key=True,
                             server_default=DB.FetchedValue())

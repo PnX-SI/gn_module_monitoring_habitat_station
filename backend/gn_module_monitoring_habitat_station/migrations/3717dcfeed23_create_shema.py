@@ -9,7 +9,7 @@ Create Date: 2022-08-09 16:09:23.592635
 import importlib
 
 from alembic import op
-import sqlalchemy as sa
+from sqlalchemy.sql import text
 
 
 # revision identifiers, used by Alembic.
