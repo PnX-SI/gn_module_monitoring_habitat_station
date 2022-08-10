@@ -1,6 +1,6 @@
  
 {
-  "name": "Suivi Habitat Station",
+  "name": "suivi_habitat_station",
   "version": "1.0.0",
   "description": "Module Suivi Habitat Station",
   "main": "index.js",

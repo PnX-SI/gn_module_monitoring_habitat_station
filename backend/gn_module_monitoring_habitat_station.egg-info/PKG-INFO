@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: gn-module-monitoring-habitat-station
+Version: 1.0.0.dev0
+Summary: Module Conservation Suivi Habitat Station
+Home-page: https://github.com/PnX-SI/gn_module_suivi_habitat_station
+Maintainer: Parcs nationaux des Écrins et des Cévennes, Conservatoire Botanique National Alpin
+Maintainer-email: geonature@ecrins-parcnational.fr
+License: UNKNOWN
+Description: # gn_module_suivi_habitat_station
+        Module GeoNature de suivi des habitats sur une station
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3Operating System :: OS Independent
+Description-Content-Type: text/x-rst
