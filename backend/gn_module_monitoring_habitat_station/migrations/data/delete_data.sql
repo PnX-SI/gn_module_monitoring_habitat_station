@@ -1,18 +1,39 @@
--- Supprimer shs schéma -- 
-DROP SCHEMA pr_monitoring_habitat_station CASCADE;
+-----------------------------------------------------------------------------
+-- Delete shs sites -- 
+DELETE from gn_monitoring.t_base_sites WHERE base_site_name LIKE 'HAB-SHS-%';
 
--- Supprimer nomemclature shs-- 
-
-DELETE FROM ref_nomenclatures.t_nomenclatures WHERE id_type=ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE') ;
-DELETE FROM ref_nomenclatures.t_nomenclatures WHERE id_type=ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE');
-
--- Supprimer shs sites -- 
-DELETE from gn_monitoring.t_base_sites where base_site_name like 'HAB-SHS-%';
----DELETE from gn_monitoring.t_base_sites where base_site_code='TESTSHS1';
-
--- Supprimer shs list habitat -- 
+-----------------------------------------------------------------------------
+-- REF HABITATS
 -- correspondance habitat
-DELETE FROM ref_habitat.cor_list_habitat WHERE id_list IN (SELECT id_list FROM ref_habitat.bib_list_habitat WHERE list_name='Suivi Habitat Station');
+DELETE FROM ref_habitat.cor_list_habitat WHERE id_list IN (
+    SELECT id_list FROM ref_habitat.bib_list_habitat WHERE list_name='Suivi Habitat Station'
+);
 
---  une liste d'habitat
-DELETE FROM ref_habitat.bib_list_habitat WHERE list_name='Suivi Habitat Station';
+DELETE FROM ref_habitats.bib_list_habitat
+    WHERE list_name = 'Suivi Habitat Station';
+
+-------------------------------------------------------------------------------
+-- GN_MONITORING
+
+-- Remove link between sites and this module
+DELETE FROM gn_monitoring.cor_site_module
+    WHERE id_module = (
+        SELECT id_module
+        FROM gn_commons.t_modules
+        WHERE module_code ILIKE 'Suivi Habitat Station'
+    ) ;
+
+-------------------------------------------------------------------------------
+-- GN_COMMONS
+
+-- Unlink module from dataset
+DELETE FROM gn_commons.cor_module_dataset
+    WHERE id_module = (
+        SELECT id_module
+        FROM gn_commons.t_modules
+        WHERE module_code ILIKE 'suivi_hab_sta'
+    ) ;
+
+-- Uninstall module (unlink this module of GeoNature)
+DELETE FROM gn_commons.t_modules
+    WHERE module_code ILIKE 'suivi_hab_sta' ;

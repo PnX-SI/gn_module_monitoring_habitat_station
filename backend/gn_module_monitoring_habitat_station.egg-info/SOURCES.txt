@@ -9,4 +9,5 @@ backend/gn_module_monitoring_habitat_station.egg-info/PKG-INFO
 backend/gn_module_monitoring_habitat_station.egg-info/SOURCES.txt
 backend/gn_module_monitoring_habitat_station.egg-info/dependency_links.txt
 backend/gn_module_monitoring_habitat_station.egg-info/entry_points.txt
+backend/gn_module_monitoring_habitat_station.egg-info/requires.txt
 backend/gn_module_monitoring_habitat_station.egg-info/top_level.txt

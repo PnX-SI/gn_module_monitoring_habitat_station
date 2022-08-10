@@ -1,41 +1,3 @@
-
-------------------------------------
--- Créer la nomenclature les strates 
-------------------------------------
-INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr, source)
-    VALUES ('STRATE_PLACETTE', 'Strates par placette', 'Nomenclature de strates pour placette.', 'Nomenclature de strates pour placette.', 'Nomenclature de strates pour placette.', 'CBNA');
-INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr) VALUES 
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rcn', 'Recouvrement sol nu', 'Recouvrement sol nu', 'Recouvrement sol nu', 'Recouvrement sol nu', 'Recouvrement sol nu'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rgc', 'Recouvrement Gravier, cailloux < 10 cm', 'Recouvrement Gravier, cailloux < 10 cm', 'Recouvrement Gravier, cailloux < 10 cm', 'Recouvrement Gravier, cailloux < 10 cm', 'Recouvrement Gravier, cailloux < 10 cm'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rbc', 'Recouvrement Blocs/rochers', 'Recouvrement Blocs/rochers', 'Recouvrement Blocs/rochers', 'Recouvrement Blocs/rochers', 'Recouvrement Blocs/rochers'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rvt', 'Recouvrement Végétation total', 'Recouvrement Végétation total', 'Recouvrement Végétation total', 'Recouvrement Végétation total', 'Recouvrement Végétation total'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rbr', 'Recouvrement Bryophytes', 'Recouvrement Bryophytes', 'Recouvrement Bryophytes', 'Recouvrement Bryophytes', 'Recouvrement Bryophytes'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rdj', 'Recouvrement Déjections', 'Recouvrement Déjections', 'Recouvrement Déjections', 'Recouvrement Déjections', 'Recouvrement Déjections'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rpi', 'Recouvrement Piétinement', 'Recouvrement Piétinement', 'Recouvrement Piétinement', 'Recouvrement Piétinement', 'Recouvrement Piétinement'),
-(ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rab', 'Recouvrement Abroutissement', 'Recouvrement Abroutissement', 'Recouvrement Abroutissement', 'Recouvrement Abroutissement', 'Recouvrement Abroutissement')
-;
-
--------------------------------------------------
--- Créer la nomenclature position placette (plot) 
--------------------------------------------------
-INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr, source)
-    VALUES ('POSITION_PLACETTE', 'Positions de placette sur un transect', 'Nomenclature de position de placette sur un transect.', 'Position de placette sur un transect', 'Position de placette sur un transect.', 'CBNA');
-
-INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr) VALUES 
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pha', 'Position en haut', 'Position en haut', 'Positions de placette sur un transect: Position en haut', 'Position en haut', 'Positions de placette sur un transect: Position en haut'),
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pba', 'Position en bas', 'Position en bas', 'Positions de placette sur un transect: Position en bas', 'Position en bas', 'Positions de placette sur un transect: Position en bas'),
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pdr', 'Position à droite', 'Position à droite', 'Positions de placette sur un transect: Position à droite', 'Position à droite', 'Positions de placette sur un transect: Position à droite'),
-(ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pga', 'Position à gauche', 'Position à gauche', 'Positions de placette sur un transect: Position à gauche', 'Position à gauche', 'Positions de placette sur un transect: Position à gauche')
-;
-
----------------------------------------------
--- Créer la nomenclature type de site habitat 
----------------------------------------------
-INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, label_fr, definition_fr, source )
-VALUES (ref_nomenclatures.get_id_nomenclature_type('TYPE_SITE'), 'HAB', 'Zone d''habitat', 'Zone d''habitat - suivi habitat', 'Zone d''habitat',  'Zone d''habitat issu des modules suivi habitat', 'CBNA');
-
-
-
 ---------------------------------
 -- Insérer la liste des habitats
 ---------------------------------
@@ -47,8 +9,10 @@ VALUES ('Suivi Habitat Station');
 -- Insérer habitat
 INSERT INTO ref_habitat.cor_list_habitat (id_list, cd_hab)
 VALUES (
-    (SELECT id_list FROM ref_habitat.bib_list_habitat WHERE list_name='Suivi Habitat Station'),
-16265); -- CARICION INCURVAE
+    (SELECT id_list FROM ref_habitat.bib_list_habitat 
+        WHERE list_name='Suivi Habitat Station'),
+    16265
+); -- CARICION INCURVAE
 
 ----------------------
 -- Insérer les sites
@@ -57,8 +21,14 @@ VALUES (
 -- insérer les données dans t_base_sites 
 INSERT INTO gn_monitoring.t_base_sites (id_nomenclature_type_site, base_site_name, base_site_description,  base_site_code, first_use_date, geom )
 VALUES (
-    ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'HAB'), 'HAB-SHS-', '', 'TESTSHS1', now(),
-    ST_SetSRID(ST_MakeLine(ST_MakePoint(6.7683121, 44.2840853),ST_MakePoint(6.7679639, 44.2841710)),4326)
+    ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'HAB'),
+    'HAB-SHS-',
+    '',
+    'TESTSHS1',
+    now(),
+    ST_SetSRID(ST_MakeLine(ST_MakePoint(6.7683121, 44.2840853),
+    ST_MakePoint(6.7679639, 44.2841710))
+    ,4326)
     );
 
 
@@ -69,12 +39,15 @@ UPDATE gn_monitoring.t_base_sites SET base_site_name=CONCAT (base_site_name, id_
 -- extension de la table t_base_sites : mettre les données dans t_transect
 INSERT INTO pr_monitoring_habitat_station.t_transects (id_base_site, transect_label, geom_start, geom_end, cd_hab, id_nomenclature_plot_position, plot_size)
 SELECT 
-	(SELECT id_base_site FROM gn_monitoring.t_base_sites WHERE base_site_code='TESTSHS1'), 
+	(SELECT id_base_site FROM gn_monitoring.t_base_sites 
+        WHERE base_site_code='TESTSHS1'), 
 	'T1',
 	ST_GeomFromText('POINT(6.7683121 44.2840853)', 4326),
 	ST_GeomFromText('POINT(6.7679639 44.2841710)', 4326),
 	16265,
-    (SELECT id_nomenclature FROM ref_nomenclatures.t_nomenclatures WHERE id_type=ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE') AND cd_nomenclature='Pha'),
+    (SELECT id_nomenclature FROM ref_nomenclatures.t_nomenclatures 
+        WHERE id_type=ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE') 
+        AND cd_nomenclature='Pha'),
     1
 ;
 
