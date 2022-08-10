@@ -13,7 +13,7 @@ from sqlalchemy.sql import text
 # revision identifiers, used by Alembic.
 revision = '349fb0607977e059'
 down_revision = None
-branch_labels = "suivi_hab_sta"
+branch_labels = "shs"
 depends_on = (
     "0a97fffb151c",  # Add nomenclatures shared in conservation modules
 )
