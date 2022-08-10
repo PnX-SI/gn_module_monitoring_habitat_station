@@ -16,9 +16,6 @@ down_revision = None
 branch_labels = "suivi_hab_sta"
 depends_on = (
     "0a97fffb151c",  # Add nomenclatures shared in conservation modules
-    "97d30ecf0cb1", # Add_M25m_mesh
-    "f3877ed851b9",  # Add_M50m_mesh
-    "e9a5e1372bce",  # Add_M100m_mesh
 )
 
 
