@@ -117,7 +117,7 @@ Le template du CSV pour l'insertion des transects est celui généré par l'expo
     INSERT INTO gn_monitoring.cor_site_module
     WITH id_module AS(
     SELECT id_module FROM gn_commons.t_modules
-    WHERE module_code ILIKE 'SUIVI_HAB_STA'
+    WHERE module_code ILIKE 'SHS'
     )
     SELECT ti.id_base_site, id_module.id_module
     FROM pr_monitoring_habitat_station.t_transects ti, id_module;

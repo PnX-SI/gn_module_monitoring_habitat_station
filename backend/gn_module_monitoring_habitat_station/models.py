@@ -45,7 +45,7 @@ class HabrefSHS(DB.Model):
                        server_default=DB.FetchedValue())
     fg_validite = DB.Column(DB.String(20), nullable=False)
     cd_typo = DB.Column(DB.ForeignKey(
-        'ref_habitat.typoref.cd_typo', onupdate='CASCADE'), nullable=False)
+        'ref_habitats.typoref.cd_typo', onupdate='CASCADE'), nullable=False)
     lb_code = DB.Column(DB.String(50))
     lb_hab_fr = DB.Column(DB.String(500))
     lb_hab_fr_complet = DB.Column(DB.String(500))
@@ -63,9 +63,9 @@ class CorListHabitat(DB.Model):
     id_cor_list = DB.Column(DB.Integer, primary_key=True,
                             server_default=DB.FetchedValue())
     id_list = DB.Column(DB.ForeignKey(
-        'ref_habitat.habref.bib_list_habitat', onupdate='CASCADE'), nullable=False)
+        'ref_habitats.habref.bib_list_habitat', onupdate='CASCADE'), nullable=False)
     cd_hab = DB.Column(DB.ForeignKey(
-        'ref_habitat.habref.cd_hab', onupdate='CASCADE'), nullable=False)
+        'ref_habitats.habref.cd_hab', onupdate='CASCADE'), nullable=False)
 
 
 @serializable
@@ -108,7 +108,7 @@ class TTransect(DB.Model):
     geom_end = DB.Column(Geometry('POINT', 4326))
     id_nomenclature_plot_position = DB.Column(DB.Integer, nullable=False)
     cd_hab = DB.Column(DB.ForeignKey(
-        'ref_habitat.habref.cd_hab', onupdate='CASCADE'), nullable=False)
+        'ref_habitats.habref.cd_hab', onupdate='CASCADE'), nullable=False)
     plot_size = DB.Column(DB.String(50))
 
     # habref = DB.relationship('HabrefSHS', primaryjoin='TTransect.cd_hab == HabrefSHS.cd_hab', backref='t_transects')
@@ -147,7 +147,7 @@ class CorHabTaxon(DB.Model):
     # cd_nom = DB.Column(DB.ForeignKey('taxonomie.taxref.cd_nom', onupdate='CASCADE'), nullable=False)
     cd_nom = DB.Column(DB.Integer, nullable=False)
     id_habitat = DB.Column(DB.ForeignKey(
-        'ref_habitat.habref.cd_hab', onupdate='CASCADE'), nullable=False)
+        'ref_habitats.habref.cd_hab', onupdate='CASCADE'), nullable=False)
     # taxref = DB.relationship('Taxref', primaryjoin='CorHabTaxon.cd_nom == Taxref.cd_nom', backref='cor_hab_taxons')
     habref = DB.relationship(
         'HabrefSHS', primaryjoin='CorHabTaxon.id_habitat == HabrefSHS.cd_hab', backref='cor_hab_taxons')

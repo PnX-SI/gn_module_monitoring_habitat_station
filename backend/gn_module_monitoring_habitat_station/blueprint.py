@@ -196,7 +196,7 @@ def get_transect(id_site):
 
 @blueprint.route('/visit', methods=['POST'])
 @json_resp
-@permissions.check_cruved_scope('C', True, module_code="SUIVI_HAB_STA")
+@permissions.check_cruved_scope('C', True, module_code="SHS")
 def post_visit(info_role):
     '''
     Poster une nouvelle visite
@@ -323,7 +323,7 @@ def get_taxa_by_habitats(cd_hab):
 
 @blueprint.route('/update_visit/<id_visit>', methods=['PATCH'])
 @json_resp
-@permissions.check_cruved_scope('U', True, module_code="SUIVI_HAB_STA")
+@permissions.check_cruved_scope('U', True, module_code="SHS")
 def patch_visit(id_visit, info_role):
     '''
     Mettre à jour une visite
@@ -446,7 +446,7 @@ def get_habitats(id_list):
 
 @blueprint.route('/transect', methods=['POST'])
 @json_resp
-@permissions.check_cruved_scope('C', True, module_code="SUIVI_HAB_STA")
+@permissions.check_cruved_scope('C', True, module_code="SHS")
 def post_transect(info_role):
     '''
     Poster un nouveau transect
@@ -478,7 +478,7 @@ def post_transect(info_role):
 
 @blueprint.route('/update_transect/<id_transect>', methods=['PATCH'])
 @json_resp
-@permissions.check_cruved_scope('U', True, module_code="SUIVI_HAB_STA")
+@permissions.check_cruved_scope('U', True, module_code="SHS")
 def patch_transect(id_transect, info_role):
     '''
     Mettre à jour un transect

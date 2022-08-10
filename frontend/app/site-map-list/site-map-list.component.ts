@@ -112,8 +112,8 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
    var iconMarker = L.icon({
       iconSize: [25, 41],
       iconAnchor: [13, 41],
-      iconUrl: './external_assets/suivi_hab_sta/marker-icon.png',
-      shadowUrl: './external_assets/suivi_hab_sta/marker-shadow.png'
+      iconUrl: './external_assets/shs/marker-icon.png',
+      shadowUrl: './external_assets/shs/marker-shadow.png'
     })
     this._map = this.mapService.getMap();
     this._deflate_features = L.deflate({minSize: 10, markerOptions: {icon: iconMarker}});

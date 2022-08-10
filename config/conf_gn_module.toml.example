@@ -7,7 +7,7 @@ zoom= 10
 pagination_serverside= False
 items_per_page = 10
 plot_size_unite = "mètre"
-MODULE_CODE = "SUIVI_HAB_STA"
+MODULE_CODE = "SHS"
 id_nomenclature_type_site = 690
 id_bib_list_habitat= 2
 
