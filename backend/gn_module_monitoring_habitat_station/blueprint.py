@@ -45,7 +45,7 @@ def get_all_transects():
             func.max(TBaseVisits.visit_date_min),
             HabrefSHS.lb_hab_fr_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
-            func.string_agg(distinct(Organismes.nom_organisme), ', ')
+            func.string_agg(distinct(Organisme.nom_organisme), ', ')
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
         )
@@ -59,7 +59,7 @@ def get_all_transects():
         ).outerjoin(
             User, User.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            Organismes, Organismes.id_organisme == User.id_organisme
+            Organisme, Organisme.id_organisme == User.id_organisme
         )
         .group_by(
             TTransect, HabrefSHS.lb_hab_fr_complet
@@ -146,7 +146,7 @@ def get_transect(id_site):
         TTransect,
         TNomenclatures,
         func.string_agg(distinct(LAreas.area_name), ', '),
-        func.string_agg(distinct(Organismes.nom_organisme), ', '),
+        func.string_agg(distinct(Organisme.nom_organisme), ', '),
         HabrefSHS.lb_hab_fr_complet
     ).filter_by(id_base_site=id_site
                 ).outerjoin(
@@ -162,7 +162,7 @@ def get_transect(id_site):
     ).outerjoin(
         User, User.id_role == corVisitObserver.c.id_role
     ).outerjoin(
-        Organismes, Organismes.id_organisme == User.id_organisme
+        Organisme, Organisme.id_organisme == User.id_organisme
         # get municipalities of a site
     ).outerjoin(
         corSiteArea, corSiteArea.c.id_base_site == TTransect.id_base_site
