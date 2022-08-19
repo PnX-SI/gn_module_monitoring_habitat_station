@@ -4,7 +4,8 @@ import datetime
 from flask import Blueprint, request, session, current_app, send_from_directory, abort, jsonify
 from geojson import FeatureCollection, Feature
 from sqlalchemy.sql.expression import func
-from sqlalchemy import and_, distinct, desc, func
+from sqlalchemy import and_, distinct, desc, func, alias
+from sqlalchemy.orm import aliased
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
 from numpy import array
@@ -13,6 +14,8 @@ from shapely.geometry import *
 from pypnusershub.db.tools import InsufficientRightsError
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
+from pypn_habref_api.models import Habref, CorListHabitat
+from apptax.taxonomie.models import Taxref
 
 from geonature.utils.env import DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
@@ -26,7 +29,7 @@ from pypnusershub.db.models import Organisme
 
 from .repositories import check_user_cruved_visit, check_year_visit, get_taxonlist_by_cdhab, get_stratelist_plot, clean_string, striphtml, get_base_column_name, get_pro_column_name, get_mapping_columns
 
-from .models import HabrefSHS, TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, Taxonomie, CorHabTaxon, CorListHabitat, ExportVisits
+from .models import TTransect, TPlot, TRelevePlot, TVisitSHS, CorTransectVisitPerturbation, CorRelevePlotStrat, CorRelevePlotTaxon, CorHabTaxon, ExportVisits
 
 blueprint = Blueprint('pr_monitoring_habitat_station', __name__)
 
@@ -43,7 +46,7 @@ def get_all_transects():
         DB.session.query(
             TTransect,
             func.max(TBaseVisits.visit_date_min),
-            HabrefSHS.lb_hab_fr_complet,
+            Habref.lb_hab_fr_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
             func.string_agg(distinct(Organisme.nom_organisme), ', ')
         ).outerjoin(
@@ -51,7 +54,7 @@ def get_all_transects():
         )
         # get habitat
         .outerjoin(
-            HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
+            Habref, TTransect.cd_hab == Habref.cd_hab
         )
         # get organisme
         .outerjoin(
@@ -62,7 +65,7 @@ def get_all_transects():
             Organisme, Organisme.id_organisme == User.id_organisme
         )
         .group_by(
-            TTransect, HabrefSHS.lb_hab_fr_complet
+            TTransect, Habref.lb_hab_fr_complet
         )
     )
 
@@ -99,6 +102,7 @@ def get_all_transects():
 
     if data:
         for d in data:
+            print(f"D: {d}")
             feature = d[0].get_geofeature(True)
             id_site = feature['properties']['id_base_site']
             base_site_code = feature['properties']['t_base_site']['base_site_code']
@@ -142,20 +146,26 @@ def get_transect(id_site):
 
     id_type_commune = blueprint.config['id_type_commune']
 
-    data = DB.session.query(
+    TNom = aliased(TNomenclatures)
+
+    query = DB.session.query(
         TTransect,
         TNomenclatures,
         func.string_agg(distinct(LAreas.area_name), ', '),
         func.string_agg(distinct(Organisme.nom_organisme), ', '),
+<<<<<<< Updated upstream
         HabrefSHS.lb_hab_fr_complet
+=======
+        Habref.lb_hab_fr_complet
+>>>>>>> Stashed changes
     ).filter_by(id_base_site=id_site
                 ).outerjoin(
         TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
     ).outerjoin(
-        TNomenclatures, TTransect.id_nomenclature_plot_position == TNomenclatures.id_nomenclature
+        TNom, TTransect.id_nomenclature_plot_position == TNom.id_nomenclature
         # get habitat
     ).outerjoin(
-        HabrefSHS, TTransect.cd_hab == HabrefSHS.cd_hab
+        Habref, TTransect.cd_hab == Habref.cd_hab
         # get organisme
     ).outerjoin(
         corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
@@ -169,8 +179,13 @@ def get_transect(id_site):
     ).outerjoin(
         LAreas, and_(LAreas.id_area == corSiteArea.c.id_area,
                      LAreas.id_type == id_type_commune)
-    ).group_by(TTransect.id_transect, TNomenclatures.id_nomenclature, HabrefSHS.lb_hab_fr_complet
-               ).first()
+    ).group_by(TTransect.id_transect, TNomenclatures.id_nomenclature, Habref.lb_hab_fr_complet)
+
+    from sqlalchemy.dialects import postgresql
+    print(query.compile(dialect=postgresql.dialect(),
+        compile_kwargs={"literal_binds": True}))
+
+    data = query.first()
 
     if data:
         transect = data[0].get_geofeature(True)
@@ -302,10 +317,10 @@ def get_taxa_by_habitats(cd_hab):
     '''
     q = DB.session.query(
         CorHabTaxon.id_cor_hab_taxon,
-        Taxonomie.nom_complet
+        Taxref.nom_complet
     ).join(
-        Taxonomie, CorHabTaxon.cd_nom == Taxonomie.cd_nom
-    ).group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxonomie.nom_complet)
+        Taxref, CorHabTaxon.cd_nom == Taxref.cd_nom
+    ).group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxref.nom_complet)
 
     q = q.filter(CorHabTaxon.id_habitat == cd_hab)
     data = q.all()
@@ -424,12 +439,12 @@ def get_habitats(id_list):
     q = DB.session.query(
         CorListHabitat.cd_hab,
         CorListHabitat.id_list,
-        HabrefSHS.lb_hab_fr_complet
+        Habref.lb_hab_fr_complet
     ).join(
-        HabrefSHS, CorListHabitat.cd_hab == HabrefSHS.cd_hab
+        Habref, CorListHabitat.cd_hab == Habref.cd_hab
     ).filter(
         CorListHabitat.id_list == id_list
-    ).group_by(CorListHabitat.cd_hab,  HabrefSHS.lb_hab_fr_complet, CorListHabitat.id_list,)
+    ).group_by(CorListHabitat.cd_hab,  Habref.lb_hab_fr_complet, CorListHabitat.id_list,)
 
     data = q.all()
     habitats = []

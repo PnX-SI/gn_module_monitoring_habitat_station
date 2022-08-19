@@ -131,20 +131,22 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   getTransects(params?) {
     this._api.getAllTransects(params).subscribe(
       data => {
-        this.sites = data[1];
-        this.page.totalElements = data[0].totalItmes;
-        this.page.size = data[0].items_per_page;
-        this.sites.features.forEach(site => {
-          if (!_.find(this.tabHab, (habitat: Habitat) => { return habitat.cd_hab == site.properties.cd_hab })) {
-            this.tabHab.push({
-              cd_hab: site.properties.cd_hab,
-              nom_habitat: site.properties.nom_habitat
-            });
-            this.tabHab = _.sortBy(this.tabHab, [(habitat: Habitat) => { return habitat.nom_habitat }])
-          }
-        });
-        this.mapListService.loadTableData(data[1]);
-        this.filteredData = this.mapListService.tableData;
+        if (data !== null) {
+          this.sites = data[1];
+          this.page.totalElements = data[0].totalItmes;
+          this.page.size = data[0].items_per_page;
+          this.sites.features.forEach(site => {
+            if (!_.find(this.tabHab, (habitat: Habitat) => { return habitat.cd_hab == site.properties.cd_hab })) {
+              this.tabHab.push({
+                cd_hab: site.properties.cd_hab,
+                nom_habitat: site.properties.nom_habitat
+              });
+              this.tabHab = _.sortBy(this.tabHab, [(habitat: Habitat) => { return habitat.nom_habitat }])
+            }
+          });
+          this.mapListService.loadTableData(data[1]);
+          this.filteredData = this.mapListService.tableData;
+        }
         this.dataLoaded = true;
       },
       error => {

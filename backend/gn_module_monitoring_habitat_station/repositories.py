@@ -7,7 +7,8 @@ import re
 from geonature.utils.errors import GeonatureApiError
 from geonature.core.gn_monitoring.models import TBaseVisits
 from geonature.utils.env import DB, ROOT_DIR
-from .models import Taxonomie, CorHabTaxon
+from .models import CorHabTaxon
+from apptax.taxonomie.models import Taxref
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 
 
