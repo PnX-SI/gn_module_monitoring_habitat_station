@@ -153,11 +153,8 @@ def get_transect(id_site):
         TNomenclatures,
         func.string_agg(distinct(LAreas.area_name), ', '),
         func.string_agg(distinct(Organisme.nom_organisme), ', '),
-<<<<<<< Updated upstream
-        HabrefSHS.lb_hab_fr_complet
-=======
         Habref.lb_hab_fr_complet
->>>>>>> Stashed changes
+
     ).filter_by(id_base_site=id_site
                 ).outerjoin(
         TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site
