@@ -1,22 +1,14 @@
-config/settings.ini
+backend/*.egg-info
 config/conf_gn_module.toml
-__pycache__/*
-*.pyc
-conf_gn_module.toml
-var/
-log/*
-.vscode
-*/venv
-module.config.ts
+config/settings.ini
+frontend/app/module.config.ts
+frontend/node_modules
+frontend/package.json
 frontend/tsconfig.json
+log/
+var/
 
-# Node
-.npm
-node_modules
-npm-debug.log
-coverage/
-node_modules/
-tmp/
-npm-debug.log*
-yarn-error.log*
-.ng_pkg_build/
+__pycache__
+*.pyc
+.vscode
+
