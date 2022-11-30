@@ -1,38 +1,16 @@
-# coding: utf-8
-from sqlalchemy import (
-    Boolean,
-    CheckConstraint,
-    Column,
-    Date,
-    DateTime,
-    ForeignKey,
-    Index,
-    Integer,
-    String,
-    Text,
-    UniqueConstraint,
-)
-from sqlalchemy.schema import FetchedValue
-import geoalchemy2.functions as geo_funcs
 from geoalchemy2 import Geometry
-from geoalchemy2.shape import to_shape
-
-from geojson import Feature, FeatureCollection, LineString
-
-from sqlalchemy.dialects.postgresql.base import UUID
-from sqlalchemy.orm import relationship
-from flask_sqlalchemy import SQLAlchemy
+import geoalchemy2.functions as geo_funcs
+from geojson import Feature, LineString
 
 from pypnusershub.db.models import User
 from pypnnomenclature.models import TNomenclatures
-from pypn_habref_api.models import Habref, TypoRef, CorListHabitat
+from pypn_habref_api.models import Habref
 from apptax.taxonomie.models import Taxref
 
 from geonature.utils.env import DB
 
 from utils_flask_sqla.serializers import serializable
 from utils_flask_sqla_geo.serializers import geoserializable
-from utils_flask_sqla.generic import GenericQuery
 from geonature.utils.utilsgeometry import shapeserializable
 
 from geonature.core.gn_monitoring.models import (
@@ -66,9 +44,7 @@ class TTransect(DB.Model):
     __tablename__ = "t_transects"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
-    id_transect = DB.Column(
-        DB.Integer, primary_key=True, server_default=DB.FetchedValue()
-    )
+    id_transect = DB.Column(DB.Integer, primary_key=True, server_default=DB.FetchedValue())
     id_base_site = DB.Column(
         DB.ForeignKey(
             "gn_monitoring.t_base_sites.id_base_site",
@@ -118,14 +94,10 @@ class CorHabTaxon(DB.Model):
         {"schema": "pr_monitoring_habitat_station"},
     )
 
-    id_cor_hab_taxon = DB.Column(
-        DB.Integer, primary_key=True, server_default=DB.FetchedValue()
-    )
+    id_cor_hab_taxon = DB.Column(DB.Integer, primary_key=True, server_default=DB.FetchedValue())
     cd_nom = DB.Column(DB.ForeignKey(Taxref.cd_nom, onupdate="CASCADE"), nullable=False)
     # cd_nom = DB.Column(DB.Integer, nullable=False)
-    id_habitat = DB.Column(
-        DB.ForeignKey(Habref.cd_hab, onupdate="CASCADE"), nullable=False
-    )
+    id_habitat = DB.Column(DB.ForeignKey(Habref.cd_hab, onupdate="CASCADE"), nullable=False)
 
     taxref = DB.relationship(Taxref)
     habref = DB.relationship(Habref)
@@ -136,9 +108,7 @@ class TRelevePlot(DB.Model):
     __tablename__ = "t_releve_plots"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
-    id_releve_plot = DB.Column(
-        DB.Integer, primary_key=True, server_default=DB.FetchedValue()
-    )
+    id_releve_plot = DB.Column(DB.Integer, primary_key=True, server_default=DB.FetchedValue())
     id_plot = DB.Column(
         DB.ForeignKey(
             "pr_monitoring_habitat_station.t_plots.id_plot",
@@ -157,12 +127,8 @@ class TRelevePlot(DB.Model):
     )
     excretes_presence = DB.Column(DB.Boolean)
 
-    cor_releve_strats = DB.relationship(
-        "CorRelevePlotStrat", backref="id_releve_plot_s"
-    )
-    cor_releve_taxons = DB.relationship(
-        "CorRelevePlotTaxon", backref="id_releve_plot_t"
-    )
+    cor_releve_strats = DB.relationship("CorRelevePlotStrat", backref="id_releve_plot_s")
+    cor_releve_taxons = DB.relationship("CorRelevePlotTaxon", backref="id_releve_plot_t")
 
     t_base_visit = DB.relationship(TBaseVisits)
     t_plot = DB.relationship(TPlot)
@@ -184,9 +150,7 @@ class CorRelevePlotStrat(DB.Model):
         nullable=False,
     )
     id_nomenclature_strate = DB.Column(
-        DB.ForeignKey(
-            "ref_nomenclatures.t_nomenclatures.id_nomenclature", onupdate="CASCADE"
-        ),
+        DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature", onupdate="CASCADE"),
         nullable=False,
     )
     cover_pourcentage = DB.Column(DB.Integer)
@@ -241,9 +205,7 @@ class CorTransectVisitPerturbation(DB.Model):
         nullable=False,
     )
     id_nomenclature_perturb = DB.Column(
-        DB.ForeignKey(
-            "ref_nomenclatures.t_nomenclatures.id_nomenclature", onupdate="CASCADE"
-        ),
+        DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature", onupdate="CASCADE"),
         nullable=False,
     )
 

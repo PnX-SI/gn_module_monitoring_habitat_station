@@ -1,14 +1,11 @@
-backend/*.egg-info
 config/conf_gn_module.toml
-config/settings.ini
 frontend/app/module.config.ts
 frontend/node_modules
-frontend/package.json
 frontend/tsconfig.json
 log/
 var/
 
+*.egg-info
 __pycache__
 *.pyc
 .vscode
-
