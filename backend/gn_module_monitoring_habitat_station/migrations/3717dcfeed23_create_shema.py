@@ -6,7 +6,7 @@ Create Date: 2022-08-09 16:09:23.592635
 
 """
 
-import importlib
+from importlib.resources import read_text
 
 from alembic import op
 from sqlalchemy.sql import text
@@ -21,7 +21,7 @@ depends_on = None
 
 def upgrade():
     operations = text(
-        importlib.resources.read_text(
+        read_text(
             "gn_module_monitoring_habitat_station.migrations.data", "schema.sql"
         )
     )

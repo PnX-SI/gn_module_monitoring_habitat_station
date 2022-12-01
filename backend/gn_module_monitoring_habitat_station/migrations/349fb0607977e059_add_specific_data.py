@@ -4,52 +4,31 @@ Revision ID: 349fb0607977e059
 Create Date: 2022-08-09 11:58:17.392946
 
 """
-import importlib
+from importlib.resources import read_text
 
-from alembic import op
-from sqlalchemy.sql import text
+from gn_conservation_backend_shared.migrations.utils import monitoring, habitats, commons
+
+from gn_module_monitoring_habitat_station import MODULE_NAME, MODULE_CODE, HABITAT_LIST_NAME
 
 
 # revision identifiers, used by Alembic.
 revision = "349fb0607977e059"
 down_revision = None
-branch_labels = "shs"
+branch_labels = MODULE_NAME.lower().replace(" ", "_")
 depends_on = ("0a97fffb151c",)  # Add nomenclatures shared in conservation modules
 
 
 def upgrade():
-    operations = text(
-        importlib.resources.read_text(
-            "gn_module_monitoring_habitat_station.migrations.data", "data.sql"
-        )
+    habitats.add_habitats_list(HABITAT_LIST_NAME)
+    commons.update_module(
+        code=MODULE_CODE,
+        label="Suivi Habitat Station",
+        description="Module de Suivi des habitats.",
+        doc_url="https://github.com/PnX-SI/gn_module_suivi_habitat_station/",
     )
-    op.get_bind().execute(operations)
 
 
 def downgrade():
-    operations = text(
-        importlib.resources.read_text(
-            "gn_module_monitoring_habitat_station.migrations.data", "delete_data.sql"
-        )
-    )
-    op.get_bind().execute(operations)
-
-    delete_module("SHS")
-
-
-def delete_module(module_code):
-    operation = text(
-        """
-        -- Unlink module from dataset
-        DELETE FROM gn_commons.cor_module_dataset
-            WHERE id_module = (
-                SELECT id_module
-                FROM gn_commons.t_modules
-                WHERE module_code = :moduleCode
-            ) ;
-        -- Uninstall module (unlink this module of GeoNature)
-        DELETE FROM gn_commons.t_modules
-            WHERE module_code = :moduleCode ;
-    """
-    )
-    op.get_bind().execute(operation, {"moduleCode": module_code})
+    monitoring.delete_sites(MODULE_CODE)
+    habitats.delete_habitats_list(HABITAT_LIST_NAME)
+    commons.delete_module(MODULE_CODE)

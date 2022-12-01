@@ -10,7 +10,6 @@ zoom = 10
 pagination_serverside = False
 items_per_page = 10
 plot_size_unite = "mètres"
-MODULE_CODE = "SHS"
 site_message = {"emptyMessage": "Aucun site à afficher ", "totalMessage": "sites(s) au total"}
 list_visit_message = {
     "emptyMessage": "Aucune visite sur ce site ",

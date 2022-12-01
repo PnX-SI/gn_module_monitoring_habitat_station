@@ -1,4 +1,4 @@
-gn_conservation_backend_shared@https://github.com/cbn-alpin/gn_conservation_backend_shared/archive/0.4.0.tar.gz
+gn_conservation_backend_shared@https://github.com/cbn-alpin/gn_conservation_backend_shared/archive/0.5.0.tar.gz
 pypnnomenclature
 pypnusershub>=1.5.9
 pypn_habref_api
