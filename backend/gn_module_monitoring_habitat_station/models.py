@@ -214,7 +214,7 @@ class CorTransectVisitPerturbation(DB.Model):
 
 
 @serializable
-class TVisitSHS(TBaseVisits):
+class Visit(TBaseVisits):
     __tablename__ = "t_base_visits"
     __table_args__ = {"schema": "gn_monitoring", "extend_existing": True}
 

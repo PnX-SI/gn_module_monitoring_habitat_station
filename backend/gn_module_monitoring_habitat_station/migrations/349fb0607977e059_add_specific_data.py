@@ -8,7 +8,7 @@ from importlib.resources import read_text
 
 from gn_conservation_backend_shared.migrations.utils import monitoring, habitats, commons
 
-from gn_module_monitoring_habitat_station import MODULE_NAME, MODULE_CODE, HABITAT_LIST_NAME
+from gn_module_monitoring_habitat_station import MODULE_NAME, MODULE_CODE, METADATA_NAME
 
 
 # revision identifiers, used by Alembic.
@@ -19,7 +19,7 @@ depends_on = ("0a97fffb151c",)  # Add nomenclatures shared in conservation modul
 
 
 def upgrade():
-    habitats.add_habitats_list(HABITAT_LIST_NAME)
+    habitats.add_habitats_list(METADATA_NAME)
     commons.update_module(
         code=MODULE_CODE,
         label="Suivi Habitat Station",
@@ -30,5 +30,5 @@ def upgrade():
 
 def downgrade():
     monitoring.delete_sites(MODULE_CODE)
-    habitats.delete_habitats_list(HABITAT_LIST_NAME)
+    habitats.delete_habitats_list(METADATA_NAME)
     commons.delete_module(MODULE_CODE)

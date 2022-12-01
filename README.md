@@ -1,6 +1,6 @@
 # Suivi Habitat Station
 
-Module GeoNature de suivi des habitats sur une station (SHS), piloté par le CBNA.
+Module GeoNature de suivi des habitats sur une station, piloté par le CBNA.
 
 ![SHT module](docs/img/main_screen_shs.png)
 

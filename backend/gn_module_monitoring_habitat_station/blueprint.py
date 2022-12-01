@@ -1,17 +1,14 @@
-import json
 import datetime
 
-from flask import Blueprint, request, session, current_app, send_from_directory, abort, jsonify
-from geojson import FeatureCollection, Feature
+from flask import Blueprint, request, session, send_from_directory, jsonify
+from geojson import FeatureCollection
 from sqlalchemy.sql.expression import func
-from sqlalchemy import and_, distinct, desc, func, alias
+from sqlalchemy import and_, distinct, func
 from sqlalchemy.orm import aliased
-from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.shape import to_shape
 from numpy import array
 from shapely.geometry import *
 
-from pypnusershub.db.tools import InsufficientRightsError
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
 from pypn_habref_api.models import Habref, CorListHabitat
@@ -25,16 +22,14 @@ from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.core.gn_monitoring.models import (
     corVisitObserver,
     corSiteArea,
-    corSiteModule,
     TBaseVisits,
     TBaseSites,
 )
 from geonature.core.ref_geo.models import LAreas
 from pypnusershub.db.models import Organisme
 
-
+from gn_module_monitoring_habitat_station import MODULE_CODE
 from .repositories import (
-    check_user_cruved_visit,
     check_year_visit,
     get_taxonlist_by_cdhab,
     get_stratelist_plot,
@@ -49,7 +44,7 @@ from .models import (
     TTransect,
     TPlot,
     TRelevePlot,
-    TVisitSHS,
+    Visit,
     CorTransectVisitPerturbation,
     CorRelevePlotStrat,
     CorRelevePlotTaxon,
@@ -240,7 +235,7 @@ def get_transect(id_site):
 
 @blueprint.route("/visit", methods=["POST"])
 @json_resp
-@permissions.check_cruved_scope("C", True, module_code="SHS")
+@permissions.check_cruved_scope("C", True, module_code=MODULE_CODE)
 def post_visit(info_role):
     """
     Poster une nouvelle visite
@@ -262,7 +257,7 @@ def post_visit(info_role):
             tab_perturbations = data.pop("perturbations")
         else:
             data.pop("perturbations")
-    visit = TVisitSHS(**data)
+    visit = Visit(**data)
 
     for per in tab_perturbations:
         visit_per = CorTransectVisitPerturbation(**per)
@@ -297,7 +292,7 @@ def get_visits(id_site):
     Retourne les visites d'un site par son id
     """
     items_per_page = blueprint.config["items_per_page"]
-    q = DB.session.query(TVisitSHS).filter_by(id_base_site=id_site)
+    q = DB.session.query(Visit).filter_by(id_base_site=id_site)
     pagination = q.paginate()
     totalItmes = pagination.total
     data = q.all()
@@ -316,7 +311,7 @@ def get_visitById(id_visit):
     """
     Retourne les visites d'un site par son id
     """
-    data = DB.session.query(TVisitSHS).filter_by(id_base_visit=id_visit).first()
+    data = DB.session.query(Visit).filter_by(id_base_visit=id_visit).first()
     if data:
         visit = data.as_dict(True)
         for releve in visit["cor_releve_plot"]:
@@ -363,14 +358,14 @@ def get_taxa_by_habitats(cd_hab):
 
 @blueprint.route("/update_visit/<id_visit>", methods=["PATCH"])
 @json_resp
-@permissions.check_cruved_scope("U", True, module_code="SHS")
+@permissions.check_cruved_scope("U", True, module_code=MODULE_CODE)
 def patch_visit(id_visit, info_role):
     """
     Mettre à jour une visite
     """
     data = dict(request.get_json())
     try:
-        existingVisit = TVisitSHS.query.filter_by(id_base_visit=id_visit).first()
+        existingVisit = Visit.query.filter_by(id_base_visit=id_visit).first()
         if existingVisit == None:
             raise ValueError("This visit does not exist")
     except ValueError:
@@ -396,7 +391,7 @@ def patch_visit(id_visit, info_role):
     if "perturbations" in data:
         tab_perturbations = data.pop("perturbations")
 
-    visit = TVisitSHS(**data)
+    visit = Visit(**data)
 
     for releve in tab_releve_plots:
         if "plot_data" in releve:
@@ -487,7 +482,7 @@ def get_habitats(id_list):
 
 @blueprint.route("/transect", methods=["POST"])
 @json_resp
-@permissions.check_cruved_scope("C", True, module_code="SHS")
+@permissions.check_cruved_scope("C", True, module_code=MODULE_CODE)
 def post_transect(info_role):
     """
     Poster un nouveau transect
@@ -519,7 +514,7 @@ def post_transect(info_role):
 
 @blueprint.route("/update_transect/<id_transect>", methods=["PATCH"])
 @json_resp
-@permissions.check_cruved_scope("U", True, module_code="SHS")
+@permissions.check_cruved_scope("U", True, module_code=MODULE_CODE)
 def patch_transect(id_transect, info_role):
     """
     Mettre à jour un transect

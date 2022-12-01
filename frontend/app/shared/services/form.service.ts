@@ -1,22 +1,9 @@
 import { Injectable } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
-import { GeoJSON } from 'leaflet';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Injectable()
 export class FormService {
   constructor(private _fb: FormBuilder) {}
-
-  initFormSHS(): FormGroup {
-    const formSuivi = this._fb.group({
-      id_base_site: null,
-      id_base_visit: null,
-      visit_date_min: [null, Validators.required],
-      cor_visit_observer: [null, Validators.required],
-      cor_visit_perturbation: null,
-      excretes_presence: null,
-    });
-    return formSuivi;
-  }
 
   initFormTransect(): FormGroup {
     const formTransect = this._fb.group({

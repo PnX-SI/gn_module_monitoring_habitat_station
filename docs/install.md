@@ -26,7 +26,7 @@
     ```
 5. Installez le module avec la commande :
     ```bash
-    geonature install-packaged-gn-module --build false /home/${USER}/modules/gn_module_suivi_habitat_station SHS
+    geonature install-packaged-gn-module --build false /home/${USER}/modules/gn_module_suivi_habitat_station MHS
     ```
     - Adaptez le chemin `/home/${USER}/modules/gn_module_suivi_habitat_station` à votre installation.
 6. Complétez la configuration du module uniquement si nécessaire :

@@ -9,7 +9,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 -- -----------------------------------------------------------------------------
--- Create SHS schema
+-- Create schema
 CREATE SCHEMA pr_monitoring_habitat_station;
 
 -- -----------------------------------------------------------------------------
