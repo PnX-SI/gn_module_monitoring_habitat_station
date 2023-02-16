@@ -1,15 +1,12 @@
-import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { AppConfig } from '@geonature_config/app.config';
-import { ModuleConfig } from '../../module.config';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
+import { DataService } from './data.service';
 
 @Injectable()
 export class UserService {
   public currentUser;
   private _cruved = {};
-  constructor(private _http: HttpClient) {
+  constructor(private dataService: DataService) {
     this.currentUser = this.getUser();
   }
 
@@ -20,12 +17,13 @@ export class UserService {
 
   // Use service geonature ? localstorage ?
   getUserCruved() {
-    if (Object.keys(this._cruved).length == 0)
-      return this._http.get<any>(
-        `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/user/cruved`
-      );
-    else return new Observable(ucruved => ucruved.next(this._cruved));
+    if (Object.keys(this._cruved).length == 0) {
+      return this.dataService.getUserCruved();
+    } else {
+      return new Observable(ucruved => ucruved.next(this._cruved));
+    }
   }
+
   // id_digitaliser ?
   check_user_cruved_visit(action, visit?): Observable<any> {
     let isAllowed = false;

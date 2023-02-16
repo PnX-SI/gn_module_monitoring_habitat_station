@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AppConfig } from '@geonature_config/app.config';
 import { ModuleConfig } from '../../module.config';
@@ -9,7 +9,7 @@ export class DataService {
 
   getTtransectByIdSite(idSite) {
     return this._http.get(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/transects/${idSite}`
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transects/${idSite}`
     );
   }
 
@@ -18,49 +18,49 @@ export class DataService {
     for (let key in params) {
       if (params[key]) myParams = myParams.set(key, params[key]);
     }
-    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/transects`, {
+    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transects`, {
       params: myParams,
     });
   }
   postTransect(transect) {
     return this._http.post(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/transect`,
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transect`,
       transect
     );
   }
 
   updateTransect(transect) {
     return this._http.patch(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/update_transect/${transect.id_transect}`,
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/update_transect/${transect.id_transect}`,
       transect
     );
   }
 
   postVisit(visit) {
-    return this._http.post(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit`, visit);
+    return this._http.post(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visit`, visit);
   }
 
   updateVisit(visit) {
     return this._http.patch(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/update_visit/${visit.id_visit}`,
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/update_visit/${visit.id_visit}`,
       visit.data
     );
   }
 
   getTaxonsByHabitat(cd_hab) {
     return this._http.get(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/habitats/${cd_hab}/taxons`
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/habitats/${cd_hab}/taxons`
     );
   }
 
   getVisits(id_site) {
     return this._http.get(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/site/${id_site}/visits`
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/site/${id_site}/visits`
     );
   }
 
   getVisitByID(id_visit) {
-    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit/${id_visit}`);
+    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visit/${id_visit}`);
   }
 
   getSites(params) {
@@ -68,19 +68,19 @@ export class DataService {
     for (let key in params) {
       if (params[key]) myParams = myParams.set(key, params[key]);
     }
-    return this._http.get(`${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`, {
+    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/sites`, {
       params: myParams,
     });
   }
 
-  getHabitatsList(id_list) {
+  getHabitatsList() {
     return this._http.get(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/habitats/${id_list}`
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/habitats`
     );
   }
 
   getUserCruved() {
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/user/cruved`);
+    return this._http.get<any>(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/user/cruved`);
   }
 
   getDefaultVisit(): IVisit {

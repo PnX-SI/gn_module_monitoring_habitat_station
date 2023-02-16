@@ -1,19 +1,22 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Page } from '../shared/models/page';
-import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { ToastrService } from 'ngx-toastr';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { map } from 'rxjs/operators';
 import { forkJoin } from 'rxjs/observable/forkJoin';
+import * as _ from 'lodash';
+
+import { DataFormService } from '@geonature_common/form/data-form.service';
+import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { Page } from '../shared/models/page';
 import { DataService } from '../shared/services/data.service';
 import { StoreService, ISite } from '../shared/services/store.service';
 import { ModuleConfig } from '../module.config';
 import { FormService } from '../shared/services/form.service';
-import { DataFormService } from '@geonature_common/form/data-form.service';
 import { UserService } from '../shared/services/user.service';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import * as _ from 'lodash';
+
 
 @Component({
   selector: 'pnx-list-visit',
@@ -67,8 +70,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.checkPermission();
     forkJoin([
-      this._api.getSites({ id_base_site: this.idSite, site_type: ModuleConfig.site_type }),
-      this._api.getHabitatsList(ModuleConfig.id_bib_list_habitat),
+      this._api.getSites({ id_base_site: this.idSite }),
+      this._api.getHabitatsList(),
       this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, {
         orderby: 'label_default',
       }),
@@ -116,11 +119,19 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   getVisits() {
-    this._api.getVisits(this.idSite).subscribe(
-      data => {
-        this.page.totalElements = data[0].totalItmes;
-        this.page.size = data[0].items_per_page;
-        data[1].forEach(visit => {
+    this._api.getVisits(this.idSite).pipe(
+      map(data => {
+        return data === null
+          ? [{ totalItems: 0, itemsPerPage: 10 }, []]
+          : data;
+        }
+      )
+    ).subscribe(
+      (data) => {
+        console.log(data)
+        this.page.totalElements = data[0].totalItems;
+        this.page.size = data[0].itemsPerPage;
+        data[1].forEach((visit) => {
           if (visit && Object.keys(visit).length) {
             let fullName = '';
             let count = visit.observers.length;
@@ -136,8 +147,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         this.rows = data[1];
         this.dataLoaded = true;
       },
-      error => {
-        if (error.status != 404) {
+      (error) => {
+        let notErrorStatus = [204, 404];
+        console.log('error.status:', error.status);
+        if (! notErrorStatus.includes(error.status)) {
           this.toastr.error(
             'Une erreur est survenue lors de la récupération des informations sur le serveur.',
             '',

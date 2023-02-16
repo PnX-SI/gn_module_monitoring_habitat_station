@@ -5,7 +5,7 @@ import { AppConfig } from '@geonature_config/app.config';
 
 @Injectable()
 export class StoreService {
-  public shsConfig = ModuleConfig;
+  public moduleConfig = ModuleConfig;
   public queryString = new HttpParams();
   public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
   public currentSite: ISite;

@@ -90,7 +90,7 @@
         <br />
         <fieldset [disabled]="disabledForm">
           <legend>
-            Coordonnées géographiques
+            Coordonnées géographiques (<a href="https://epsg.io/4326" target="_blank">SRID 4326</a>)
           </legend>
           <h6 class="mb-0">
             <i class="material-icons location-icon">location_on</i>Point de départ :
@@ -182,7 +182,7 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-6">
-              <small> Taille des placettes ( {{ storeService.shsConfig.plot_size_unite }} ) </small>
+              <small> Taille des placettes ( {{ storeService.moduleConfig.plot_size_unite }} ) </small>
               <input
                 class="form-control form-control-sm"
                 [formControl]="formTransect.controls.plot_size"
@@ -210,7 +210,7 @@
               </span>
               <span class="plot-item"
                 ><i class="material-icons gps-icon">location_on</i> Distance :
-                {{ plot.distance_plot }} {{ storeService.shsConfig.plot_size_unite }}</span
+                {{ plot.distance_plot }} {{ storeService.moduleConfig.plot_size_unite }}</span
               >
             </li>
           </ul>
@@ -231,14 +231,14 @@
           [headerHeight]="50"
           [footerHeight]="50"
           [rowHeight]="'auto'"
-          [messages]="storeService.shsConfig.list_visit_message"
+          [messages]="storeService.moduleConfig.list_visit_message"
           [offset]="page.pageNumber"
           [limit]="page.size"
           [selectionType]="'single'"
           (select)="onRowSelect($event)"
         >
           <ngx-datatable-column
-            *ngFor="let col of storeService.shsConfig.default_list_visit_columns"
+            *ngFor="let col of storeService.moduleConfig.default_list_visit_columns"
             [name]="col.name"
             [prop]="col.prop"
             maxWidth="col.maxWidth"
@@ -260,7 +260,7 @@
           <pnx-modal-download
             labelButton="Télécharger ces visites"
             [pathDownload]="storeService.urlLoad"
-            [exportFormat]="storeService.shsConfig.export_available_format"
+            [exportFormat]="storeService.moduleConfig.export_available_format"
             [queryString]="storeService.queryString"
           >
           </pnx-modal-download>
@@ -292,7 +292,7 @@
         <input class="form-control form-control-sm" [formControl]="formPlot.controls.code_plot" />
       </div>
       <div class="form-group">
-        <small>Distance ( {{ storeService.shsConfig.plot_size_unite }} ) : </small>
+        <small>Distance ( {{ storeService.moduleConfig.plot_size_unite }} ) : </small>
         <input
           type="number"
           class="form-control form-control-sm"

@@ -108,17 +108,18 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     this.checkPermission();
     this.getTransects();
-    this.center = this.storeService.shsConfig.zoom_center;
-    this.zoom = this.storeService.shsConfig.zoom;
+    this.center = this.storeService.moduleConfig.zoom_center;
+    this.zoom = this.storeService.moduleConfig.zoom;
     this.initFilters();
   }
 
   ngAfterViewInit() {
-    var iconMarker = L.icon({
+    let moduleCode = ModuleConfig.MODULE_CODE.toLocaleLowerCase();
+    let iconMarker = L.icon({
       iconSize: [25, 41],
       iconAnchor: [13, 41],
-      iconUrl: './external_assets/shs/marker-icon.png',
-      shadowUrl: './external_assets/shs/marker-shadow.png',
+      iconUrl: `./external_assets/${moduleCode}/marker-icon.png`,
+      shadowUrl: `./external_assets/${moduleCode}/marker-shadow.png`,
     });
     this._map = this.mapService.getMap();
     this._deflate_features = L.deflate({ minSize: 10, markerOptions: { icon: iconMarker } });
@@ -137,8 +138,8 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
       data => {
         if (data !== null) {
           this.sites = data[1];
-          this.page.totalElements = data[0].totalItmes;
-          this.page.size = data[0].items_per_page;
+          this.page.totalElements = data[0].totalItems;
+          this.page.size = data[0].itemsPerPage;
           this.sites.features.forEach(site => {
             if (
               !_.find(this.tabHab, (habitat: Habitat) => {
@@ -202,7 +203,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setPage(pageInfo) {
     this.page.pageNumber = pageInfo.offset;
-    if (this.storeService.shsConfig.pagination_serverside) {
+    if (this.storeService.moduleConfig.pagination_serverside) {
       this.onSetParams('page', pageInfo.offset + 1);
       this.getTransects(this.storeService.queryString.toString());
     }

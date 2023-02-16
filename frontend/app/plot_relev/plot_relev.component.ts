@@ -3,12 +3,12 @@ import { FormGroup, FormBuilder, FormArray, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'plot_relev',
+  selector: 'plot-relev',
   templateUrl: 'plot_relev.component.html',
   styleUrls: ['./plot_relev.component.scss'],
 })
 export class PlotReleveComponent implements OnInit, OnChanges {
-  @Input() taxons: any[];
+  @Input() taxons: any[] = [];
   @Input() strates: any[];
   @Input() id_plot: number;
   @Input() data: any = null;
@@ -31,8 +31,11 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     } else {
       this.id_releve_plot = null;
     }
-    if (this.disabledForm) this.plotForm.disable();
-    else this.plotForm.enable();
+    if (this.disabledForm) {
+      this.plotForm.disable();
+    } else {
+      this.plotForm.enable();
+    }
     this.onChanges();
   }
 
@@ -100,16 +103,24 @@ export class PlotReleveComponent implements OnInit, OnChanges {
 
   onBlurMethod() {
     _.map(this.plotForm.value.strates_releve, strate => {
-      if (this.id_releve_plot) strate.id_releve_plot = this.id_releve_plot;
-      if (!strate.id_releve_plot_strat) delete strate.id_releve_plot_strat;
+      if (this.id_releve_plot) {
+        strate.id_releve_plot = this.id_releve_plot;
+      }
+      if (!strate.id_releve_plot_strat) {
+        delete strate.id_releve_plot_strat;
+      }
       delete strate.label_default;
     });
     _.map(this.plotForm.value.taxons_releve, taxon => {
-      if (this.id_releve_plot) taxon.id_releve_plot = this.id_releve_plot;
-      if (!taxon.id_cor_releve_plot_taxon) delete taxon.id_cor_releve_plot_taxon;
+      if (this.id_releve_plot) {
+        taxon.id_releve_plot = this.id_releve_plot;
+      }
+      if (!taxon.id_cor_releve_plot_taxon) {
+        delete taxon.id_cor_releve_plot_taxon;
+      }
       delete taxon.nom_complet;
     });
-    if (this.id_releve_plot)
+    if (this.id_releve_plot) {
       this.plotReleve.emit([
         {
           id_plot: this.id_plot,
@@ -119,11 +130,12 @@ export class PlotReleveComponent implements OnInit, OnChanges {
         },
         this.isModifeded,
       ]);
-    else
+    } else {
       this.plotReleve.emit([
         { id_plot: this.id_plot, plot_data: this.plotForm.value, status: this.plotForm.valid },
         this.isModifeded,
       ]);
+    }
     this.isModifeded = false;
   }
 
