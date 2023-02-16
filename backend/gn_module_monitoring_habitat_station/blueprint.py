@@ -335,9 +335,9 @@ def get_taxa_by_habitats(cd_hab):
     Retourne tous les taxons d'un habitat.
     """
     query = (
-        DB.session.query(CorHabTaxon.id_cor_hab_taxon, Taxref.nom_complet)
+        DB.session.query(CorHabTaxon.id_cor_hab_taxon, Taxref.nom_complet_html)
         .join(Taxref, CorHabTaxon.cd_nom == Taxref.cd_nom)
-        .group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxref.nom_complet)
+        .group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxref.nom_complet_html)
         .filter(CorHabTaxon.id_habitat == cd_hab)
     )
     data = query.all()

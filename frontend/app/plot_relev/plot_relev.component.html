@@ -62,7 +62,7 @@
         *ngFor="let taxon of plotForm.controls.taxons_releve.controls"
         formArrayName="taxons_releve"
       >
-        <td>{{ taxon.controls.nom_complet.value }}</td>
+        <td [innerHtml]="taxon.controls.nom_complet.value"></td>
         <td>
           <div class="input-group">
             <input
