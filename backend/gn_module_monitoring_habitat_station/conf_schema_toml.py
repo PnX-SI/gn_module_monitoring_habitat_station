@@ -5,11 +5,6 @@
 from marshmallow import Schema, fields
 
 export_available_format = ["geojson", "csv", "shapefile"]
-zoom_center = [44.863664, 6.268670]
-zoom = 10
-pagination_serverside = False
-items_per_page = 10
-plot_size_unite = "mètres"
 site_message = {"emptyMessage": "Aucun site à afficher ", "totalMessage": "sites(s) au total"}
 list_visit_message = {
     "emptyMessage": "Aucune visite sur ce site ",
@@ -29,11 +24,6 @@ default_list_visit_columns = [
     {"name": "Date", "prop": "visit_date_min", "width": "120"},
     {"name": "Observateur(s)", "prop": "observers", "width": "350"},
 ]
-id_nomenclature_type_site = 550
-id_bib_list_habitat = 2
-id_menu_list_user = 1
-id_type_commune = 25
-
 
 class GnModuleSchemaConf(Schema):
     site_message = fields.Dict(load_default=site_message)
@@ -45,12 +35,12 @@ class GnModuleSchemaConf(Schema):
         fields.Dict(), load_default=default_list_visit_columns
     )
     export_srid = fields.Integer(load_default=2154)
-    zoom_center = fields.List(fields.Float(), load_default=zoom_center)
+    zoom_center = fields.List(fields.Float(), load_default=[44.863664, 6.268670])
     zoom = fields.Integer(load_default=10)
-    pagination_serverside = fields.Boolean(load_default=pagination_serverside)
-    items_per_page = fields.Integer(load_default=items_per_page)
-    plot_size_unite = fields.String(load_default=plot_size_unite)
-    id_bib_list_habitat = fields.Integer(load_default=id_bib_list_habitat)
-    site_type = fields.Integer(load_default=id_nomenclature_type_site)
-    id_menu_list_user = fields.Integer(load_default=id_menu_list_user)
-    id_type_commune = fields.Integer(load_default=id_type_commune)
+    pagination_serverside = fields.Boolean(load_default=False)
+    items_per_page = fields.Integer(load_default=10)
+    plot_size_unite = fields.String(load_default="mètres")
+    habitat_list_name = fields.String(load_default="MHS")
+    site_type_code = fields.String(load_default="HAB")
+    user_list_code = fields.String(load_default="OFS")
+    municipality_type_code = fields.String(load_default="COM")
