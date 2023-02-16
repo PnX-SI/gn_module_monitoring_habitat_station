@@ -76,6 +76,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   }
 
   initTaxon(): void {
+    this.taxons.sort((taxonA, taxonB) => taxonA.nom_complet.localeCompare(taxonB.nom_complet));
     this.taxons.forEach(taxon => {
       (this.plotForm.get('taxons_releve') as FormArray).push(
         this._fb.group({
@@ -89,6 +90,9 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   }
 
   initStrates(): void {
+    this.strates.sort((strateA, strateB) =>
+      strateA.label_default.localeCompare(strateB.label_default)
+    );
     this.strates.forEach(strate => {
       (this.plotForm.get('strates_releve') as FormArray).push(
         this._fb.group({
