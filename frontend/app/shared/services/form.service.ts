@@ -14,6 +14,7 @@ export class FormService {
       geom_start_lat: [null, Validators.required],
       geom_start_long: [null, Validators.required],
       plot_size: [null, Validators.required],
+      plot_shape: [null],
       transect_label: [null, Validators.required],
       cd_hab: [null, Validators.required],
       id_nomenclature_plot_position: [null, Validators.required],

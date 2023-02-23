@@ -72,6 +72,7 @@ class TTransect(MonitoringHabitatStation):
         DB.ForeignKey("ref_habitats.habref.cd_hab", onupdate="CASCADE"), nullable=False
     )
     plot_size = DB.Column(DB.String(50))
+    plot_shape = DB.Column(DB.Unicode())
 
     t_base_site = DB.relationship("TBaseSites")
     cor_plots = DB.relationship("TPlot")

@@ -1,5 +1,8 @@
 BEGIN;
 
+-- ----------------------------------------------------------------------
+-- Add additional taxa to the list of predefined habitat taxa
+
 ALTER TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons ADD cd_nom integer NULL;
 
 COMMENT ON COLUMN pr_monitoring_habitat_station.cor_releve_plot_taxons.cd_nom IS 'Code du nom scientifique du taxon.';
@@ -20,5 +23,12 @@ ALTER TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons
 ADD CONSTRAINT fk_cor_releve_plot_taxons_cd_nom
 FOREIGN KEY (cd_nom)
 REFERENCES taxonomie.taxref(cd_nom) ON UPDATE CASCADE ;
+
+-- ----------------------------------------------------------------------
+-- Add plot shape description field
+
+ALTER TABLE pr_monitoring_habitat_station.t_transects ADD plot_shape text NULL;
+COMMENT ON COLUMN pr_monitoring_habitat_station.t_transects.plot_shape IS 'Description de la forme des placettes.';
+
 
 COMMIT;

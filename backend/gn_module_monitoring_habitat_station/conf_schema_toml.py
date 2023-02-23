@@ -39,7 +39,6 @@ class GnModuleSchemaConf(Schema):
     zoom = fields.Integer(load_default=10)
     pagination_serverside = fields.Boolean(load_default=False)
     items_per_page = fields.Integer(load_default=10)
-    plot_size_unite = fields.String(load_default="mètres")
     habitat_list_name = fields.String(load_default="MHS")
     site_type_code = fields.String(load_default="HAB")
     user_list_code = fields.String(load_default="OFS")

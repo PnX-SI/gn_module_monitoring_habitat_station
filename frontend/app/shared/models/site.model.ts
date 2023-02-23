@@ -8,6 +8,7 @@ export interface ISite {
     nom_habitat?: string;
     nom_commune?: string;
     plot_size?: number;
+    plot_shape?: string;
     cor_plots?: any[];
     plot_position?: any;
     transect_label?: string;

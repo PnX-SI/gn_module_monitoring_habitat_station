@@ -29,9 +29,12 @@ CREATE TABLE t_transects (
     geom_end public.geometry(Point, 4326),
     id_nomenclature_plot_position integer NOT NULL,
     cd_hab integer NOT NULL,
-    plot_size character varying(50)
+    plot_size character varying(50),
+    plot_shape text NULL
 );
 COMMENT ON TABLE pr_monitoring_habitat_station.t_transects IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
+
+COMMENT ON COLUMN pr_monitoring_habitat_station.t_transects.plot_shape IS 'Description de la forme des placettes.';
 
 -- Table `t_plots`
 CREATE TABLE t_plots (
@@ -64,10 +67,13 @@ COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_strats IS 'Strate
 CREATE TABLE cor_releve_plot_taxons (
     id_cor_releve_plot_taxon serial NOT NULL,
     id_releve_plot integer NOT NULL,
-    id_cor_hab_taxon integer NOT NULL,
+    id_cor_hab_taxon integer NULL,
+    cd_nom integer NOT NULL,
     cover_pourcentage integer
 );
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons IS 'Taxons observés par placette';
+
+COMMENT ON COLUMN pr_monitoring_habitat_station.cor_releve_plot_taxons.cd_nom IS 'Code du nom scientifique du taxon.';
 
 -- Table `cor_hab_taxon`
 CREATE TABLE cor_hab_taxon (
@@ -135,6 +141,8 @@ ALTER TABLE ONLY cor_releve_plot_taxons
     ADD CONSTRAINT fk_cor_releve_plot_taxons_id_releve_plot FOREIGN KEY (id_releve_plot) REFERENCES pr_monitoring_habitat_station.t_releve_plots (id_releve_plot) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY cor_releve_plot_taxons
     ADD CONSTRAINT fk_cor_releve_plot_taxons_id_cor_hab_taxon FOREIGN KEY (id_cor_hab_taxon) REFERENCES pr_monitoring_habitat_station.cor_hab_taxon (id_cor_hab_taxon) ON UPDATE CASCADE;
+ALTER TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons
+    ADD CONSTRAINT fk_cor_releve_plot_taxons_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref(cd_nom) ON UPDATE CASCADE ;
 
 ALTER TABLE ONLY cor_hab_taxon
     ADD CONSTRAINT fk_cor_hab_taxon_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;

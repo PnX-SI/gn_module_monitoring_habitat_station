@@ -209,6 +209,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       id_nomenclature_plot_position: this.currentSite.properties.plot_position.id_nomenclature,
       cd_hab: this.currentSite.properties.cd_hab,
       plot_size: this.currentSite.properties.plot_size,
+      plot_shape: this.currentSite.properties.plot_shape,
       transect_label: this.currentSite.properties.transect_label,
     });
   }
