@@ -30,33 +30,6 @@ legend {
   }
 }
 
-.card {
-  max-height: 100vh;
-  overflow-y: auto;
-  padding-bottom: 5px;
-}
-
-.card-resize {
-  max-height: calc(95vh - 67px);
-}
-
-.card-header {
-  border-top: 1px solid rgba(0, 0, 0, 0.125);
-}
-
-.card-title {
-  margin-bottom: 0;
-}
-
-.card-footer {
-  position: fixed;
-  z-index: 999;
-  bottom: 0;
-  width: 100%;
-  min-height: 67px;
-  background-color: #f5f5f5;
-}
-
 .plot {
   text-align: left;
   width: 100%;

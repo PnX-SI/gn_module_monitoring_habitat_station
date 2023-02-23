@@ -1,10 +1,12 @@
 import re
 
 from sqlalchemy.sql.expression import func
+from werkzeug.exceptions import Conflict
 
-from geonature.utils.errors import GeonatureApiError
+from apptax.taxonomie.models import Taxref
 from geonature.core.gn_monitoring.models import TBaseVisits
-from geonature.utils.env import DB, ROOT_DIR
+from geonature.utils.env import DB
+from geonature.utils.errors import GeonatureApiError
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 from pypnusershub.db.tools import InsufficientRightsError
 
@@ -27,7 +29,6 @@ def check_user_cruved_visit(user, visit, cruved_level):
 
         for role in visit.observers:
             if role.id_role == user.id_role:
-                print("même id ")
                 is_allowed = True
                 break
             elif visit.id_digitiser == user.id_role:
@@ -44,7 +45,6 @@ def check_user_cruved_visit(user, visit, cruved_level):
     elif cruved_level == "2":
         for role in visit.observers:
             if role.id_role == user.id_role:
-                print("même role")
                 is_allowed = True
                 break
             elif visit.id_digitiser == user.id_role:
@@ -62,37 +62,44 @@ def check_user_cruved_visit(user, visit, cruved_level):
             )
 
 
-def check_year_visit(id_base_site, new_visit_date):
+# TODO: move this function in conservation shared library. See also SHT and SFT.
+# TODO: use Conflict instead of Forbidden.
+def check_year_visit(id_base_site, new_visit_date, id_base_visit=None):
     """
     Check if there is already a visit of the same year.
     If yes, observer is not allowed to post the new visit
     """
-    q_year = DB.session.query(func.date_part("year", TBaseVisits.visit_date_min)).filter(
+    query = DB.session.query(func.date_part("year", TBaseVisits.visit_date_min)).filter(
         TBaseVisits.id_base_site == id_base_site
     )
-    tab_old_year = q_year.all()
-    print(tab_old_year)
-    year_new_visit = new_visit_date[0:4]
+    if id_base_visit is not None:
+        query = query.filter(TBaseVisits.id_base_visit != id_base_visit)
+    old_years = query.all()
 
-    for y in tab_old_year:
-        year_old_visit = str(int(y[0]))
+    year_new_visit = new_visit_date[0:4]
+    for year in old_years:
+        year_old_visit = str(int(year[0]))
         if year_old_visit == year_new_visit:
             DB.session.rollback()
-            raise PostYearError(
-                ("Maille {} has already been visited in {} ").format(id_base_site, year_old_visit),
-                403,
+            msg = (
+                f"PostYearError - Site {id_base_site} has already been visited in {year_old_visit}"
             )
+            raise Conflict(msg)
 
 
-def get_taxonlist_by_cdhab(cdhab):
-    q = (
-        DB.session.query(CorHabTaxon.id_cor_hab_taxon, Taxonomie.lb_nom)
-        .join(Taxonomie, CorHabTaxon.cd_nom == Taxonomie.cd_nom)
-        .group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxonomie.lb_nom)
+def get_id_type_site(code):
+    query = DB.session.query(func.ref_nomenclatures.get_id_nomenclature("TYPE_SITE", code))
+    return query.first()
+
+
+def get_taxons_by_cd_hab(habitat_code):
+    query = (
+        DB.session.query(CorHabTaxon.id_cor_hab_taxon, Taxref.lb_nom)
+        .join(Taxref, CorHabTaxon.cd_nom == Taxref.cd_nom)
+        .group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxref.lb_nom)
+        .filter(CorHabTaxon.id_habitat == habitat_code)
     )
-
-    q = q.filter(CorHabTaxon.id_habitat == cdhab)
-    data = q.all()
+    data = query.all()
 
     taxons = []
     if data:
@@ -126,7 +133,7 @@ def clean_string(my_string):
     return my_string
 
 
-def striphtml(data):
+def strip_html(data):
     p = re.compile(r"<.*?>")
     return p.sub("", data)
 

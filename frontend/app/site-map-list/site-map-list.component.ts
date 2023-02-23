@@ -8,18 +8,19 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Page } from '../shared/models/page';
+import { Page } from '../shared/models/page.model';
 import * as L from 'leaflet';
 import 'Leaflet.Deflate';
 
 import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
 
-import { DataService, Habitat } from '../shared/services/data.service';
+import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
 import { ModuleConfig } from '../module.config';
 import * as _ from 'lodash';
+import { Habitat } from '../shared/models/habitat.model';
 
 const I18N_VALUES = {
   fr: {

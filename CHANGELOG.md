@@ -5,6 +5,7 @@
 ### Added
 
 * Added Bash script (`import_habitats.sh`) to import habitats into the module.
+* Added possibility to add new taxon to each releve.
 
 ### Changed
 

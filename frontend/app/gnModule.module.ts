@@ -16,7 +16,7 @@ import { UserService } from './shared/services/user.service';
 import { SiteMapListComponent } from './site-map-list/site-map-list.component';
 import { ListVisitComponent } from './list-visit/list-visit.component';
 import { ReleveComponent } from './releve/releve.component';
-import { PlotReleveComponent } from './plot_relev/plot_relev.component';
+import { PlotReleveComponent } from './plot-releve/plot-releve.component';
 
 // Routes
 import { routes } from './gnModule.routes';

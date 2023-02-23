@@ -32,11 +32,6 @@ legend {
     padding: 4px 10px;
   }
 }
-.card {
-  max-height: 94vh;
-  overflow-y: auto;
-  padding-bottom: 5px;
-}
 
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
   background-color: #00188f;
@@ -73,14 +68,6 @@ legend {
 
 .custom-checkbox .custom-control-input:disabled:checked ~ .custom-control-label::before {
   background-color: #b3b3b39e;
-}
-
-.card-header {
-  border-top: 1px solid rgba(0, 0, 0, 0.125);
-}
-
-.card-title {
-  margin-bottom: 0;
 }
 
 form.ng-invalid {

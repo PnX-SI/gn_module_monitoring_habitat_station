@@ -10,12 +10,14 @@ import * as _ from 'lodash';
 
 import { DataFormService } from '@geonature_common/form/data-form.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
-import { Page } from '../shared/models/page';
-import { DataService } from '../shared/services/data.service';
-import { StoreService, ISite } from '../shared/services/store.service';
+
 import { ModuleConfig } from '../module.config';
+import { DataService } from '../shared/services/data.service';
 import { FormService } from '../shared/services/form.service';
+import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
+import { Page } from '../shared/models/page.model';
+import { ISite } from '../shared/models/site.model';
 
 
 @Component({
@@ -70,8 +72,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.checkPermission();
     forkJoin([
-      this._api.getSites({ id_base_site: this.idSite }),
-      this._api.getHabitatsList(),
+      this._api.getAllSites({ id_base_site: this.idSite }),
+      this._api.getHabitats(),
       this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, {
         orderby: 'label_default',
       }),
@@ -82,7 +84,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         this.plot_position = results[2] ? results[2].values : [];
         this.formTransect = this.formService.initFormTransect();
         if (!this.isNew) {
-          this.getTtransectByIdSite();
+          this.loadTransect();
         } else {
           this.transect_title = 'Nouveau transect';
           this.dataLoaded = true;
@@ -119,7 +121,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   getVisits() {
-    this._api.getVisits(this.idSite).pipe(
+    this._api.getAllVisits(this.idSite).pipe(
       map(data => {
         return data === null
           ? [{ totalItems: 0, itemsPerPage: 10 }, []]
@@ -128,23 +130,28 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       )
     ).subscribe(
       (data) => {
-        console.log(data)
         this.page.totalElements = data[0].totalItems;
         this.page.size = data[0].itemsPerPage;
-        data[1].forEach((visit) => {
-          if (visit && Object.keys(visit).length) {
+        let visits = data[1] ? data[1] : [];
+        visits.forEach(visit => {
+          if (visit && visit.observers) {
             let fullName = '';
             let count = visit.observers.length;
             visit.observers.forEach((obs, index) => {
               if (count > 1) {
-                if (index + 1 == count) fullName += obs.nom_role + ' ' + obs.prenom_role;
-                else fullName += obs.nom_role + ' ' + obs.prenom_role + ', ';
-              } else fullName = obs.nom_role + ' ' + obs.prenom_role;
+                if (index + 1 == count) {
+                  fullName += obs.nom_role + ' ' + obs.prenom_role;
+                } else {
+                  fullName += obs.nom_role + ' ' + obs.prenom_role + ', ';
+                }
+              } else {
+                fullName = obs.nom_role + ' ' + obs.prenom_role;
+              }
             });
             visit.observers = fullName;
           }
         });
-        this.rows = data[1];
+        this.rows = visits;
         this.dataLoaded = true;
       },
       (error) => {
@@ -162,8 +169,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     );
   }
 
-  getTtransectByIdSite() {
-    this._api.getTtransectByIdSite(this.idSite).subscribe(
+  private loadTransect() {
+    this._api.getOneTransect(this.idSite).subscribe(
       site => {
         this.currentSite = site;
         if (!this.currentSite.properties.cor_plots) {
@@ -215,6 +222,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       `${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/new_visit`,
     ]);
   }
+
   onVisitDetails(idVisit) {
     this.router.navigate([
       `${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/visit/`,
@@ -229,6 +237,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     });
     this.modalRef = this.modalService.open(content, { centered: true });
   }
+
   onSavePlot() {
     this.plots.push(this.formPlot.value);
     this.modalRef.close();
@@ -265,7 +274,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     delete transect.geom_end_lat;
     delete transect.geom_start_lat;
     if (this.isNew) {
-      this._api.postTransect(transect).subscribe(
+      this._api.addTransect(transect).subscribe(
         data => {
           this.toastr.success('Le transect a été ajouté avec succès', '', {
             positionClass: 'toast-top-right',

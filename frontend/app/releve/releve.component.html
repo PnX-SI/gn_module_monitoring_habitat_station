@@ -1,27 +1,26 @@
-<div class="releve" *ngIf="loadForm">
-  <div class="row row-0">
-    <div
-      class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container"
-      [class.card-resize]="resizeCard()"
-    >
-      <div class="card-header">
-        <h4 class="card-title">{{ visit_name }}</h4>
-      </div>
-      <div>
-        <button type="button" class="btn btn-link btn-sm back-button" (click)="backToVisites()">
-          <i class="fa fa-arrow-left" aria-hidden="true"> </i>
-          Retour au transect n° {{ idSite }}
-        </button>
-      </div>
-      <div class="card-body">
-        <form [formGroup]="visitForm">
-          <fieldset [disabled]="disabledForm">
-            <legend>
-              Transect
-            </legend>
-            <div class="form-group">
-              <label> Observateur(s) * :</label>
-              <div id="newObserver">
+<div id="cover-spin" *ngIf="spinner"></div>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="card-group">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">{{ visit_name }}</h4>
+        </div>
+        <div class="card-body py-0">
+          <div class="pb-2">
+            <button type="button" class="btn btn-link btn-sm back-button" (click)="backToVisites()">
+              <i class="fa fa-arrow-left" aria-hidden="true"> </i>
+              Retour au transect n° {{ idSite }}
+            </button>
+          </div>
+
+          <form [formGroup]="visitForm">
+            <fieldset [disabled]="disabledForm">
+              <legend>
+                Transect
+              </legend>
+              <div class="form-group">
+                <label> Observateur(s) * :</label>
                 <pnx-observers
                   [parentFormControl]="visitForm.controls.observers"
                   [bindAllItem]="true"
@@ -30,86 +29,81 @@
                 >
                 </pnx-observers>
               </div>
-            </div>
-            <div class="form-group">
-              <label> Perturbation(s) : </label>
-              <div>
+              <div class="form-group">
+                <label> Perturbation(s) : </label>
                 <pnx-nomenclature
                   [parentFormControl]="visitForm.controls.perturbations"
                   [multiSelect]="true"
                   keyValue="id_nomenclature"
                   [bindAllItem]="true"
                   keyLabel="label_default"
-                  [disabled]="disabledForm"
                   codeNomenclatureType="TYPE_PERTURBATION"
                 >
                 </pnx-nomenclature>
               </div>
-            </div>
-            <div class="form-group">
-              <label> Date de la visite * : </label>
-              <div>
+              <div class="form-group">
+                <label> Date de la visite * : </label>
                 <pnx-date [parentFormControl]="visitForm.controls.visit_date_min"> </pnx-date>
               </div>
-            </div>
-          </fieldset>
-        </form>
-        <fieldset>
-          <legend>
-            Placettes
-          </legend>
-          <div class="list-plots">
-            <button
-              *ngFor="let plot of currentSite.properties.cor_plots"
-              class="plot"
-              [class.active]="isActive(plot)"
-              (click)="onChangePlot(plot)"
-            >
-              <i
-                class="fa fa-angle-right plot-icon"
-                [class.plot-active]="isActive(plot)"
-                aria-hidden="true"
-              ></i>
-              <span class="plot-item"
-                ><i class="fa fa-hashtag"></i> Code placette : {{ plot.code_plot }}</span
-              >
-              <span class="plot-item"
-                ><i class="material-icons gps-icon">location_on</i> Distance :
-                {{ plot.distance_plot }} {{ storeService.moduleConfig.plot_size_unite }}</span
-              >
-              <span *ngIf="plot.isModifided && plot.status == true" class="badge  badge-warning"
-                >Modifiée</span
-              >
-              <span *ngIf="plot.status == false" class="badge  badge-danger">Erreur</span>
-              <span *ngIf="plot.isEmpty" class="badge  badge-secondary">Vide</span>
-            </button>
-          </div>
-        </fieldset>
+            </fieldset>
+          </form>
+
+          <form>
+            <fieldset>
+              <legend>
+                Placettes
+              </legend>
+              <div class="list-plots">
+                <button
+                  *ngFor="let plot of currentSite?.properties.cor_plots"
+                  class="plot"
+                  [class.active]="isActive(plot)"
+                  (click)="onChangePlot(plot)"
+                >
+                  <i
+                    class="fa fa-angle-right plot-icon"
+                    [class.plot-active]="isActive(plot)"
+                    aria-hidden="true"
+                  ></i>
+                  <span class="plot-item"
+                    ><i class="fa fa-hashtag"></i> Code placette : {{ plot.code_plot }}</span
+                  >
+                  <span class="plot-item"
+                    ><i class="material-icons gps-icon">location_on</i> Distance :
+                    {{ plot.distance_plot }} {{ storeService.moduleConfig.plot_size_unite }}</span
+                  >
+                  <span *ngIf="plot.isModifided && plot.status == true" class="badge  badge-warning"
+                    >Modifiée</span
+                  >
+                  <span *ngIf="plot.status == false" class="badge  badge-danger">Erreur</span>
+                  <span *ngIf="plot.isEmpty" class="badge  badge-secondary">Vide</span>
+                </button>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <plot-releve
+          [plot-id]="plotId"
+          [taxons]="taxons == null ? [] : taxons"
+          [strates]="strates"
+          [disabledForm]="disabledForm"
+          [(data)]="selectedPlot"
+          [title]="plotTitle"
+          (plotReleve)="getPlotReleve($event)"
+        >
+        </plot-releve>
       </div>
     </div>
-
-    <div
-      class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm "
-      [class.card-resize]="resizeCard()"
-    >
-      <div id="cover-spin" *ngIf="spinner"></div>
-      <plot-relev
-        [id_plot]="id_plot"
-        [taxons]="taxons == null ? [] : taxons"
-        [strates]="strates"
-        [disabledForm]="disabledForm"
-        [(data)]="selectedPolt"
-        [plot_title]="plot_title"
-        (plotReleve)="getPlotReleve($event)"
-      >
-      </plot-relev>
-    </div>
   </div>
-  <div *ngIf="updateIsAllowed || addIsAllowed" class="card-footer">
+
+  <div class="card-footer" *ngIf="updateIsAllowed || addIsAllowed">
     <div class="d-flex justify-content-end">
       <button
         *ngIf="!isNew && updateIsAllowed"
-        class="btn  pull-right box-shadow"
+        class="btn box-shadow"
         [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'"
         (click)="onEdit()"
       >
@@ -119,7 +113,7 @@
       <button
         *ngIf="(!disabledForm && addIsAllowed) || (!disabledForm && updateIsAllowed)"
         type="submit"
-        class="btn btn-success  ml-3 submit-btn box-shadow"
+        class="btn btn-success box-shadow ml-3 submit-btn"
         [disabled]="!visitForm.valid"
         (click)="onSubmitVisit()"
       >

@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
+
 import { Observable } from 'rxjs/Observable';
+
 import { DataService } from './data.service';
+
 
 @Injectable()
 export class UserService {
@@ -18,7 +21,7 @@ export class UserService {
   // Use service geonature ? localstorage ?
   getUserCruved() {
     if (Object.keys(this._cruved).length == 0) {
-      return this.dataService.getUserCruved();
+      return this.dataService.getCurrentUserRights();
     } else {
       return new Observable(ucruved => ucruved.next(this._cruved));
     }

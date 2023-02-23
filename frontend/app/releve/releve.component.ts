@@ -1,16 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
+import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { ModuleConfig } from '../module.config';
-import { DataService, IVisit, Plot } from '../shared/services/data.service';
-import { StoreService, ISite } from '../shared/services/store.service';
 import { ToastrService } from 'ngx-toastr';
 import * as _ from 'lodash';
 
+import { CommonService } from '@geonature_common/service/common.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
+
+import { ModuleConfig } from '../module.config';
+import { DataService } from '../shared/services/data.service';
+import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
+import { IVisit, Plot } from '../shared/models/visit.model';
+import { ISite } from '../shared/models/site.model';
+
 
 @Component({
   selector: 'releve',
@@ -31,11 +37,11 @@ export class ReleveComponent implements OnInit {
   checked = 0;
   currentSite: ISite;
   plots: Plot[] = [];
-  id_plot: number;
+  plotId: number;
   visitForm: FormGroup;
-  plot_title: string;
+  plotTitle: string;
   submit_label: string;
-  selectedPolt;
+  selectedPlot;
   spinner: boolean;
   public disabledForm: boolean = true;
   public edit_btn: string = 'Editer';
@@ -44,6 +50,7 @@ export class ReleveComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private commonService: CommonService,
     public router: Router,
     private _fb: FormBuilder,
     public dateParser: NgbDateParserFormatter,
@@ -65,15 +72,15 @@ export class ReleveComponent implements OnInit {
         this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, {
           orderby: 'label_default',
         }),
-        this._api.getTtransectByIdSite(this.idSite),
+        this._api.getOneTransect(this.idSite),
       ]).subscribe(
         results => {
           this.strates = results[0].values;
           this.renameKey(this.strates);
           this.currentSite = results[1];
           this.id_base_site = this.currentSite.properties.id_base_site;
-          this.id_plot = this.currentSite.properties.cor_plots[0].id_plot;
-          this.plot_title = this.currentSite.properties.cor_plots[0].code_plot;
+          this.plotId = this.currentSite.properties.cor_plots[0].id_plot;
+          this.plotTitle = this.currentSite.properties.cor_plots[0].code_plot;
           this._api.getTaxonsByHabitat(this.currentSite.properties.cd_hab).subscribe(taxons => {
             this.taxons = taxons;
             if (!this.isNew) {
@@ -99,8 +106,8 @@ export class ReleveComponent implements OnInit {
         }
       );
     } else {
-      this.id_plot = this.currentSite.properties.cor_plots[0].id_plot;
-      this.plot_title = this.currentSite.properties.cor_plots[0].code_plot;
+      this.plotId = this.currentSite.properties.cor_plots[0].id_plot;
+      this.plotTitle = this.currentSite.properties.cor_plots[0].code_plot;
       this.id_base_site = this.currentSite.properties.id_base_site;
       forkJoin([
         this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, {
@@ -143,23 +150,30 @@ export class ReleveComponent implements OnInit {
     }
   }
 
-  getVisit() {
-    this._api.getVisitByID(this.idVisit).subscribe(
+  private renameKey(strates) {
+    strates.forEach(element => {
+      element.id_nomenclature_strate = element.id_nomenclature;
+      delete element.id_nomenclature;
+    });
+  }
+
+  private getVisit() {
+    this._api.getOneVisit(this.idVisit).subscribe(
       data => {
         this.visit = data;
         this.userService.check_user_cruved_visit('U', this.visit).subscribe(ucruved => {
           this.updateIsAllowed = ucruved;
         });
-        if (this.visit.cor_visit_perturbation)
-          this.visit.cor_visit_perturbation.forEach(element => {
-            element.label_default = element.t_nomenclature.label_default;
-            delete element.t_nomenclature;
-          });
-        else this.visit.cor_visit_perturbation = null;
+        this.visit.perturbations = null;
+        if (this.visit.cor_visit_perturbation) {
+          this.visit.perturbations = this.visit.cor_visit_perturbation.map(
+            perturbation => perturbation.t_nomenclature
+          );
+        }
         this.patchForm();
         this.plots = _.clone(this.visit.cor_releve_plot);
-        this.selectedPolt = this.visit.cor_releve_plot.find(plot => {
-          return plot.id_plot == this.id_plot;
+        this.selectedPlot = this.visit.cor_releve_plot.find(plot => {
+          return plot.id_plot == this.plotId;
         });
         this.currentSite.properties.cor_plots.map(plotlist => {
           if (
@@ -212,12 +226,12 @@ export class ReleveComponent implements OnInit {
 
   onChangePlot(plot) {
     this.spinner = true;
-    this.id_plot = plot.id_plot;
-    this.plot_title = this.currentSite.properties.cor_plots.find(plot => {
-      return plot.id_plot == this.id_plot;
+    this.plotId = plot.id_plot;
+    this.plotTitle = this.currentSite.properties.cor_plots.find(plot => {
+      return plot.id_plot == this.plotId;
     }).code_plot;
-    this.selectedPolt = this.plots.find(plot => {
-      return plot.id_plot == this.id_plot;
+    this.selectedPlot = this.plots.find(plot => {
+      return plot.id_plot == this.plotId;
     });
     setTimeout(() => {
       this.spinner = false;
@@ -225,11 +239,12 @@ export class ReleveComponent implements OnInit {
   }
 
   isActive(plot) {
-    return this.id_plot === plot.id_plot;
+    return this.plotId === plot.id_plot;
   }
 
-  intitForm() {
+  private intitForm() {
     this.visitForm = this._fb.group({
+      id_base_visit: null,
       visit_date_min: [null, Validators.required],
       observers: [null, Validators.required],
       perturbations: new Array(),
@@ -238,80 +253,70 @@ export class ReleveComponent implements OnInit {
     this.visitForm.controls['plots'].statusChanges.subscribe(status => {});
   }
 
-  patchForm() {
-    this.visitForm.patchValue({
-      visit_date_min: this.dateParser.parse(this.visit.visit_date_min),
-      observers: this.visit.observers,
-      perturbations: this.visit.cor_visit_perturbation,
-    });
-    this.loadForm = true;
-  }
-
   onSubmitVisit() {
     if (this.visitForm.valid) {
-      this.visitForm.value['observers'] = this.visitForm.value['observers'].map(obs => {
+      let preparedData = {};
+      preparedData['id_base_visit'] = this.visitForm.value['id_base_visit'];
+      preparedData['observers'] = this.visitForm.value['observers'].map(obs => {
         return obs.id_role;
       });
       if (this.visitForm.value['perturbations'])
-        this.visitForm.value['perturbations'] = this.visitForm.value['perturbations'].map(
-          perturbation => {
-            if (!perturbation.hasOwnProperty('id_nomenclature_perturb'))
-              return { id_nomenclature_perturb: perturbation.id_nomenclature };
-            else return { id_nomenclature_perturb: perturbation.id_nomenclature_perturb };
+        preparedData['perturbations'] = this.visitForm.value['perturbations'].map(perturbation => {
+          if (!perturbation.hasOwnProperty('id_nomenclature_perturb')) {
+            return { id_nomenclature_perturb: perturbation.id_nomenclature };
+          } else {
+            return { id_nomenclature_perturb: perturbation.id_nomenclature_perturb };
           }
-        );
-      this.visitForm.value['visit_date_min'] = this.dateParser.format(
+        });
+      preparedData['visit_date_min'] = this.dateParser.format(
         this.visitForm.value['visit_date_min']
       );
-      this.visitForm.value['id_base_site'] = this.id_base_site;
+      preparedData['id_base_site'] = this.id_base_site;
       this.plots.map(plot => {
         delete plot.status;
       });
-      this.visitForm.value['plots'] = this.plots;
-      if (this.isNew) this.postVisit();
-      else this.updateVisit();
+      preparedData['plots'] = this.plots;
+      this.sendFormData(preparedData);
     }
   }
 
-  postVisit() {
-    this._api.postVisit(this.visitForm.value).subscribe(
-      () => {
-        //this.visitForm.reset();
-        this.toastr.success('la visite est enregitrée avec succès', '', {
-          positionClass: 'toast-top-right',
-        });
-        this.backToVisites();
-      },
-      error => {
-        let msg = 'Une erreur est survenue lors de la création de la visite';
-        if (error.status == 403 && error.error.raisedError == 'PostYearError') {
-          this.visitForm.controls['visit_date_min'].setErrors({ dateExisit: true });
-          msg = 'Une existe déja pour cette année';
-        }
-        this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
-      }
-    );
+  private sendFormData(preparedData) {
+    if (this.isNew) {
+      this._api.addVisit(preparedData).subscribe(
+        result => this.onDataSavedSuccess(result),
+        error => this.onDataSavedError(error)
+      );
+    } else {
+      this._api.updateVisit({ idVisit: this.idVisit, data: preparedData }).subscribe(
+        result => this.onDataSavedSuccess(result),
+        error => this.onDataSavedError(error)
+      );
+    }
   }
 
-  updateVisit() {
-    this.visitForm.value.id_base_visit = this.idVisit;
-    this._api.updateVisit({ id_visit: this.idVisit, data: this.visitForm.value }).subscribe(
-      () => {
-        //this.visitForm.reset();
-        this.toastr.success('la visite est modifiée avec succès', '', {
-          positionClass: 'toast-top-right',
-        });
-        this.backToVisites();
-      },
-      error => {
-        let msg = 'Une erreur est survenue lors de la modification de la visite';
-        if (error.status == 403 && error.error.raisedError == 'PostYearError') {
-          this.visitForm.controls['visit_date_min'].setErrors({ dateExisit: true });
-          msg = 'Une existe déja pour cette année';
-        }
-        this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
-      }
-    );
+  private onDataSavedSuccess(result) {
+    this.toastr.success('Visite enregistrée avec succès', '', {
+      positionClass: 'toast-top-right',
+    });
+    this.backToVisites();
+  }
+
+  private onDataSavedError(error) {
+    if (error.status === 409 && error.error.description.startsWith('PostYearError')) {
+      this.visitForm.controls['visit_date_min'].setErrors({ dateExisit: true });
+      const title = 'Une visite existe déjà sur ce site pour cette année !';
+      const msg = this.isNew
+        ? "Veuillez plutôt éditer l'ancienne visite."
+        : "Veuiller corriger l'année de la date de cette visite.";
+      const options = {
+        positionClass: 'toast-top-center',
+        timeOut: 5000,
+      };
+      this.toastr.warning(msg, title, options);
+    } else {
+      this.commonService.translateToaster('error', 'ErrorMessage');
+    }
+    console.log(error);
   }
 
   onEdit() {
@@ -335,12 +340,16 @@ export class ReleveComponent implements OnInit {
     }
   }
 
-  renameKey(strates) {
-    strates.forEach(element => {
-      element.id_nomenclature_strate = element.id_nomenclature;
-      delete element.id_nomenclature;
+  private patchForm() {
+    this.visitForm.patchValue({
+      id_base_visit: this.idVisit,
+      visit_date_min: this.dateParser.parse(this.visit.visit_date_min),
+      observers: this.visit.observers,
+      perturbations: this.visit.perturbations,
     });
+    this.loadForm = true;
   }
+
   resizeCard() {
     return this.updateIsAllowed || this.addIsAllowed;
   }

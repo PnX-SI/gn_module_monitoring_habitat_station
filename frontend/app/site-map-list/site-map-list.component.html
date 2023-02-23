@@ -129,7 +129,7 @@
         </ngx-datatable>
       </div>
     </div>
-    <div *ngIf="addIsAllowed" class="card-footer">
+    <div class="card-footer" *ngIf="addIsAllowed">
       <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewTransect()">
         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
         Ajouter un nouveau transect
@@ -137,7 +137,7 @@
     </div>
   </div>
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-    <pnx-map height="94vh" [center]="center" [zoom]="zoom">
+    <pnx-map height="91vh" [center]="center" [zoom]="zoom">
       <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="sites"> </pnx-geojson>
     </pnx-map>
   </div>

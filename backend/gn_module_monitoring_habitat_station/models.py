@@ -7,21 +7,32 @@ from pypnnomenclature.models import TNomenclatures
 from pypn_habref_api.models import Habref
 from apptax.taxonomie.models import Taxref
 
-from geonature.utils.env import DB
+from geonature.utils.env import DB, db
 
 from utils_flask_sqla.serializers import serializable
 from utils_flask_sqla_geo.serializers import geoserializable
 from geonature.utils.utilsgeometry import shapeserializable
 
-from geonature.core.gn_monitoring.models import (
-    TBaseSites,
-    TBaseVisits,
-    corVisitObserver,
-)
+from geonature.core.gn_monitoring.models import TBaseVisits
+
+
+class MonitoringHabitatStation(db.Model):
+    """
+    Module DB master parent abstract class.
+    Debug is more easy.
+    """
+
+    __abstract__ = True
+
+    def __repr__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
 
 
 @serializable
-class TPlot(DB.Model):
+class TPlot(MonitoringHabitatStation):
     __tablename__ = "t_plots"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
@@ -40,7 +51,7 @@ class TPlot(DB.Model):
 
 @serializable
 @geoserializable
-class TTransect(DB.Model):
+class TTransect(MonitoringHabitatStation):
     __tablename__ = "t_transects"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
@@ -65,12 +76,12 @@ class TTransect(DB.Model):
     t_base_site = DB.relationship("TBaseSites")
     cor_plots = DB.relationship("TPlot")
 
-    def get_geofeature(self, recursif=False):
+    def get_geofeature(self, fields=[]):
         line = self.points_to_linestring()
         feature = Feature(
             id=str(self.id_base_site),
             geometry=line,
-            properties=self.as_dict(recursif),
+            properties=self.as_dict(fields=fields),
         )
         return feature
 
@@ -87,7 +98,7 @@ class TTransect(DB.Model):
 
 
 @serializable
-class CorHabTaxon(DB.Model):
+class CorHabTaxon(MonitoringHabitatStation):
     __tablename__ = "cor_hab_taxon"
     __table_args__ = (
         DB.UniqueConstraint("id_habitat", "cd_nom"),
@@ -104,7 +115,7 @@ class CorHabTaxon(DB.Model):
 
 
 @serializable
-class TRelevePlot(DB.Model):
+class TRelevePlot(MonitoringHabitatStation):
     __tablename__ = "t_releve_plots"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
@@ -135,7 +146,7 @@ class TRelevePlot(DB.Model):
 
 
 @serializable
-class CorRelevePlotStrat(DB.Model):
+class CorRelevePlotStrat(MonitoringHabitatStation):
     __tablename__ = "cor_releve_plot_strats"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
@@ -160,7 +171,7 @@ class CorRelevePlotStrat(DB.Model):
 
 
 @serializable
-class CorRelevePlotTaxon(DB.Model):
+class CorRelevePlotTaxon(MonitoringHabitatStation):
     __tablename__ = "cor_releve_plot_taxons"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
@@ -180,16 +191,18 @@ class CorRelevePlotTaxon(DB.Model):
             "pr_monitoring_habitat_station.cor_hab_taxon.id_cor_hab_taxon",
             onupdate="CASCADE",
         ),
-        nullable=False,
+        nullable=True,
     )
+    cd_nom = DB.Column(DB.ForeignKey(Taxref.cd_nom, onupdate="CASCADE"), nullable=False)
     cover_pourcentage = DB.Column(DB.Integer)
 
     cor_hab_taxon = DB.relationship(CorHabTaxon)
     t_releve_plot = DB.relationship(TRelevePlot)
+    sciname = DB.relationship(Taxref)
 
 
 @serializable
-class CorTransectVisitPerturbation(DB.Model):
+class CorTransectVisitPerturbation(MonitoringHabitatStation):
     __tablename__ = "cor_transect_visit_perturbation"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
@@ -218,25 +231,22 @@ class Visit(TBaseVisits):
     __tablename__ = "t_base_visits"
     __table_args__ = {"schema": "gn_monitoring", "extend_existing": True}
 
+    def __repr__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
     cor_visit_perturbation = DB.relationship(
-        "CorTransectVisitPerturbation", backref="t_base_visits"
+        CorTransectVisitPerturbation, backref="t_base_visits"
     )
-
-    cor_releve_plot = DB.relationship("TRelevePlot", backref="t_base_visits")
-
-    observers = DB.relationship(
-        "User",
-        secondary=corVisitObserver,
-        primaryjoin=(corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit),
-        secondaryjoin=(corVisitObserver.c.id_role == User.id_role),
-        foreign_keys=[corVisitObserver.c.id_base_visit, corVisitObserver.c.id_role],
-    )
+    cor_releve_plot = DB.relationship(TRelevePlot, backref="t_base_visits")
 
 
 @serializable
 @geoserializable
 @shapeserializable
-class ExportVisits(DB.Model):
+class ExportVisits(MonitoringHabitatStation):
     __tablename__ = "export_visits"
     __table_args__ = {
         "schema": "pr_monitoring_habitat_station",

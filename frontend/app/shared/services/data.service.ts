@@ -1,17 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+
 import { AppConfig } from '@geonature_config/app.config';
+
 import { ModuleConfig } from '../../module.config';
+import { IVisit } from '../models/visit.model';
 
 @Injectable()
 export class DataService {
   constructor(private _http: HttpClient) {}
-
-  getTtransectByIdSite(idSite) {
-    return this._http.get(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transects/${idSite}`
-    );
-  }
 
   getAllTransects(params?) {
     let myParams = new HttpParams();
@@ -22,65 +19,46 @@ export class DataService {
       params: myParams,
     });
   }
-  postTransect(transect) {
+
+  getOneTransect(idSite) {
+    return this._http.get(
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transects/${idSite}`
+    );
+  }
+
+  addTransect(transect) {
     return this._http.post(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transect`,
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transects`,
       transect
     );
   }
 
   updateTransect(transect) {
     return this._http.patch(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/update_transect/${transect.id_transect}`,
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/transects/${transect.id_transect}`,
       transect
     );
   }
 
-  postVisit(visit) {
-    return this._http.post(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visit`, visit);
+  getAllVisits(id_site) {
+    return this._http.get(
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/sites/${id_site}/visits`
+    );
+  }
+
+  getOneVisit(id_visit) {
+    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visits/${id_visit}`);
+  }
+
+  addVisit(visit) {
+    return this._http.post(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visits`, visit);
   }
 
   updateVisit(visit) {
     return this._http.patch(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/update_visit/${visit.id_visit}`,
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visits/${visit.idVisit}`,
       visit.data
     );
-  }
-
-  getTaxonsByHabitat(cd_hab) {
-    return this._http.get(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/habitats/${cd_hab}/taxons`
-    );
-  }
-
-  getVisits(id_site) {
-    return this._http.get(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/site/${id_site}/visits`
-    );
-  }
-
-  getVisitByID(id_visit) {
-    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/visit/${id_visit}`);
-  }
-
-  getSites(params) {
-    let myParams = new HttpParams();
-    for (let key in params) {
-      if (params[key]) myParams = myParams.set(key, params[key]);
-    }
-    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/sites`, {
-      params: myParams,
-    });
-  }
-
-  getHabitatsList() {
-    return this._http.get(
-      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/habitats`
-    );
-  }
-
-  getUserCruved() {
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/user/cruved`);
   }
 
   getDefaultVisit(): IVisit {
@@ -102,31 +80,30 @@ export class DataService {
       ],
     };
   }
-}
 
-export interface IVisit {
-  id_base_site?: string;
-  id_base_visit?: string;
-  visit_date_min?: string;
-  observers?: any[];
-  cor_visit_perturbation?: any[];
-  cor_releve_plot?: Plot[];
-}
+  getAllSites(params) {
+    let myParams = new HttpParams();
+    for (let key in params) {
+      if (params[key]) myParams = myParams.set(key, params[key]);
+    }
+    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/sites`, {
+      params: myParams,
+    });
+  }
 
-export interface Plot {
-  code_plot?: string;
-  id_plot?: number;
-  plot_data?: PlotData;
-  status?: boolean;
-}
+  getHabitats() {
+    return this._http.get(`${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/habitats`);
+  }
 
-export interface PlotData {
-  excretes_presence?: boolean;
-  taxons_releve?: any[];
-  strates_releve?: any[];
-}
+  getTaxonsByHabitat(cd_hab) {
+    return this._http.get(
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/habitats/${cd_hab}/taxons`
+    );
+  }
 
-export interface Habitat {
-  cd_hab: number;
-  nom_habitat: string;
+  getCurrentUserRights() {
+    return this._http.get<any>(
+      `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}/users/current/cruved`
+    );
+  }
 }
