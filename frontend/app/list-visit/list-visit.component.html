@@ -41,38 +41,39 @@
             Transect
           </legend>
           <div class="row">
-            <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
+            <div *ngIf="disabledForm" class="col-sm-12 col-md-3">
               <div class="form-group">
-                <small>Identifiant :</small>
+                <label>Identifiant</label>
                 <input
                   value="{{ currentSite.properties.id_base_site }}"
                   class="form-control form-control-sm"
                 />
               </div>
             </div>
-            <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-9">
               <div class="form-group">
-                <small>Commune :</small>
-                <input
-                  value="{{ currentSite.properties.nom_commune }}"
-                  class="form-control form-control-sm"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-sm-12 col-md-6">
-              <div class="form-group">
-                <small>Nom du transect :</small>
+                <label>Nom du transect</label>
                 <input
                   class="form-control form-control-sm"
                   [formControl]="formTransect.controls.transect_label"
                 />
               </div>
             </div>
+          </div>
+
+          <div class="row">
+            <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
+              <div class="form-group">
+                <label>Commune</label>
+                <input
+                  value="{{ currentSite.properties.nom_commune }}"
+                  class="form-control form-control-sm"
+                />
+              </div>
+            </div>
             <div class="col-sm-12 col-md-6">
               <div class="form-group">
-                <small>Habitat :</small>
+                <label>Habitat</label>
                 <select
                   class="form-control form-control-sm"
                   [formControl]="formTransect.controls.cd_hab"
@@ -92,15 +93,17 @@
 
         <fieldset class="mb-3" [disabled]="disabledForm">
           <legend>
-            Coordonnées géographiques (<a href="https://epsg.io/4326" target="_blank">SRID 4326</a>)
+            Positionnement du transect
           </legend>
-          <h6 class="mb-0">
-            <i class="material-icons location-icon">location_on</i>Point de départ :
-          </h6>
-          <div class="form-group">
+
+          <div class="form-group mb-4">
+            <h6 class="mb-2">
+              <i class="material-icons location-icon">location_on</i>
+              Coordonnées (<a href="https://epsg.io/4326" target="_blank">SRID 4326</a>) point de départ
+            </h6>
             <div class="row">
               <div class="col-sm-12 col-md-6">
-                <small>Longitude :</small>
+                <label>Longitude</label>
                 <input
                   type="number"
                   class="form-control form-control-sm"
@@ -112,7 +115,7 @@
                 />
               </div>
               <div class="col-sm-12 col-md-6">
-                <small>Latitude :</small>
+                <label>Latitude</label>
                 <input
                   type="number"
                   class="form-control form-control-sm"
@@ -126,14 +129,15 @@
             </div>
           </div>
 
-          <h6 class="mb-0">
-            <i class="material-icons location-icon">location_on</i>
-            Point d'arrivée :
-          </h6>
+
           <div class="form-group">
+            <h6 class="mb-2">
+              <i class="material-icons location-icon">location_on</i>
+              Coordonnées (<a href="https://epsg.io/4326" target="_blank">SRID 4326</a>) point d'arrivée
+            </h6>
             <div class="row">
               <div class="col-sm-12 col-md-6">
-                <small>Longitude :</small>
+                <label> Longitude </label>
                 <input
                   type="number"
                   class="form-control form-control-sm"
@@ -145,7 +149,7 @@
                 />
               </div>
               <div class="col-sm-12 col-md-6">
-                <small>Latitude :</small>
+                <label> Latitude </label>
                 <input
                   type="number"
                   class="form-control form-control-sm"
@@ -158,6 +162,20 @@
               </div>
             </div>
           </div>
+
+          <div class="form-group">
+            <div class="row">
+              <div class="col">
+                <label> Informations complémentaires de localisation </label>
+                <textarea
+                  class="form-control form-control-sm"
+                  [formControl]="formTransect.controls.base_site_description"
+                  rows="4"
+                  placeholder="Indiquer l'azimut et des informations permettant de localiser le transect sur le terrain."
+                ></textarea>
+              </div>
+            </div>
+          </div>
         </fieldset>
 
         <fieldset [disabled]="disabledForm">
@@ -167,7 +185,7 @@
           <div class="row">
             <div class="col-sm-12 col-md-6">
               <div class="form-group">
-                <small> Position des placettes : </small>
+                <label> Position des placettes </label>
                 <div class="" id="newPerturs">
                   <select
                     class="form-control form-control-sm"
@@ -185,12 +203,11 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-6">
-              <small> Surface des placettes (m²) </small>
+              <label> Surface des placettes (m²) </label>
               <input
                 class="form-control form-control-sm"
                 [formControl]="formTransect.controls.plot_size"
                 type="number"
-                placeholder="Taille des placettes"
               />
             </div>
           </div>
@@ -207,7 +224,7 @@
             </div>
           </div>
 
-          <small> Liste des placettes :</small>
+          <label> Liste des placettes </label>
           <div class="d-flex">
             <button
               *ngIf="!disabledForm"
@@ -221,7 +238,7 @@
           <ul class="list-group mx-5 mt-3">
             <li *ngFor="let plot of plots" class="list-group-item">
               <span class="plot-item"
-                ><i class="fa fa-hashtag"></i> Code placette : {{ plot.code_plot }}
+                ><i class="fa fa-hashtag"></i> Code placette {{ plot.code_plot }}
               </span>
               <span class="plot-item"
                 ><i class="material-icons gps-icon">location_on</i> Distance :

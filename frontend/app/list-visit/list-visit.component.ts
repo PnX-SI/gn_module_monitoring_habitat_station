@@ -13,7 +13,6 @@ import { MapListService } from '@geonature_common/map-list/map-list.service';
 
 import { ModuleConfig } from '../module.config';
 import { DataService } from '../shared/services/data.service';
-import { FormService } from '../shared/services/form.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
 import { Page } from '../shared/models/page.model';
@@ -40,30 +39,28 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     '' + ModuleConfig.MODULE_CODE
   );
   public upIsAllowed = false;
-  public addIsAllowed = false;
-  public exportIsAllowed = false;
-  public dataLoaded = false;
-  public formTransect: FormGroup;
-  public edit_btn: string = 'Editer';
+  addIsAllowed = false;
+  dataLoaded = false;
+  formTransect: FormGroup;
+  edit_btn: string = 'Editer';
   habitats: any;
   isNew: boolean;
   plot_position: any;
-  public addVisitIsAllowed = false;
+  addVisitIsAllowed = false;
   formPlot: FormGroup;
-  modalRef: NgbModalRef;
+  private modalRef: NgbModalRef;
 
   constructor(
     public storeService: StoreService,
-    public _api: DataService,
+    private api: DataService,
     public activatedRoute: ActivatedRoute,
     private toastr: ToastrService,
     public mapListService: MapListService,
     private modalService: NgbModal,
     public router: Router,
     private userService: UserService,
-    public formService: FormService,
     private nomenclatureServ: DataFormService,
-    private _fb: FormBuilder
+    private formBuilder: FormBuilder
   ) {}
 
   ngOnInit() {
@@ -71,9 +68,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.isNew = !this.idSite;
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
     this.checkPermission();
+
     forkJoin([
-      this._api.getAllSites({ id_base_site: this.idSite }),
-      this._api.getHabitats(),
+      this.api.getAllSites({ id_base_site: this.idSite }),
+      this.api.getHabitats(),
       this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, {
         orderby: 'label_default',
       }),
@@ -82,7 +80,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         this.sites = results[0];
         this.habitats = results[1];
         this.plot_position = results[2] ? results[2].values : [];
-        this.formTransect = this.formService.initFormTransect();
+        this.formTransect = this.initFormTransect();
         if (!this.isNew) {
           this.loadTransect();
         } else {
@@ -92,9 +90,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         }
       },
       error => {
-        const msg = (error.error.message == 'sites_not_found')
-          ? "Aucun site n'est disponible pour ajouter un nouveau transect."
-          : 'Une erreur est survenue lors de la récupération des informations sur le serveur.';
+        const msg =
+          error.error.message == 'sites_not_found'
+            ? "Aucun site n'est disponible pour ajouter un nouveau transect."
+            : 'Une erreur est survenue lors de la récupération des informations sur le serveur.';
         this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
         this.router.navigate([`${ModuleConfig.MODULE_URL}/`]);
       }
@@ -106,9 +105,6 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   checkPermission() {
-    this.userService.check_user_cruved_visit('E').subscribe(ucruved => {
-      this.exportIsAllowed = ucruved;
-    });
     this.userService.check_isAdmin('U').subscribe(ucruved => {
       this.upIsAllowed = ucruved;
     });
@@ -120,57 +116,75 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     });
   }
 
+  initFormTransect(): FormGroup {
+    const formTransect = this.formBuilder.group({
+      id_base_site: [null, Validators.required],
+      base_site_description: [null],
+      id_transect: [null, Validators.required],
+      geom_end_lat: [null, Validators.required],
+      geom_end_long: [null, Validators.required],
+      geom_start_lat: [null, Validators.required],
+      geom_start_long: [null, Validators.required],
+      plot_size: [null, Validators.required],
+      plot_shape: [null],
+      transect_label: [null, Validators.required],
+      cd_hab: [null, Validators.required],
+      id_nomenclature_plot_position: [null, Validators.required],
+    });
+    return formTransect;
+  }
+
   getVisits() {
-    this._api.getAllVisits(this.idSite).pipe(
-      map(data => {
-        return data === null
-          ? [{ totalItems: 0, itemsPerPage: 10 }, []]
-          : data;
-        }
+    this.api
+      .getAllVisits(this.idSite)
+      .pipe(
+        map(data => {
+          return data === null ? [{ totalItems: 0, itemsPerPage: 10 }, []] : data;
+        })
       )
-    ).subscribe(
-      (data) => {
-        this.page.totalElements = data[0].totalItems;
-        this.page.size = data[0].itemsPerPage;
-        let visits = data[1] ? data[1] : [];
-        visits.forEach(visit => {
-          if (visit && visit.observers) {
-            let fullName = '';
-            let count = visit.observers.length;
-            visit.observers.forEach((obs, index) => {
-              if (count > 1) {
-                if (index + 1 == count) {
-                  fullName += obs.nom_role + ' ' + obs.prenom_role;
+      .subscribe(
+        data => {
+          this.page.totalElements = data[0].totalItems;
+          this.page.size = data[0].itemsPerPage;
+          let visits = data[1] ? data[1] : [];
+          visits.forEach(visit => {
+            if (visit && visit.observers) {
+              let fullName = '';
+              let count = visit.observers.length;
+              visit.observers.forEach((obs, index) => {
+                if (count > 1) {
+                  if (index + 1 == count) {
+                    fullName += obs.nom_role + ' ' + obs.prenom_role;
+                  } else {
+                    fullName += obs.nom_role + ' ' + obs.prenom_role + ', ';
+                  }
                 } else {
-                  fullName += obs.nom_role + ' ' + obs.prenom_role + ', ';
+                  fullName = obs.nom_role + ' ' + obs.prenom_role;
                 }
-              } else {
-                fullName = obs.nom_role + ' ' + obs.prenom_role;
-              }
-            });
-            visit.observers = fullName;
+              });
+              visit.observers = fullName;
+            }
+          });
+          this.rows = visits;
+          this.dataLoaded = true;
+        },
+        error => {
+          let notErrorStatus = [204, 404];
+          console.log('error.status:', error.status);
+          if (!notErrorStatus.includes(error.status)) {
+            this.toastr.error(
+              'Une erreur est survenue lors de la récupération des informations sur le serveur.',
+              '',
+              { positionClass: 'toast-top-right' }
+            );
           }
-        });
-        this.rows = visits;
-        this.dataLoaded = true;
-      },
-      (error) => {
-        let notErrorStatus = [204, 404];
-        console.log('error.status:', error.status);
-        if (! notErrorStatus.includes(error.status)) {
-          this.toastr.error(
-            'Une erreur est survenue lors de la récupération des informations sur le serveur.',
-            '',
-            { positionClass: 'toast-top-right' }
-          );
+          this.dataLoaded = true;
         }
-        this.dataLoaded = true;
-      }
-    );
+      );
   }
 
   private loadTransect() {
-    this._api.getOneTransect(this.idSite).subscribe(
+    this.api.getOneTransect(this.idSite).subscribe(
       site => {
         this.currentSite = site;
         if (!this.currentSite.properties.cor_plots) {
@@ -201,6 +215,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   pachForm() {
     this.formTransect.patchValue({
       id_base_site: this.currentSite.properties.id_base_site,
+      base_site_description: this.currentSite.properties.base_site_description,
       id_transect: this.currentSite.properties.id_transect,
       geom_start_lat: this.currentSite.geometry.coordinates[0][1],
       geom_start_long: this.currentSite.geometry.coordinates[0][0],
@@ -232,7 +247,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   onAddPlot(content) {
-    this.formPlot = this._fb.group({
+    this.formPlot = this.formBuilder.group({
       code_plot: [null, Validators.required],
       distance_plot: [null, Validators.required],
     });
@@ -251,31 +266,23 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     } else {
       this.plots = this.currentSite.properties.cor_plots;
       this.pachForm();
-      this.edit_btn = 'Editer';
+      this.edit_btn = 'Éditer';
     }
   }
 
   onSubmitTransect() {
     let transect = this.formTransect.value;
     transect.cor_plots = this.plots;
-    transect.geom_start =
-      'SRID=4326;POINT(' +
-      this.formTransect.value.geom_start_long +
-      ' ' +
-      this.formTransect.value.geom_start_lat +
-      ')';
-    transect.geom_end =
-      'SRID=4326;POINT(' +
-      this.formTransect.value.geom_end_long +
-      ' ' +
-      this.formTransect.value.geom_end_lat +
-      ')';
+
+    transect.geom_start = `SRID=4326;POINT(${transect.geom_start_long} ${transect.geom_start_lat})`;
+    transect.geom_end = `SRID=4326;POINT(${transect.geom_end_long} ${transect.geom_end_lat})`;
     delete transect.geom_end_long;
     delete transect.geom_start_long;
     delete transect.geom_end_lat;
     delete transect.geom_start_lat;
+
     if (this.isNew) {
-      this._api.addTransect(transect).subscribe(
+      this.api.addTransect(transect).subscribe(
         data => {
           this.toastr.success('Le transect a été ajouté avec succès', '', {
             positionClass: 'toast-top-right',
@@ -290,7 +297,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         }
       );
     } else {
-      this._api.updateTransect(transect).subscribe(
+      this.api.updateTransect(transect).subscribe(
         data => {
           this.toastr.success('Le transect a été modifié avec succès', '', {
             positionClass: 'toast-top-right',

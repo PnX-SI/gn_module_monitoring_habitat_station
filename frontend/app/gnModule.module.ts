@@ -9,7 +9,6 @@ import { GN2CommonModule } from '@geonature_common/GN2Common.module';
 // Service
 import { DataService } from './shared/services/data.service';
 import { StoreService } from './shared/services/store.service';
-import { FormService } from './shared/services/form.service';
 import { UserService } from './shared/services/user.service';
 
 // Components
@@ -24,7 +23,7 @@ import { routes } from './gnModule.routes';
 @NgModule({
   declarations: [SiteMapListComponent, ListVisitComponent, ReleveComponent, PlotReleveComponent],
   imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule],
-  providers: [HttpClient, DataService, StoreService, FormService, UserService],
+  providers: [HttpClient, DataService, StoreService, UserService],
   bootstrap: [],
 })
 export class GeonatureModule {}

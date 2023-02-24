@@ -61,7 +61,7 @@ blueprint = Blueprint("pr_monitoring_habitat_station", __name__)
 @blueprint.route("/users/current/cruved", methods=["GET"])
 @permissions.check_cruved_scope("R", get_role=True, module_code=MODULE_CODE)
 @json_resp
-def returnUserCruved(info_role):
+def get_user_cruved(info_role):
     # récupérer le CRUVED complet de l'utilisateur courant
     user_cruved = get_or_fetch_user_cruved(
         session=session, id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
@@ -244,9 +244,7 @@ def load_transect(id_site):
         if data[4]:
             transect["properties"]["nom_habitat"] = str(data[4])
         base_site_code = transect["properties"]["t_base_site"]["base_site_code"]
-        base_site_description = (
-            transect["properties"]["t_base_site"]["base_site_description"] or "Aucune description"
-        )
+        base_site_description = transect["properties"]["t_base_site"]["base_site_description"]
         base_site_name = transect["properties"]["t_base_site"]["base_site_name"]
         if transect["properties"]["t_base_site"]:
             del transect["properties"]["t_base_site"]
@@ -260,7 +258,7 @@ def load_transect(id_site):
 @blueprint.route("/transects/<id_site>", methods=["GET"])
 @permissions.check_cruved_scope("R", module_code=MODULE_CODE)
 @json_resp
-def get_transect(id_site):
+def get_one_transect(id_site):
     """
     Retourne un transect à l'aide de son id_site
     """
@@ -270,7 +268,7 @@ def get_transect(id_site):
 @blueprint.route("/transects", methods=["POST"])
 @permissions.check_cruved_scope("C", get_role=True, module_code=MODULE_CODE)
 @json_resp
-def post_transect(info_role):
+def add_transect(info_role):
     """
     Poster un nouveau transect
     """
@@ -280,14 +278,20 @@ def post_transect(info_role):
         tab_plots = data.pop("cor_plots")
     site_data = {
         "id_nomenclature_type_site": get_id_type_site(blueprint.config["site_type_code"]),
-        "base_site_name": "HAB-SHS-",
+        "base_site_name": f"HAB - {MODULE_CODE} - {data['transect_label']}",
+        "base_site_description": data.pop("base_site_description", None),
         "first_use_date": datetime.datetime.now(),
+        "id_digitiser": info_role.id_role,
         "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")),
     }
     site = TBaseSites(**site_data)
     DB.session.add(site)
     DB.session.commit()
+
     data["id_base_site"] = site.as_dict().get("id_base_site")
+    site.base_site_code = f"HAB-{MODULE_CODE}-{data['id_base_site']}"
+    DB.session.merge(site)
+    DB.session.commit()
 
     transect = TTransect(**data)
     for plot in tab_plots:
@@ -302,24 +306,29 @@ def post_transect(info_role):
 @blueprint.route("/transects/<id_transect>", methods=["PATCH"])
 @permissions.check_cruved_scope("U", get_role=True, module_code=MODULE_CODE)
 @json_resp
-def patch_transect(id_transect, info_role):
+def update_transect(id_transect, info_role):
     """
     Mettre à jour un transect
     """
     data = dict(request.get_json())
-    site_data = {"geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end"))}
-    q = (
+
+    # Update base site table
+    site_data = {
+        "base_site_description": data.pop("base_site_description", None),
+        "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end"))
+    }
+    (
         DB.session.query(TBaseSites)
         .filter_by(id_base_site=data.get("id_base_site"))
         .update(site_data, synchronize_session="fetch")
     )
 
-    tab_plots = []
+    plots = []
     if "cor_plots" in data:
-        tab_plots = data.pop("cor_plots")
+       plots = data.pop("cor_plots")
 
     transect = TTransect(**data)
-    for plot in tab_plots:
+    for plot in plots:
         transect_plot = TPlot(**plot)
         transect.cor_plots.append(transect_plot)
     DB.session.merge(transect)
@@ -331,7 +340,7 @@ def patch_transect(id_transect, info_role):
 @blueprint.route("/sites/<id_site>/visits", methods=["GET"])
 @permissions.check_cruved_scope("R", module_code=MODULE_CODE)
 @json_resp
-def get_visits(id_site):
+def get_all_visits(id_site):
     """
     Retourne les visites d'un site par son id
     """
@@ -397,7 +406,7 @@ def get_one_visit(id_visit):
 @blueprint.route("/visits", methods=["POST"])
 @permissions.check_cruved_scope("C", get_role=True, module_code=MODULE_CODE)
 @json_resp
-def post_visit(info_role):
+def add_visit(info_role):
     """
     Poster une nouvelle visite
     """
@@ -477,7 +486,7 @@ def post_visit(info_role):
 @blueprint.route("/visits/<id_visit>", methods=["PATCH"])
 @permissions.check_cruved_scope("U", module_code=MODULE_CODE)
 @json_resp
-def patch_visit(id_visit):
+def update_visit(id_visit):
     """
     Mettre à jour une visite
     """
@@ -555,7 +564,7 @@ def patch_visit(id_visit):
 @blueprint.route("/habitats", methods=["GET"])
 @permissions.check_cruved_scope("R", module_code=MODULE_CODE)
 @json_resp
-def get_habitats():
+def get_all_habitats():
     """
     Récupère les habitats utilisé dans ce module.
     """
@@ -587,7 +596,7 @@ def get_habitats():
 @blueprint.route("/habitats/<cd_hab>/taxons", methods=["GET"])
 @permissions.check_cruved_scope("R", module_code=MODULE_CODE)
 @json_resp
-def get_taxa_by_habitats(cd_hab):
+def get_all_taxa_by_habitats(cd_hab):
     """
     Retourne tous les taxons d'un habitat.
     """
