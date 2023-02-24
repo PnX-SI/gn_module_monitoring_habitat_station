@@ -1,11 +1,11 @@
 type_nomenclature_code,cd_nomenclature,mnemonique,label_default,definition_default,label_fr,definition_fr,cd_nomenclature_broader,hierarchy
-STRATE_PLACETTE, Rcn, Recouvrement sol nu, Recouvrement sol nu, Recouvrement sol nu, Recouvrement sol nu, Recouvrement sol nu,0,.001
-STRATE_PLACETTE, Rgc, Recouvrement gravier/cailloux, Recouvrement gravier/cailloux, Recouvrement gravier/cailloux < 10 cm, Recouvrement gravier/cailloux, Recouvrement gravier/cailloux < 10 cm,0,.002
-STRATE_PLACETTE, Rbc, Recouvrement blocs/rochers, Recouvrement blocs/rochers, Recouvrement blocs/rochers >= 10 cm, Recouvrement blocs/rochers, Recouvrement blocs/rochers >= 10 cm,0,.003
-STRATE_PLACETTE, Rvt, Recouvrement végétation total, Recouvrement végétation total, Recouvrement végétation total, Recouvrement végétation total, Recouvrement végétation total,0,.004
-STRATE_PLACETTE, Rbr, Recouvrement bryophytes, Recouvrement bryophytes, Recouvrement bryophytes, Recouvrement bryophytes, Recouvrement bryophytes,0,.005
-STRATE_PLACETTE, Rdj, Recouvrement déjections, Recouvrement déjections, Recouvrement déjections, Recouvrement déjections, Recouvrement déjections,0,.006
-STRATE_PLACETTE, Rpi, Recouvrement piétinement, Recouvrement piétinement, Recouvrement piétinement, Recouvrement piétinement, Recouvrement piétinement,0,.007
-STRATE_PLACETTE, Rab, Recouvrement abroutissement, Recouvrement abroutissement, Recouvrement abroutissement, Recouvrement abroutissement, Recouvrement abroutissement,0,.008
-POSITION_PLACETTE, Pdr, Position à droite, Position à droite, Positions de placette sur un transect: position à droite en étant placé sur le point départ et en regardant le point d'arrivé., Position à droite, Positions de placette sur un transect: position à droite en étant placé sur le point départ et en regardant le point d'arrivé.,0,.001
-POSITION_PLACETTE, Pga, Position à gauche, Position à gauche, Positions de placette sur un transect: position à gauche en étant placé sur le point départ et en regardant le point d'arrivé., Position à gauche, Positions de placette sur un transect: position à gauche en étant placé sur le point départ et en regardant le point d'arrivé.,0,.002
+STRATE_PLACETTE,Rcn,Recouvrement sol nu,Recouvrement sol nu,Recouvrement sol nu,Recouvrement sol nu,Recouvrement sol nu,0,.001
+STRATE_PLACETTE,Rgc,Recouvrement gravier/cailloux,Recouvrement gravier/cailloux,Recouvrement gravier/cailloux < 10 cm,Recouvrement gravier/cailloux,Recouvrement gravier/cailloux < 10 cm,0,.002
+STRATE_PLACETTE,Rbc,Recouvrement blocs/rochers,Recouvrement blocs/rochers,Recouvrement blocs/rochers >= 10 cm,Recouvrement blocs/rochers,Recouvrement blocs/rochers >= 10 cm,0,.003
+STRATE_PLACETTE,Rvt,Recouvrement végétation total,Recouvrement végétation total,Recouvrement végétation total,Recouvrement végétation total,Recouvrement végétation total,0,.004
+STRATE_PLACETTE,Rbr,Recouvrement bryophytes,Recouvrement bryophytes,Recouvrement bryophytes,Recouvrement bryophytes,Recouvrement bryophytes,0,.005
+STRATE_PLACETTE,Rdj,Recouvrement déjections,Recouvrement déjections,Recouvrement déjections,Recouvrement déjections,Recouvrement déjections,0,.006
+STRATE_PLACETTE,Rpi,Recouvrement piétinement,Recouvrement piétinement,Recouvrement piétinement,Recouvrement piétinement,Recouvrement piétinement,0,.007
+STRATE_PLACETTE,Rab,Recouvrement abroutissement,Recouvrement abroutissement,Recouvrement abroutissement,Recouvrement abroutissement,Recouvrement abroutissement,0,.008
+POSITION_PLACETTE,Pdr,Position à droite,Position à droite,Positions de placette sur un transect: position à droite en étant placé sur le point départ et en regardant le point d'arrivé.,Position à droite,Positions de placette sur un transect: position à droite en étant placé sur le point départ et en regardant le point d'arrivé.,0,.001
+POSITION_PLACETTE,Pga,Position à gauche,Position à gauche,Positions de placette sur un transect: position à gauche en étant placé sur le point départ et en regardant le point d'arrivé.,Position à gauche,Positions de placette sur un transect: position à gauche en étant placé sur le point départ et en regardant le point d'arrivé.,0,.002
