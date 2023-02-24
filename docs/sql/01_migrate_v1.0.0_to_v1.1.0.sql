@@ -31,4 +31,34 @@ ALTER TABLE pr_monitoring_habitat_station.t_transects ADD plot_shape text NULL;
 COMMENT ON COLUMN pr_monitoring_habitat_station.t_transects.plot_shape IS 'Description de la forme des placettes.';
 
 
+-- ----------------------------------------------------------------------
+-- Remove nomenclatures "Position en haut", "Position en bas" and update others
+
+DELETE FROM ref_nomenclatures.t_nomenclatures
+WHERE cd_nomenclature IN ('Pha', 'Pba')
+    AND id_type = ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE') ;
+
+UPDATE ref_nomenclatures.t_nomenclatures SET
+    cd_nomenclature = TRIM(cd_nomenclature),
+    mnemonique = TRIM(mnemonique),
+    label_default = TRIM(label_default),
+    definition_default = TRIM(definition_default),
+    label_fr = TRIM(label_fr),
+    definition_fr = TRIM(definition_fr)
+WHERE id_type = ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE')
+    OR id_type = ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE') ;
+
+UPDATE ref_nomenclatures.t_nomenclatures SET
+    definition_default = 'Positions de placette sur un transect: position à droite en étant placé sur le point départ et en regardant le point d''arrivé.',
+    definition_fr = 'Positions de placette sur un transect: position à droite en étant placé sur le point départ et en regardant le point d''arrivé.'
+WHERE cd_nomenclature = 'Pdr'
+    AND id_type = ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE') ;
+
+UPDATE ref_nomenclatures.t_nomenclatures SET
+    definition_default = 'Positions de placette sur un transect: position à gauche en étant placé sur le point départ et en regardant le point d''arrivé.',
+    definition_fr = 'Positions de placette sur un transect: position à gauche en étant placé sur le point départ et en regardant le point d''arrivé.'
+WHERE cd_nomenclature = 'Pga'
+    AND id_type = ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE') ;
+
+
 COMMIT;
