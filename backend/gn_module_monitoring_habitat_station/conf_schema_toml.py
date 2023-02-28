@@ -4,6 +4,8 @@
 
 from marshmallow import Schema, fields
 
+from gn_module_monitoring_habitat_station import METADATA_NAME, METADATA_CODE
+
 export_available_format = ["geojson", "csv", "shapefile"]
 site_message = {"emptyMessage": "Aucun site à afficher ", "totalMessage": "sites(s) au total"}
 list_visit_message = {
@@ -39,7 +41,7 @@ class GnModuleSchemaConf(Schema):
     zoom = fields.Integer(load_default=10)
     pagination_serverside = fields.Boolean(load_default=False)
     items_per_page = fields.Integer(load_default=10)
-    habitat_list_name = fields.String(load_default="MHS")
+    habitat_list_name = fields.String(load_default=METADATA_NAME)
     site_type_code = fields.String(load_default="HAB")
-    user_list_code = fields.String(load_default="OFS")
+    user_list_code = fields.String(load_default=METADATA_CODE)
     municipality_type_code = fields.String(load_default="COM")
