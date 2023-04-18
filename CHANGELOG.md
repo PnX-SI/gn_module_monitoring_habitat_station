@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+* Added new nomenclature "*Lichens*" for *STRATE_PLACETTE* nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41)
+
+
 ## [1.1.0] - 2023-02-24
 
 ### Added
