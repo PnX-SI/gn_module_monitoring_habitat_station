@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, Input, EventEmitter, OnChanges } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
-import { AppConfig } from '@geonature_config/app.config';
+import { ConfigService } from '@geonature/services/config.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -18,13 +18,16 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   @Output() plotReleve = new EventEmitter();
   private isModifeded: boolean = false;
   private relevePlotId: number = null;
-  taxonApiEndPoint = `${AppConfig.API_TAXHUB}/taxref/search/lb_nom`;
+  taxonApiEndPoint = `${this.config.API_TAXHUB}/taxref/search/lb_nom`;
   plotForm: FormGroup;
   scinameCodeControl: FormControl = new FormControl(null);
   hasStrateCovering: Boolean;
   hasTaxaCovering: Boolean;
 
-  constructor(private _fb: FormBuilder) {}
+  constructor(
+    private _fb: FormBuilder,
+    private config: ConfigService,
+  ) { }
 
   ngOnInit() { }
 

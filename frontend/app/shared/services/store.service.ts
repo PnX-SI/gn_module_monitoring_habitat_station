@@ -1,8 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { AppConfig } from '@geonature_config/app.config';
-
+import { ConfigService } from '@geonature/services/config.service';
 import { ModuleConfig } from '../../module.config';
 import { ISite } from '../models/site.model';
 
@@ -10,8 +9,12 @@ import { ISite } from '../models/site.model';
 export class StoreService {
   public moduleConfig = ModuleConfig;
   public queryString = new HttpParams();
-  public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits/export`;
+  public urlLoad = `${this.config.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits/export`;
   public currentSite: ISite;
+
+  constructor(
+    private config: ConfigService,
+  ) { }
 
   getCurrentSite() {
     return this.currentSite;
