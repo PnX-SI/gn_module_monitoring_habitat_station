@@ -25,7 +25,7 @@ from geonature.core.gn_monitoring.models import (
     TBaseSites,
 )
 from geonature.core.gn_commons.models import TModules
-from geonature.core.ref_geo.models import LAreas
+from ref_geo.models import LAreas
 from geonature.utils.env import db, DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
 from gn_conservation_backend_shared.webservices.debug import fprint
