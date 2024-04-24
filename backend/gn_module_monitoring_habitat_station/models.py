@@ -10,8 +10,7 @@ from apptax.taxonomie.models import Taxref
 from geonature.utils.env import DB, db
 
 from utils_flask_sqla.serializers import serializable
-from utils_flask_sqla_geo.serializers import geoserializable
-from geonature.utils.utilsgeometry import shapeserializable
+from utils_flask_sqla_geo.serializers import geoserializable, shapeserializable
 
 from geonature.core.gn_monitoring.models import TBaseVisits
 

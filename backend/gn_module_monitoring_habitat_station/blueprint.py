@@ -14,6 +14,7 @@ from pypn_habref_api.models import BibListHabitat, CorListHabitat, Habref
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_csv_resp, to_json_resp
+from utils_flask_sqla_geo.utilsgeometry import FionaShapeService
 
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import get_scopes_by_action
@@ -27,7 +28,6 @@ from geonature.core.gn_monitoring.models import (
 from geonature.core.gn_commons.models import TModules
 from ref_geo.models import LAreas
 from geonature.utils.env import db, DB, ROOT_DIR
-from geonature.utils.utilsgeometry import FionaShapeService
 from gn_conservation_backend_shared.webservices.debug import fprint
 
 from gn_module_monitoring_habitat_station import MODULE_CODE, METADATA_CODE
