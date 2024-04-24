@@ -280,7 +280,7 @@ def add_transect(scope):
         "id_nomenclature_type_site": get_id_type_site(blueprint.config["site_type_code"]),
         "base_site_name": f"HAB - {MODULE_CODE} - {data['transect_label']}",
         "base_site_description": data.pop("base_site_description", None),
-        "first_use_date": datetime.datetime.now(),
+        "first_use_date": datetime.now(),
         "id_digitiser": g.current_user.id_role,
         "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")),
     }
@@ -632,7 +632,7 @@ def export_visits():
     parameters = request.args
     export_format = parameters["export_format"] if "export_format" in request.args else "shapefile"
 
-    file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
+    file_name = datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
     q = DB.session.query(ExportVisits)
 
     if "id_base_visit" in parameters:
