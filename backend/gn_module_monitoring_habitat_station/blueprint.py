@@ -1,22 +1,24 @@
 import datetime
+import os
 
-from flask import Blueprint, request, session, send_from_directory
+from flask import Blueprint, request, send_from_directory, g
 from geojson import FeatureCollection
-from sqlalchemy.sql.expression import func
-from sqlalchemy import and_, distinct, func
+from sqlalchemy.sql.expression import func, select
+from sqlalchemy import and_, distinct, func, update, delete
 from geoalchemy2.shape import to_shape
 from numpy import array
 from shapely.geometry import *
 from werkzeug.exceptions import BadRequest, NotFound
 
 from apptax.taxonomie.models import Taxref
-from pypn_habref_api.models import BibListHabitat, CorListHabitat, Habref
+from pypn_habref_api.models import BibListHabitat, cor_list_habitat, Habref
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_csv_resp, to_json_resp
+from utils_flask_sqla_geo.utilsgeometry import FionaShapeService
 
 from geonature.core.gn_permissions import decorators as permissions
-from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
+from geonature.core.gn_permissions.tools import get_scopes_by_action
 from geonature.core.gn_meta.models import TDatasets
 from geonature.core.gn_monitoring.models import (
     corVisitObserver,
@@ -25,9 +27,8 @@ from geonature.core.gn_monitoring.models import (
     TBaseSites,
 )
 from geonature.core.gn_commons.models import TModules
-from geonature.core.ref_geo.models import LAreas
+from ref_geo.models import LAreas
 from geonature.utils.env import db, DB, ROOT_DIR
-from geonature.utils.utilsgeometry import FionaShapeService
 from gn_conservation_backend_shared.webservices.debug import fprint
 
 from gn_module_monitoring_habitat_station import MODULE_CODE, METADATA_CODE
@@ -59,12 +60,12 @@ blueprint = Blueprint("pr_monitoring_habitat_station", __name__)
 
 
 @blueprint.route("/users/current/cruved", methods=["GET"])
-@permissions.check_cruved_scope("R", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def get_user_cruved(info_role):
+def get_user_cruved(scope):
     # récupérer le CRUVED complet de l'utilisateur courant
-    user_cruved = get_or_fetch_user_cruved(
-        session=session, id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
+    user_cruved = get_scopes_by_action(
+        id_role=g.current_user.id_role, module_code=blueprint.config["MODULE_CODE"]
     )
     return user_cruved
 
@@ -79,21 +80,24 @@ def get_all_sites():
     parameters = request.args
 
     q = (
-        DB.session.query(TBaseSites)
-        .outerjoin((TTransect, TBaseSites.id_base_site == TTransect.id_base_site))
-        .filter(
-            TBaseSites.id_nomenclature_type_site
-            == get_id_type_site(blueprint.config["site_type_code"])
+        select(TBaseSites)
+        .outerjoin(TTransect, TBaseSites.id_base_site == TTransect.id_base_site)
+        .where(
+            and_(
+            TBaseSites.id_nomenclature_type_site == get_id_type_site(blueprint.config["site_type_code"]),
+            TTransect.id_base_site == None
+                )
+            )
         )
-        .filter(TTransect.id_base_site == None)
-    )
 
-    data = q.all()
+    data = DB.session.scalars(q).unique().all()
+
     if "id_base_site" in parameters:
         current_site = (
-            DB.session.query(TBaseSites)
-            .filter(TBaseSites.id_base_site == parameters["id_base_site"])
-            .first()
+            DB.session.scalars(
+                select(TBaseSites)
+            .where(TBaseSites.id_base_site == parameters["id_base_site"])
+            ).first()
         )
         if current_site:
             data.append(current_site)
@@ -112,7 +116,7 @@ def get_all_transects():
     parameters = request.args
 
     q = (
-        DB.session.query(
+        select(
             TTransect,
             func.max(TBaseVisits.visit_date_min),
             Habref.lb_hab_fr,
@@ -128,19 +132,18 @@ def get_all_transects():
     )
 
     if "filterHab" in parameters:
-        q = q.filter(TTransect.cd_hab == parameters["filterHab"])
+        q = q.where(TTransect.cd_hab == parameters["filterHab"])
 
     if "date_low" in parameters and "date_up" in parameters:
         q_date = (
-            DB.session.query(
+            select(
                 TTransect.id_base_site,
                 func.max(TBaseVisits.visit_date_min),
             )
             .outerjoin(TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site)
             .group_by(TTransect.id_base_site)
-            .all()
         )
-        q = q.filter(
+        q = q.where(
             and_(
                 TBaseVisits.visit_date_min <= parameters["date_up"],
                 TBaseVisits.visit_date_min >= parameters["date_low"],
@@ -150,12 +153,14 @@ def get_all_transects():
     page = request.args.get("page", 1, type=int)
     items_per_page = blueprint.config["items_per_page"]
     pagination_serverside = blueprint.config["pagination_serverside"]
-    pagination = q.paginate(page, items_per_page, False)
-    total_items = pagination.total
+    total_items = DB.session.scalar(select(func.count("*")).select_from(q))
+    # we can't use DB.paginate() here because it use a .scalars() which return only the first item of the select
+    results = DB.session.execute(q.limit(items_per_page).offset(page * items_per_page)).unique().all()
+
     if pagination_serverside:
-        data = pagination.items
+        data = results.items
     else:
-        data = q.all()
+        data = DB.session.execute(q).unique().all()
 
     pageInfo = {
         "totalItems": total_items,
@@ -202,8 +207,8 @@ def get_all_transects():
 
 
 def load_transect(id_site):
-    query = (
-        DB.session.query(
+    data = DB.session.execute(
+        select(
             TTransect,
             TNomenclatures,
             func.string_agg(distinct(LAreas.area_name), ", "),
@@ -230,8 +235,7 @@ def load_transect(id_site):
             ),
         )
         .group_by(TTransect.id_transect, TNomenclatures.id_nomenclature, Habref.lb_hab_fr)
-    )
-    data = query.first()
+    ).first()
 
     if data:
         transect = data[0].get_geofeature(fields=["t_base_site", "cor_plots"])
@@ -266,9 +270,9 @@ def get_one_transect(id_site):
 
 
 @blueprint.route("/transects", methods=["POST"])
-@permissions.check_cruved_scope("C", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def add_transect(info_role):
+def add_transect(scope):
     """
     Poster un nouveau transect
     """
@@ -281,7 +285,7 @@ def add_transect(info_role):
         "base_site_name": f"HAB - {MODULE_CODE} - {data['transect_label']}",
         "base_site_description": data.pop("base_site_description", None),
         "first_use_date": datetime.datetime.now(),
-        "id_digitiser": info_role.id_role,
+        "id_digitiser": g.current_user.id_role,
         "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")),
     }
     site = TBaseSites(**site_data)
@@ -304,24 +308,26 @@ def add_transect(info_role):
 
 
 @blueprint.route("/transects/<id_transect>", methods=["PATCH"])
-@permissions.check_cruved_scope("U", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def update_transect(id_transect, info_role):
+def update_transect(id_transect, scope):
     """
     Mettre à jour un transect
     """
     data = dict(request.get_json())
 
     # Update base site table
-    site_data = {
-        "base_site_description": data.pop("base_site_description", None),
-        "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end"))
-    }
-    (
-        DB.session.query(TBaseSites)
+    DB.session.execute(
+        update(TBaseSites)
         .filter_by(id_base_site=data.get("id_base_site"))
-        .update(site_data, synchronize_session="fetch")
+        .values(base_site_description=data.pop("base_site_description", None),
+                geom=func.ST_MakeLine(data.get("geom_start"), data.get("geom_end"))
+        .execution_options(
+            synchronize_session="fetch"
+        )
+        )
     )
+
 
     plots = []
     if "cor_plots" in data:
@@ -345,25 +351,31 @@ def get_all_visits(id_site):
     Retourne les visites d'un site par son id
     """
     query = (
-        DB.session.query(Visit)
+        select(Visit)
         .filter_by(id_base_site=id_site)
         .order_by(Visit.visit_date_min.desc())
     )
-    pagination = query.paginate()
-    total_items = pagination.total
-    data = query.all()
+
+    page = request.args.get("page", 0, type=int)
+    print(f"PAGE : {page}")
+    total_items = DB.session.scalar(select(func.count("*")).select_from(query))
+    items_per_page = blueprint.config["items_per_page"]
+    # we can't use DB.paginate() here because it use a .scalars() which return only the first item of the select
+    data = DB.session.scalars(query).unique().all()
 
     pageInfo = {
         "totalItems": total_items,
-        "itemsPerPage": blueprint.config["items_per_page"],
+        "itemsPerPage": items_per_page,
     }
+
+    fields = ["cor_releve_plot", "cor_visit_perturbation", "observers"]
     if data:
         return [
             pageInfo,
             [
-                d.as_dict(fields=["cor_releve_plot", "cor_visit_perturbation", "observers"])
+                d.as_dict(fields=fields)
                 for d in data
-            ],
+            ]
         ]
     return None
 
@@ -375,7 +387,7 @@ def get_one_visit(id_visit):
     """
     Retourne les visites d'un site par son id
     """
-    data = DB.session.query(Visit).filter_by(id_base_visit=id_visit).first()
+    data = DB.session.scalars(select(Visit).filter_by(id_base_visit=id_visit)).first()
     if data:
         visit = data.as_dict(
             fields=[
@@ -404,9 +416,9 @@ def get_one_visit(id_visit):
 
 
 @blueprint.route("/visits", methods=["POST"])
-@permissions.check_cruved_scope("C", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def add_visit(info_role):
+def add_visit(scope):
     """
     Poster une nouvelle visite
     """
@@ -420,7 +432,7 @@ def add_visit(info_role):
 
     observers_ids = []
     if "observers" in data:
-        observers = data.pop("observers")
+        observers_ids = data.pop("observers")
 
     perturbations = []
     if "perturbations" in data:
@@ -432,23 +444,23 @@ def add_visit(info_role):
 
     if "id_dataset" not in data or data["id_dataset"] == "":
         dataset_code = METADATA_CODE
-        Dataset = (
-            DB.session.query(TDatasets).filter(TDatasets.dataset_shortname == dataset_code).first()
-        )
+        Dataset = DB.session.scalars(
+            select(TDatasets)
+            .where(TDatasets.dataset_shortname == dataset_code)
+            ).first()
         if Dataset:
             data["id_dataset"] = Dataset.id_dataset
         else:
             raise BadRequest(f"Module dataset shortname '{dataset_code}' was not found !")
 
     if "id_module" not in data or data["id_module"] == "":
-        data["id_module"] = (
-            db.session.query(TModules.id_module)
-            .filter(TModules.module_code == MODULE_CODE)
-            .scalar()
-        )
+        data["id_module"] =  DB.session.execute(
+            select(TModules.id_module)
+            .where(TModules.module_code == MODULE_CODE)
+        ).scalar_one()
 
     if "id_digitiser" not in data or data["id_digitiser"] == "":
-        data["id_digitiser"] = info_role.id_role
+        data["id_digitiser"] = g.current_user.id_role
 
     visit = Visit(**data)
 
@@ -474,7 +486,7 @@ def add_visit(info_role):
 
         visit.cor_releve_plot.append(releve_plot)
 
-    observers = DB.session.query(User).filter(User.id_role.in_(observers_ids)).all()
+    observers = DB.session.scalars(select(User).where(User.id_role.in_(observers_ids))).unique().all()
     for observer in observers:
         visit.observers.append(observer)
 
@@ -492,7 +504,7 @@ def update_visit(id_visit):
     """
     data = dict(request.get_json())
 
-    existingVisit = Visit.query.filter_by(id_base_visit=id_visit).first()
+    existingVisit = DB.session.get(Visit, id_visit)
     if existingVisit == None:
         raise NotFound(f"Visit {id_visit} does not exist")
 
@@ -530,9 +542,10 @@ def update_visit(id_visit):
                 strat_item = CorRelevePlotStrat(**strat)
                 releve_plot.cor_releve_strats.append(strat_item)
             elif "id_releve_plot_strat" in strat and (strat["cover_pourcentage"] == None or strat["cover_pourcentage"] == 0):
-                DB.session.query(CorRelevePlotStrat).filter_by(
-                    id_releve_plot_strat=strat["id_releve_plot_strat"]
-                ).delete()
+                delete_cor_releve_plot_strat = delete(
+                    CorRelevePlotStrat
+                    ).filter_by(id_releve_plot_strat = strat["id_releve_plot_strat"])
+                DB.session.execute(delete_cor_releve_plot_strat)
         for taxon in plot_data["taxons_releve"]:
             if "sciname" in taxon:
                 del taxon["sciname"]
@@ -540,21 +553,24 @@ def update_visit(id_visit):
                 taxon_item = CorRelevePlotTaxon(**taxon)
                 releve_plot.cor_releve_taxons.append(taxon_item)
             elif "id_cor_releve_plot_taxon" in taxon and (taxon["cover_pourcentage"] == None or taxon["cover_pourcentage"] == 0):
-                DB.session.query(CorRelevePlotTaxon).filter_by(
-                    id_cor_releve_plot_taxon=taxon["id_cor_releve_plot_taxon"]
-                ).delete()
+                delete_cor_releve_plot_taxon = delete(
+                    CorRelevePlotTaxon
+                    ).filter_by(id_cor_releve_plot_taxon = taxon["id_cor_releve_plot_taxon"])
+                DB.session.execute(delete_cor_releve_plot_taxon)
         visit.cor_releve_plot.append(releve_plot)
 
-    DB.session.query(CorTransectVisitPerturbation).filter_by(id_base_visit=id_visit).delete()
+    delete_cor_transect_visit_perturbation = delete(
+        CorTransectVisitPerturbation
+        ).filter_by(id_base_visit = id_visit)
+    DB.session.execute(delete_cor_transect_visit_perturbation)
     for perturbation in perturbations:
         visit_perturbation = CorTransectVisitPerturbation(**perturbation)
         visit.cor_visit_perturbation.append(visit_perturbation)
 
-    observers = DB.session.query(User).filter(User.id_role.in_(observers_ids)).all()
+    observers = DB.session.scalars(select(User).where(User.id_role.in_(observers_ids))).unique().all()
     for observer in observers:
         visit.observers.append(observer)
 
-    print(visit)
     mergeVisit = DB.session.merge(visit)
     DB.session.commit()
 
@@ -569,16 +585,16 @@ def get_all_habitats():
     Récupère les habitats utilisé dans ce module.
     """
     query = (
-        DB.session.query(CorListHabitat.cd_hab, Habref.lb_hab_fr)
-        .join(Habref, CorListHabitat.cd_hab == Habref.cd_hab)
-        .join(BibListHabitat, BibListHabitat.id_list == CorListHabitat.id_list)
-        .filter(BibListHabitat.list_name == blueprint.config["habitat_list_name"])
+        select(cor_list_habitat.c.cd_hab, Habref.lb_hab_fr)
+        .join(Habref, cor_list_habitat.c.cd_hab == Habref.cd_hab)
+        .join(BibListHabitat, BibListHabitat.id_list == cor_list_habitat.c.id_list)
+        .where(BibListHabitat.list_name == blueprint.config["habitat_list_name"])
         .group_by(
-            CorListHabitat.cd_hab,
+            cor_list_habitat.c.cd_hab,
             Habref.lb_hab_fr,
         )
     )
-    data = query.all()
+    data = DB.session.execute(query).all()
 
     if data:
         habitats = []
@@ -601,12 +617,12 @@ def get_all_taxa_by_habitats(cd_hab):
     Retourne tous les taxons d'un habitat.
     """
     query = (
-        DB.session.query(CorHabTaxon.id_cor_hab_taxon, CorHabTaxon.cd_nom, Taxref.nom_complet_html)
+        select(CorHabTaxon.id_cor_hab_taxon, CorHabTaxon.cd_nom, Taxref.nom_complet_html)
         .join(Taxref, CorHabTaxon.cd_nom == Taxref.cd_nom)
         .group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxref.nom_complet_html)
-        .filter(CorHabTaxon.id_habitat == cd_hab)
+        .where(CorHabTaxon.id_habitat == cd_hab)
     )
-    data = query.all()
+    data = DB.session.execute(query).all()
 
     if data:
         taxons = []
@@ -633,30 +649,30 @@ def export_visits():
     export_format = parameters["export_format"] if "export_format" in request.args else "shapefile"
 
     file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
-    q = DB.session.query(ExportVisits)
+    query = select(ExportVisits)
 
     if "id_base_visit" in parameters:
-        q = DB.session.query(ExportVisits).filter(
+        query = query.where(
             ExportVisits.idbvisit == parameters["id_base_visit"]
         )
     elif "id_releve_plot" in parameters:
-        q = DB.session.query(ExportVisits).filter(
+        query = query.where(
             ExportVisits.idreleve == parameters["id_releve_plot"]
         )
     elif "id_base_site" in parameters:
-        q = DB.session.query(ExportVisits).filter(
+        query = query.where(
             ExportVisits.idbsite == parameters["id_base_site"]
         )
     elif "organisme" in parameters:
-        q = DB.session.query(ExportVisits).filter(ExportVisits.organisme == parameters["organisme"])
+        query = query.where(ExportVisits.organisme == parameters["organisme"])
     elif "year" in parameters:
-        q = DB.session.query(ExportVisits).filter(
+        query = query.where(
             func.date_part("year", ExportVisits.visitdate) == parameters["year"]
         )
     elif "cd_hab" in parameters:
-        q = DB.session.query(ExportVisits).filter(ExportVisits.cd_hab == parameters["cd_hab"])
+        query = query.where(ExportVisits.cd_hab == parameters["cd_hab"])
 
-    data = q.all()
+    data = DB.session.scalars(query).all()
     features = []
 
     # formate data
@@ -680,14 +696,10 @@ def export_visits():
             cor_hab_taxon = get_taxons_by_cd_hab(cd_hab)
             flag_cdhab = cd_hab
 
-        # remove geom Type
-        geom_wkt = to_shape(d.geom)
-        geom_array = array(geom_wkt)
-        visit["geom_wkt"] = geom_wkt
-        if export_format == "csv" or export_format == "shapefile":
-            visit["geom"] = d.geom
-            if geom_wkt.type.lower() == "linestring":
-                visit["geom"] = str(geom_array[0]) + " / " + str(geom_array[1])
+        # Geom
+        if export_format != "geojson":
+            geom_wkt = to_shape(d.geom)
+            visit["geom"] = geom_wkt
 
         # remove html tag
         visit["lbhab"] = strip_html(visit["lbhab"])
@@ -741,7 +753,8 @@ def export_visits():
     else:
 
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
-
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
         FionaShapeService.create_shapes_struct(
             db_cols=ExportVisits.__mapper__.c,
             srid=4326,

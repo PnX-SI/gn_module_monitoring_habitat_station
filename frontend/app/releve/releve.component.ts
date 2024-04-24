@@ -9,8 +9,8 @@ import * as _ from 'lodash';
 
 import { CommonService } from '@geonature_common/service/common.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
+import { ConfigService } from '@geonature/services/config.service';
 
-import { ModuleConfig } from '../module.config';
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
@@ -49,12 +49,13 @@ export class ReleveComponent implements OnInit {
   public addIsAllowed: boolean = false;
 
   constructor(
+    private config: ConfigService,
     private activatedRoute: ActivatedRoute,
     private commonService: CommonService,
     public router: Router,
-    private _fb: FormBuilder,
+    private formBuilder: FormBuilder,
     public dateParser: NgbDateParserFormatter,
-    private storeService: StoreService,
+    public storeService: StoreService,
     private _api: DataService,
     private toastr: ToastrService,
     private nomenclatureServ: DataFormService,
@@ -69,7 +70,7 @@ export class ReleveComponent implements OnInit {
     this.intitForm();
     if (!this.currentSite) {
       forkJoin([
-        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, {
+        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, null, {
           orderby: 'label_default',
         }),
         this._api.getOneTransect(this.idSite),
@@ -110,7 +111,7 @@ export class ReleveComponent implements OnInit {
       this.plotTitle = this.currentSite.properties.cor_plots[0].code_plot;
       this.id_base_site = this.currentSite.properties.id_base_site;
       forkJoin([
-        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, {
+        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, null, {
           orderby: 'label_default',
         }),
         this._api.getTaxonsByHabitat(this.currentSite.properties.cd_hab),
@@ -221,7 +222,7 @@ export class ReleveComponent implements OnInit {
   }
 
   backToVisites() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects`, this.id_base_site]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, this.id_base_site]);
   }
 
   onChangePlot(plot) {
@@ -243,7 +244,7 @@ export class ReleveComponent implements OnInit {
   }
 
   private intitForm() {
-    this.visitForm = this._fb.group({
+    this.visitForm = this.formBuilder.group({
       id_base_visit: null,
       visit_date_min: [null, Validators.required],
       observers: [null, Validators.required],

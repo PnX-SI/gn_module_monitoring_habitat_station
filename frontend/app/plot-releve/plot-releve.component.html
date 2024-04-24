@@ -30,7 +30,7 @@
       </thead>
       <tbody>
         <tr
-          *ngFor="let strate of plotForm.controls.strates_releve.controls"
+          *ngFor="let strate of plotForm.controls.strates_releve['controls']"
           formArrayName="strates_releve"
         >
           <ng-container *ngIf="!disabledForm || (disabledForm && strate.controls.cover_pourcentage.value)">
@@ -67,7 +67,7 @@
       </thead>
       <tbody>
         <tr
-          *ngFor="let taxon of plotForm.controls.taxons_releve.controls"
+          *ngFor="let taxon of plotForm.controls.taxons_releve['controls']"
           formArrayName="taxons_releve"
         >
           <ng-container *ngIf="!disabledForm || (disabledForm && taxon.controls.cover_pourcentage.value)">

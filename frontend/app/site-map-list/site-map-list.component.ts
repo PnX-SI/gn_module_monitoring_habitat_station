@@ -14,13 +14,14 @@ import 'Leaflet.Deflate';
 
 import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { ConfigService } from '@geonature/services/config.service';
 
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
-import { ModuleConfig } from '../module.config';
 import * as _ from 'lodash';
 import { Habitat } from '../shared/models/habitat.model';
+import { TranslationWidth } from '@angular/common';
 
 const I18N_VALUES = {
   fr: {
@@ -37,8 +38,12 @@ export class I18n {
 // Define custom service providing the months and weekdays translations
 @Injectable()
 export class CustomDatepickerI18n extends NgbDatepickerI18n {
+
   constructor(private _i18n: I18n) {
     super();
+  }
+  getWeekdayLabel(weekday: number): string {
+    return I18N_VALUES[this._i18n.language].weekdays[weekday - 1];
   }
   getWeekdayShortName(weekday: number): string {
     return I18N_VALUES[this._i18n.language].weekdays[weekday - 1];
@@ -90,6 +95,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   maxDate: any;
 
   constructor(
+    private config:ConfigService,
     public mapService: MapService,
     private _api: DataService,
     private userService: UserService,
@@ -99,7 +105,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     public mapListService: MapListService,
     public router: Router,
     private toastr: ToastrService,
-    private _fb: FormBuilder
+    private formBuilder: FormBuilder
   ) {
     datePickerConfig.outsideDays = 'hidden';
     datePickerConfig.minDate = { year: 1735, month: 1, day: 1 };
@@ -109,18 +115,18 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     this.checkPermission();
     this.getTransects();
-    this.center = this.storeService.moduleConfig.zoom_center;
-    this.zoom = this.storeService.moduleConfig.zoom;
+    this.center = this.storeService.mhsConfig.zoom_center;
+    this.zoom = this.storeService.mhsConfig.zoom;
     this.initFilters();
   }
 
   ngAfterViewInit() {
-    let moduleCode = ModuleConfig.MODULE_CODE.toLocaleLowerCase();
+    let moduleCode = this.config['MHS']['MODULE_CODE'].toLocaleLowerCase();
     let iconMarker = L.icon({
       iconSize: [25, 41],
       iconAnchor: [13, 41],
-      iconUrl: `./external_assets/${moduleCode}/marker-icon.png`,
-      shadowUrl: `./external_assets/${moduleCode}/marker-shadow.png`,
+      iconUrl: `./assets/${moduleCode}/marker-icon.png`,
+      shadowUrl: `./assets/${moduleCode}/marker-shadow.png`,
     });
     this._map = this.mapService.getMap();
     this._deflate_features = L.deflate({ minSize: 10, markerOptions: { icon: iconMarker } });
@@ -161,6 +167,9 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.mapListService.loadTableData(data[1]);
           this.filteredData = this.mapListService.tableData;
         }
+        else {
+          this.filteredData = []
+        }
         this.dataLoaded = true;
       },
       error => {
@@ -181,7 +190,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   initFilters() {
-    this.filterForm = this._fb.group({
+    this.filterForm = this.formBuilder.group({
       date_low: null,
       date_up: null,
       filterHab: null,
@@ -204,7 +213,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setPage(pageInfo) {
     this.page.pageNumber = pageInfo.offset;
-    if (this.storeService.moduleConfig.pagination_serverside) {
+    if (this.storeService.mhsConfig.pagination_serverside) {
       this.onSetParams('page', pageInfo.offset + 1);
       this.getTransects(this.storeService.queryString.toString());
     }
@@ -251,7 +260,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onInfo(id_base_site) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects`, id_base_site]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, id_base_site]);
   }
 
   addCustomControl() {
@@ -296,7 +305,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onNewTransect() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/new_transect`]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects/new_transect`]);
   }
 
   closeFix(event, datePicker) {

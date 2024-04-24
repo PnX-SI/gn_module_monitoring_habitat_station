@@ -1,6 +1,7 @@
 import re
 
 from sqlalchemy.sql.expression import func
+from sqlalchemy import select
 from werkzeug.exceptions import Conflict
 
 from apptax.taxonomie.models import Taxref
@@ -69,12 +70,14 @@ def check_year_visit(id_base_site, new_visit_date, id_base_visit=None):
     Check if there is already a visit of the same year.
     If yes, observer is not allowed to post the new visit
     """
-    query = DB.session.query(func.date_part("year", TBaseVisits.visit_date_min)).filter(
+    query = select(
+        func.date_part("year", TBaseVisits.visit_date_min)
+        ).where(
         TBaseVisits.id_base_site == id_base_site
     )
     if id_base_visit is not None:
-        query = query.filter(TBaseVisits.id_base_visit != id_base_visit)
-    old_years = query.all()
+        query = query.where(TBaseVisits.id_base_visit != id_base_visit)
+    old_years = DB.session.execute(query).all()
 
     year_new_visit = new_visit_date[0:4]
     for year in old_years:
@@ -88,18 +91,18 @@ def check_year_visit(id_base_site, new_visit_date, id_base_visit=None):
 
 
 def get_id_type_site(code):
-    query = DB.session.query(func.ref_nomenclatures.get_id_nomenclature("TYPE_SITE", code))
-    return query.first()
+    query = select(func.ref_nomenclatures.get_id_nomenclature("TYPE_SITE", code))
+    return DB.session.execute(query).first()[0]
 
 
 def get_taxons_by_cd_hab(habitat_code):
     query = (
-        DB.session.query(CorHabTaxon.id_cor_hab_taxon, Taxref.lb_nom)
+        select(CorHabTaxon.id_cor_hab_taxon, Taxref.lb_nom)
         .join(Taxref, CorHabTaxon.cd_nom == Taxref.cd_nom)
         .group_by(CorHabTaxon.id_habitat, CorHabTaxon.id_cor_hab_taxon, Taxref.lb_nom)
-        .filter(CorHabTaxon.id_habitat == habitat_code)
+        .where(CorHabTaxon.id_habitat == habitat_code)
     )
-    data = query.all()
+    data = DB.session.execute(query).all()
 
     taxons = []
     if data:
@@ -110,12 +113,14 @@ def get_taxons_by_cd_hab(habitat_code):
 
 
 def get_stratelist_plot():
-    q = DB.session.query(TNomenclatures.label_default).join(
+    q = select(
+        TNomenclatures.label_default
+        ).join(
         BibNomenclaturesTypes, BibNomenclaturesTypes.id_type == TNomenclatures.id_type
-    )
+        )
 
-    q = q.filter(BibNomenclaturesTypes.mnemonique == "STRATE_PLACETTE")
-    data = q.all()
+    q = q.where(BibNomenclaturesTypes.mnemonique == "STRATE_PLACETTE")
+    data = DB.session.execute(q).all()
     strates = []
     if data:
         for d in data:

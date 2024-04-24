@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, Input, EventEmitter, OnChanges } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
-import { AppConfig } from '@geonature_config/app.config';
+import { ConfigService } from '@geonature/services/config.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -16,17 +16,21 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   @Input() disabledForm;
   @Input() title: string;
   @Output() plotReleve = new EventEmitter();
-  private isModifeded: boolean = false;
-  private relevePlotId: number = null;
-  taxonApiEndPoint = `${AppConfig.API_TAXHUB}/taxref/search/lb_nom`;
+  private isModified: boolean = false;
+  private relevePlotId;
+  taxonApiEndPoint = `${this.config.API_TAXHUB}/taxref/search/lb_nom`;
   plotForm: FormGroup;
   scinameCodeControl: FormControl = new FormControl(null);
   hasStrateCovering: Boolean;
   hasTaxaCovering: Boolean;
 
-  constructor(private _fb: FormBuilder) {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private config: ConfigService,
+  ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+  }
 
   ngOnChanges() {
     this.hasStrateCovering = false;
@@ -36,24 +40,24 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     this.initTaxon();
     this.initStrates();
 
+    this.plotForm.enable();
+    if (this.disabledForm) {
+      this.plotForm.disable();
+    }
+
     this.relevePlotId = null;
     if (this.data) {
       this.relevePlotId = this.data.id_releve_plot;
       this.patchForm();
     }
 
-    this.plotForm.enable();
-    if (this.disabledForm) {
-      this.plotForm.disable();
-    }
-
     this.onChanges();
   }
 
   private initPlots() {
-    this.plotForm = this._fb.group({
-      taxons_releve: this._fb.array([]),
-      strates_releve: this._fb.array([]),
+    this.plotForm = this.formBuilder.group({
+      taxons_releve: this.formBuilder.array([]),
+      strates_releve: this.formBuilder.array([]),
       excretes_presence: false,
     });
   }
@@ -63,7 +67,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
 
     this.taxons.forEach(taxon => {
       (this.plotForm.get('taxons_releve') as FormArray).push(
-        this._fb.group({
+        this.formBuilder.group({
           id_cor_releve_plot_taxon: [null],
           cd_nom: [taxon.cd_nom],
           id_cor_hab_taxon: [taxon.id_cor_hab_taxon],
@@ -78,9 +82,10 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     this.strates.sort((strateA, strateB) =>
       strateA.label_default.localeCompare(strateB.label_default)
     );
+
     this.strates.forEach(strate => {
       (this.plotForm.get('strates_releve') as FormArray).push(
-        this._fb.group({
+        this.formBuilder.group({
           id_nomenclature_strate: [strate.id_nomenclature_strate],
           id_releve_plot_strat: [null],
           cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
@@ -114,7 +119,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
       }
       if (!in_predefined_taxa) {
         (this.plotForm.get('taxons_releve') as FormArray).push(
-          this._fb.group({
+          this.formBuilder.group({
             id_cor_releve_plot_taxon: [item.id_cor_releve_plot_taxon],
             cd_nom: [item.cd_nom],
             id_cor_hab_taxon: [null],
@@ -147,7 +152,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
 
   private onChanges(): void {
     this.plotForm.valueChanges.subscribe(val => {
-      this.isModifeded = true;
+      this.isModified = true;
     });
   }
 
@@ -178,21 +183,21 @@ export class PlotReleveComponent implements OnInit, OnChanges {
           plot_data: this.plotForm.value,
           status: this.plotForm.valid,
         },
-        this.isModifeded,
+        this.isModified,
       ]);
     } else {
       this.plotReleve.emit([
         { id_plot: this.plotId, plot_data: this.plotForm.value, status: this.plotForm.valid },
-        this.isModifeded,
+        this.isModified,
       ]);
     }
-    this.isModifeded = false;
+    this.isModified = false;
   }
 
   addNewTaxon(event): void {
     let taxon = event.item;
     (this.plotForm.get('taxons_releve') as FormArray).push(
-      this._fb.group({
+      this.formBuilder.group({
         id_cor_releve_plot_taxon: [null],
         cd_nom: [taxon.cd_nom],
         id_cor_hab_taxon: [null],
