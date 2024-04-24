@@ -69,7 +69,7 @@ export class ReleveComponent implements OnInit {
     this.intitForm();
     if (!this.currentSite) {
       forkJoin([
-        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, {
+        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, null, {
           orderby: 'label_default',
         }),
         this._api.getOneTransect(this.idSite),
@@ -110,7 +110,7 @@ export class ReleveComponent implements OnInit {
       this.plotTitle = this.currentSite.properties.cor_plots[0].code_plot;
       this.id_base_site = this.currentSite.properties.id_base_site;
       forkJoin([
-        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, {
+        this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, null, {
           orderby: 'label_default',
         }),
         this._api.getTaxonsByHabitat(this.currentSite.properties.cd_hab),

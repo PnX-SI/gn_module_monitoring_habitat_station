@@ -72,7 +72,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     forkJoin([
       this.api.getAllSites({ id_base_site: this.idSite }),
       this.api.getHabitats(),
-      this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, {
+      this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, null, {
         orderby: 'label_default',
       }),
     ]).subscribe(
