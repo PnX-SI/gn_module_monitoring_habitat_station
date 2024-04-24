@@ -21,6 +21,7 @@ import { UserService } from '../shared/services/user.service';
 import { ModuleConfig } from '../module.config';
 import * as _ from 'lodash';
 import { Habitat } from '../shared/models/habitat.model';
+import { TranslationWidth } from '@angular/common';
 
 const I18N_VALUES = {
   fr: {
@@ -37,6 +38,9 @@ export class I18n {
 // Define custom service providing the months and weekdays translations
 @Injectable()
 export class CustomDatepickerI18n extends NgbDatepickerI18n {
+  getWeekdayLabel(weekday: number, width?: TranslationWidth): string {
+    throw new Error('Method not implemented.');
+  }
   constructor(private _i18n: I18n) {
     super();
   }
