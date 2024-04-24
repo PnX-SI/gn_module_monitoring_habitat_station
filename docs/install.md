@@ -28,7 +28,7 @@
     ```
 5. Installez le module avec la commande :
     ```bash
-    geonature install-packaged-gn-module --build false /home/${USER}/modules/gn_module_monitoring_habitat_station MHS
+    geonature install-gn-module --build false /home/${USER}/modules/gn_module_monitoring_habitat_station
     ```
     - Adaptez le chemin `/home/${USER}/modules/gn_module_monitoring_habitat_station` à votre installation.
 6. Complétez la configuration du module uniquement si nécessaire :
@@ -39,7 +39,7 @@
     - Les valeurs par défaut dans : `backend/gn_module_monitoring_habitat_station/conf_schema_toml.py`
 7. Mettre à jour le frontend :
     ```bash
-    geonature update-configuration --build false && geonature generate-frontend-tsconfig && geonature generate-frontend-tsconfig-app && geonature generate-frontend-modules-route
+    geonature update-configuration --build false && geonature generate-frontend-module-config MHS
     ```
 8. Vous pouvez sortir du venv en lançant la commande : `deactivate`
 
