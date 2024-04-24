@@ -33,7 +33,7 @@ dependencies = [
     "pypnnomenclature",
     "pypnusershub>=1.5.9",
     "pypn_habref_api",
-    "gn_conservation_backend_shared>=0.4.0",
+    "gn_conservation_backend_shared>=0.5.1",
 ]
 
 [project.optional-dependencies]
@@ -41,7 +41,7 @@ dev = [
     "black",
 ]
 prod = [
-    "gn_conservation_backend_shared@git+https://github.com/cbn-alpin/gn_conservation_backend_shared.git@0.4.0",
+    "gn_conservation_backend_shared@git+https://github.com/cbn-alpin/gn_conservation_backend_shared.git@0.5.1",
 ]
 
 [project.entry-points.gn_module]
