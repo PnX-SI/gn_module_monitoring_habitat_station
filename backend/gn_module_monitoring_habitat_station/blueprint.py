@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Blueprint, request, send_from_directory
+from flask import Blueprint, request, send_from_directory, g
 from geojson import FeatureCollection
 from sqlalchemy.sql.expression import func
 from sqlalchemy import and_, distinct, func
@@ -59,12 +59,12 @@ blueprint = Blueprint("pr_monitoring_habitat_station", __name__)
 
 
 @blueprint.route("/users/current/cruved", methods=["GET"])
-@permissions.check_cruved_scope("R", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def get_user_cruved(info_role):
+def get_user_cruved(scope):
     # récupérer le CRUVED complet de l'utilisateur courant
     user_cruved = get_scopes_by_action(
-        id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
+        id_role=g.current_user.id_role, module_code=blueprint.config["MODULE_CODE"]
     )
     return user_cruved
 
@@ -266,9 +266,9 @@ def get_one_transect(id_site):
 
 
 @blueprint.route("/transects", methods=["POST"])
-@permissions.check_cruved_scope("C", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def add_transect(info_role):
+def add_transect(scope):
     """
     Poster un nouveau transect
     """
@@ -281,7 +281,7 @@ def add_transect(info_role):
         "base_site_name": f"HAB - {MODULE_CODE} - {data['transect_label']}",
         "base_site_description": data.pop("base_site_description", None),
         "first_use_date": datetime.datetime.now(),
-        "id_digitiser": info_role.id_role,
+        "id_digitiser": g.current_user.id_role,
         "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")),
     }
     site = TBaseSites(**site_data)
@@ -304,9 +304,9 @@ def add_transect(info_role):
 
 
 @blueprint.route("/transects/<id_transect>", methods=["PATCH"])
-@permissions.check_cruved_scope("U", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def update_transect(id_transect, info_role):
+def update_transect(id_transect, scope):
     """
     Mettre à jour un transect
     """
@@ -404,9 +404,9 @@ def get_one_visit(id_visit):
 
 
 @blueprint.route("/visits", methods=["POST"])
-@permissions.check_cruved_scope("C", get_role=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def add_visit(info_role):
+def add_visit(scope):
     """
     Poster une nouvelle visite
     """
@@ -448,7 +448,7 @@ def add_visit(info_role):
         )
 
     if "id_digitiser" not in data or data["id_digitiser"] == "":
-        data["id_digitiser"] = info_role.id_role
+        data["id_digitiser"] = g.current_user.id_role
 
     visit = Visit(**data)
 
