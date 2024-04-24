@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Blueprint, request, session, send_from_directory
+from flask import Blueprint, request, send_from_directory
 from geojson import FeatureCollection
 from sqlalchemy.sql.expression import func
 from sqlalchemy import and_, distinct, func
@@ -16,7 +16,7 @@ from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_csv_resp, to_json_resp
 
 from geonature.core.gn_permissions import decorators as permissions
-from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
+from geonature.core.gn_permissions.tools import get_scopes_by_action
 from geonature.core.gn_meta.models import TDatasets
 from geonature.core.gn_monitoring.models import (
     corVisitObserver,
@@ -63,8 +63,8 @@ blueprint = Blueprint("pr_monitoring_habitat_station", __name__)
 @json_resp
 def get_user_cruved(info_role):
     # récupérer le CRUVED complet de l'utilisateur courant
-    user_cruved = get_or_fetch_user_cruved(
-        session=session, id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
+    user_cruved = get_scopes_by_action(
+        id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
     )
     return user_cruved
 
