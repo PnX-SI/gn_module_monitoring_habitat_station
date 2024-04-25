@@ -265,14 +265,14 @@
           [headerHeight]="50"
           [footerHeight]="50"
           [rowHeight]="'auto'"
-          [messages]="storeService.moduleConfig.list_visit_message"
+          [messages]="storeService.mhsConfig.list_visit_message"
           [offset]="page.pageNumber"
           [limit]="page.size"
           [selectionType]="'single'"
           (select)="onRowSelect($event)"
         >
           <ngx-datatable-column
-            *ngFor="let col of storeService.moduleConfig.default_list_visit_columns"
+            *ngFor="let col of storeService.mhsConfig.default_list_visit_columns"
             [name]="col.name"
             [prop]="col.prop"
             maxWidth="col.maxWidth"
@@ -295,7 +295,7 @@
           <pnx-modal-download
             labelButton="Télécharger ces visites"
             [pathDownload]="storeService.urlLoad"
-            [exportFormat]="storeService.moduleConfig.export_available_format"
+            [exportFormat]="storeService.mhsConfig.export_available_format"
             [queryString]="storeService.queryString"
           >
           </pnx-modal-download>

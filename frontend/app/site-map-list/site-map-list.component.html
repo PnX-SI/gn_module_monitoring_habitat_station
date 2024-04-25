@@ -101,15 +101,15 @@
           [selectionType]="'single'"
           (select)="onRowSelect($event)"
           [rowClass]="mapListService.getRowClass"
-          [externalPaging]="storeService.moduleConfig.pagination_serverside"
+          [externalPaging]="storeService.mhsConfig.pagination_serverside"
           [count]="page.totalElements"
           [offset]="page.pageNumber"
           [limit]="page.size"
           (page)="setPage($event)"
-          [messages]="storeService.moduleConfig.site_message"
+          [messages]="storeService.mhsConfig.site_message"
         >
           <ngx-datatable-column
-            *ngFor="let col of storeService.moduleConfig.default_site_columns"
+            *ngFor="let col of storeService.mhsConfig.default_site_columns"
             [name]="col.name"
             [prop]="col.prop"
           >

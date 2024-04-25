@@ -2,14 +2,13 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { ConfigService } from '@geonature/services/config.service';
-import { ModuleConfig } from '../../module.config';
 import { ISite } from '../models/site.model';
 
 @Injectable()
 export class StoreService {
-  public moduleConfig = ModuleConfig;
+  public mhsConfig = this.config['MHS'];
   public queryString = new HttpParams();
-  public urlLoad = `${this.config.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits/export`;
+  public urlLoad = `${this.config.API_ENDPOINT}/${this.mhsConfig.MODULE_URL}/visits/export`;
   public currentSite: ISite;
 
   constructor(

@@ -14,11 +14,11 @@ import 'Leaflet.Deflate';
 
 import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { ConfigService } from '@geonature/services/config.service';
 
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
-import { ModuleConfig } from '../module.config';
 import * as _ from 'lodash';
 import { Habitat } from '../shared/models/habitat.model';
 import { TranslationWidth } from '@angular/common';
@@ -94,6 +94,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   maxDate: any;
 
   constructor(
+    private config:ConfigService,
     public mapService: MapService,
     private _api: DataService,
     private userService: UserService,
@@ -113,13 +114,13 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     this.checkPermission();
     this.getTransects();
-    this.center = this.storeService.moduleConfig.zoom_center;
-    this.zoom = this.storeService.moduleConfig.zoom;
+    this.center = this.storeService.mhsConfig.zoom_center;
+    this.zoom = this.storeService.mhsConfig.zoom;
     this.initFilters();
   }
 
   ngAfterViewInit() {
-    let moduleCode = ModuleConfig.MODULE_CODE.toLocaleLowerCase();
+    let moduleCode = this.config['MHS']['MODULE_CODE'].toLocaleLowerCase();
     let iconMarker = L.icon({
       iconSize: [25, 41],
       iconAnchor: [13, 41],
@@ -208,7 +209,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setPage(pageInfo) {
     this.page.pageNumber = pageInfo.offset;
-    if (this.storeService.moduleConfig.pagination_serverside) {
+    if (this.storeService.mhsConfig.pagination_serverside) {
       this.onSetParams('page', pageInfo.offset + 1);
       this.getTransects(this.storeService.queryString.toString());
     }
@@ -255,7 +256,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onInfo(id_base_site) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects`, id_base_site]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, id_base_site]);
   }
 
   addCustomControl() {
@@ -300,7 +301,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onNewTransect() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects/new_transect`]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects/new_transect`]);
   }
 
   closeFix(event, datePicker) {

@@ -10,8 +10,8 @@ import * as _ from 'lodash';
 
 import { DataFormService } from '@geonature_common/form/data-form.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { ConfigService } from '@geonature/services/config.service';
 
-import { ModuleConfig } from '../module.config';
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
@@ -36,7 +36,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   public page = new Page();
   public paramApp = this.storeService.queryString.append(
     'id_application',
-    '' + ModuleConfig.MODULE_CODE
+    '' + this.config['MHS']['MODULE_CODE']
   );
   public upIsAllowed = false;
   addIsAllowed = false;
@@ -51,6 +51,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   private modalRef: NgbModalRef;
 
   constructor(
+    private config: ConfigService,
     public storeService: StoreService,
     private api: DataService,
     public activatedRoute: ActivatedRoute,
@@ -95,7 +96,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
             ? "Aucun site n'est disponible pour ajouter un nouveau transect."
             : 'Une erreur est survenue lors de la récupération des informations sur le serveur.';
         this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
-        this.router.navigate([`${ModuleConfig.MODULE_URL}/`]);
+        this.router.navigate([`${this.config['MHS']['MODULE_URL']}/`]);
       }
     );
   }
@@ -230,18 +231,18 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   backToSites() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/`]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/`]);
   }
 
   onNewVisit() {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/new_visit`,
+      `${this.config['MHS']['MODULE_URL']}/transects/${this.currentSite.properties.id_base_site}/new_visit`,
     ]);
   }
 
   onVisitDetails(idVisit) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/transects/${this.currentSite.properties.id_base_site}/visit/`,
+      `${this.config['MHS']['MODULE_URL']}/transects/${this.currentSite.properties.id_base_site}/visit/`,
       idVisit,
     ]);
   }

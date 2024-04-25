@@ -9,8 +9,8 @@ import * as _ from 'lodash';
 
 import { CommonService } from '@geonature_common/service/common.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
+import { ConfigService } from '@geonature/services/config.service';
 
-import { ModuleConfig } from '../module.config';
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
@@ -49,6 +49,7 @@ export class ReleveComponent implements OnInit {
   public addIsAllowed: boolean = false;
 
   constructor(
+    private config: ConfigService,
     private activatedRoute: ActivatedRoute,
     private commonService: CommonService,
     public router: Router,
@@ -221,7 +222,7 @@ export class ReleveComponent implements OnInit {
   }
 
   backToVisites() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/transects`, this.id_base_site]);
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, this.id_base_site]);
   }
 
   onChangePlot(plot) {
