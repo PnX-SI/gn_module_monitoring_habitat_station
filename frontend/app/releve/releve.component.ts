@@ -55,7 +55,7 @@ export class ReleveComponent implements OnInit {
     public router: Router,
     private _fb: FormBuilder,
     public dateParser: NgbDateParserFormatter,
-    private storeService: StoreService,
+    public storeService: StoreService,
     private _api: DataService,
     private toastr: ToastrService,
     private nomenclatureServ: DataFormService,
