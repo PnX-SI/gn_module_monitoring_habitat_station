@@ -32,7 +32,6 @@ fieldset {
   border: 1px solid silver !important;
   margin: 0 2px;
   border-radius: 3px;
-  // background-color: #f3f3f3;
 }
 
 legend {
@@ -89,16 +88,17 @@ fieldset:disabled {
   vertical-align: text-bottom;
 }
 
-/deep/.datatable-row-group {
+:host ::ng-deep.datatable-row-group {
   cursor: pointer;
 }
 
-/deep/ngb-modal-window {
+:host ::ng-deep ngb-modal-window {
   display: flex !important;
   justify-content: space-around;
   flex-direction: column;
 }
-/deep/.modal-content {
+
+:host ::ng-deep.modal-content {
   min-width: 500px;
 }
 
