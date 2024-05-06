@@ -39,6 +39,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "black",
+    # Manually install gn_conservation_backend_shared with `pip install -e gn-conservation-backend-shared` if not installed in venv
 ]
 prod = [
     "gn_conservation_backend_shared@git+https://github.com/cbn-alpin/gn_conservation_backend_shared.git@0.5.1",
@@ -50,6 +51,7 @@ picto = "gn_module_monitoring_habitat_station:MODULE_PICTO"
 blueprint = "gn_module_monitoring_habitat_station.blueprint:blueprint"
 config_schema = "gn_module_monitoring_habitat_station.conf_schema_toml:GnModuleSchemaConf"
 migrations = "gn_module_monitoring_habitat_station:migrations"
+alembic_branch = "gn_module_monitoring_habitat_station:MODULE_DB_BRANCH"
 
 [build-system]
 # Minimum requirements for the build system to execute.

@@ -1,5 +1,6 @@
 MODULE_NAME = "Monitoring Habitat Station"
 MODULE_CODE = "MHS"
+MODULE_DB_BRANCH = "monitoring_habitat_station"
 MODULE_PICTO = "fa-map-marker"
 METADATA_NAME = "Suivi Habitat Station"
 METADATA_CODE = "SHS"
