@@ -29,15 +29,16 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     private config: ConfigService,
   ) { }
 
-  ngOnInit() { }
-
-  ngOnChanges() {
+  ngOnInit() {
     this.hasStrateCovering = false;
     this.hasTaxaCovering = false;
 
     this.initPlots();
     this.initTaxon();
     this.initStrates();
+  }
+
+  ngOnChanges() {
 
     this.relevePlotId = null;
     if (this.data) {
