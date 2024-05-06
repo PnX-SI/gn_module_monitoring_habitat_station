@@ -53,7 +53,7 @@ export class ReleveComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private commonService: CommonService,
     public router: Router,
-    private _fb: FormBuilder,
+    private formBuilder: FormBuilder,
     public dateParser: NgbDateParserFormatter,
     public storeService: StoreService,
     private _api: DataService,
@@ -244,7 +244,7 @@ export class ReleveComponent implements OnInit {
   }
 
   private intitForm() {
-    this.visitForm = this._fb.group({
+    this.visitForm = this.formBuilder.group({
       id_base_visit: null,
       visit_date_min: [null, Validators.required],
       observers: [null, Validators.required],

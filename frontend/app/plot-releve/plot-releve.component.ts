@@ -25,7 +25,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   hasTaxaCovering: Boolean;
 
   constructor(
-    private _fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private config: ConfigService,
   ) { }
 
@@ -55,9 +55,9 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   }
 
   private initPlots() {
-    this.plotForm = this._fb.group({
-      taxons_releve: this._fb.array([]),
-      strates_releve: this._fb.array([]),
+    this.plotForm = this.formBuilder.group({
+      taxons_releve: this.formBuilder.array([]),
+      strates_releve: this.formBuilder.array([]),
       excretes_presence: false,
     });
   }
@@ -67,7 +67,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
 
     this.taxons.forEach(taxon => {
       (this.plotForm.get('taxons_releve') as FormArray).push(
-        this._fb.group({
+        this.formBuilder.group({
           id_cor_releve_plot_taxon: [null],
           cd_nom: [taxon.cd_nom],
           id_cor_hab_taxon: [taxon.id_cor_hab_taxon],
@@ -84,7 +84,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     );
     this.strates.forEach(strate => {
       (this.plotForm.get('strates_releve') as FormArray).push(
-        this._fb.group({
+        this.formBuilder.group({
           id_nomenclature_strate: [strate.id_nomenclature_strate],
           id_releve_plot_strat: [null],
           cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
@@ -118,7 +118,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
       }
       if (!in_predefined_taxa) {
         (this.plotForm.get('taxons_releve') as FormArray).push(
-          this._fb.group({
+          this.formBuilder.group({
             id_cor_releve_plot_taxon: [item.id_cor_releve_plot_taxon],
             cd_nom: [item.cd_nom],
             id_cor_hab_taxon: [null],
@@ -196,7 +196,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   addNewTaxon(event): void {
     let taxon = event.item;
     (this.plotForm.get('taxons_releve') as FormArray).push(
-      this._fb.group({
+      this.formBuilder.group({
         id_cor_releve_plot_taxon: [null],
         cd_nom: [taxon.cd_nom],
         id_cor_hab_taxon: [null],

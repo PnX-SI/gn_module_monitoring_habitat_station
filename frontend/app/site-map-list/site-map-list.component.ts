@@ -104,7 +104,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     public mapListService: MapListService,
     public router: Router,
     private toastr: ToastrService,
-    private _fb: FormBuilder
+    private formBuilder: FormBuilder
   ) {
     datePickerConfig.outsideDays = 'hidden';
     datePickerConfig.minDate = { year: 1735, month: 1, day: 1 };
@@ -186,7 +186,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   initFilters() {
-    this.filterForm = this._fb.group({
+    this.filterForm = this.formBuilder.group({
       date_low: null,
       date_up: null,
       filterHab: null,
