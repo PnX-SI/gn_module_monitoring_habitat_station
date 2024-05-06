@@ -6,14 +6,17 @@ import { ISite } from '../models/site.model';
 
 @Injectable()
 export class StoreService {
-  public mhsConfig = this.config['MHS'];
+  public mhsConfig: any = {};
   public queryString = new HttpParams();
-  public urlLoad = `${this.config.API_ENDPOINT}/${this.mhsConfig.MODULE_URL}/visits/export`;
   public currentSite: ISite;
+  public urlLoad: string;
 
   constructor(
     private config: ConfigService,
-  ) { }
+  ) {
+    this.mhsConfig = this.config['MHS'];
+    this.urlLoad = `${this.config.API_ENDPOINT}/${this.mhsConfig.MODULE_URL}/visits/export`;
+  }
 
   getCurrentSite() {
     return this.currentSite;
