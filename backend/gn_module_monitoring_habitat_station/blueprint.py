@@ -569,12 +569,12 @@ def get_all_habitats():
     Récupère les habitats utilisé dans ce module.
     """
     query = (
-        DB.session.query(cor_list_habitat.cd_hab, Habref.lb_hab_fr)
-        .join(Habref, cor_list_habitat.cd_hab == Habref.cd_hab)
-        .join(BibListHabitat, BibListHabitat.id_list == cor_list_habitat.id_list)
+        DB.session.query(cor_list_habitat.c.cd_hab, Habref.lb_hab_fr)
+        .join(Habref, cor_list_habitat.c.cd_hab == Habref.cd_hab)
+        .join(BibListHabitat, BibListHabitat.id_list == cor_list_habitat.c.id_list)
         .filter(BibListHabitat.list_name == blueprint.config["habitat_list_name"])
         .group_by(
-            cor_list_habitat.cd_hab,
+            cor_list_habitat.c.cd_hab,
             Habref.lb_hab_fr,
         )
     )
