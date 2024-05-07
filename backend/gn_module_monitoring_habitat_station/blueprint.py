@@ -2,7 +2,7 @@ import datetime
 
 from flask import Blueprint, request, send_from_directory, g
 from geojson import FeatureCollection
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func, select
 from sqlalchemy import and_, distinct, func
 from geoalchemy2.shape import to_shape
 from numpy import array
@@ -150,12 +150,14 @@ def get_all_transects():
     page = request.args.get("page", 1, type=int)
     items_per_page = blueprint.config["items_per_page"]
     pagination_serverside = blueprint.config["pagination_serverside"]
-    pagination = q.paginate(page, items_per_page, False)
-    total_items = pagination.total
+    total_items = DB.session.scalar(select(func.count("*")).select_from(q))
+    # we can't use DB.paginate() here because it use a .scalars() which return only the first item of the select
+    results = DB.session.execute(q.limit(items_per_page).offset(page * items_per_page)).unique().all()
+
     if pagination_serverside:
-        data = pagination.items
+        data = results.items
     else:
-        data = q.all()
+        data = DB.session.execute(q).unique().all()
 
     pageInfo = {
         "totalItems": total_items,
