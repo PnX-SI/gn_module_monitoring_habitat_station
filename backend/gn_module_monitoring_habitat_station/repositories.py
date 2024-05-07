@@ -89,7 +89,7 @@ def check_year_visit(id_base_site, new_visit_date, id_base_visit=None):
 
 def get_id_type_site(code):
     query = DB.session.query(func.ref_nomenclatures.get_id_nomenclature("TYPE_SITE", code))
-    return query.first()
+    return query.first()[0]
 
 
 def get_taxons_by_cd_hab(habitat_code):
