@@ -422,7 +422,7 @@ def add_visit(scope):
 
     observers_ids = []
     if "observers" in data:
-        observers = data.pop("observers")
+        observers_ids = data.pop("observers")
 
     perturbations = []
     if "perturbations" in data:
@@ -556,7 +556,6 @@ def update_visit(id_visit):
     for observer in observers:
         visit.observers.append(observer)
 
-    print(visit)
     mergeVisit = DB.session.merge(visit)
     DB.session.commit()
 
