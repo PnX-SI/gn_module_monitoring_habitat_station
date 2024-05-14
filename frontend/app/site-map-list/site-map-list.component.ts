@@ -167,6 +167,9 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.mapListService.loadTableData(data[1]);
           this.filteredData = this.mapListService.tableData;
         }
+        else {
+          this.filteredData = []
+        }
         this.dataLoaded = true;
       },
       error => {
