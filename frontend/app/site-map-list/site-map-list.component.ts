@@ -38,11 +38,12 @@ export class I18n {
 // Define custom service providing the months and weekdays translations
 @Injectable()
 export class CustomDatepickerI18n extends NgbDatepickerI18n {
-  getWeekdayLabel(weekday: number, width?: TranslationWidth): string {
-    throw new Error('Method not implemented.');
-  }
+
   constructor(private _i18n: I18n) {
     super();
+  }
+  getWeekdayLabel(weekday: number): string {
+    return I18N_VALUES[this._i18n.language].weekdays[weekday - 1];
   }
   getWeekdayShortName(weekday: number): string {
     return I18N_VALUES[this._i18n.language].weekdays[weekday - 1];
