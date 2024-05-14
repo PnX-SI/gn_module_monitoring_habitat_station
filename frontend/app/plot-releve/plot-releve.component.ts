@@ -16,8 +16,8 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   @Input() disabledForm;
   @Input() title: string;
   @Output() plotReleve = new EventEmitter();
-  private isModifeded: boolean = false;
-  private relevePlotId: number = null;
+  private isModified: boolean = false;
+  private relevePlotId;
   taxonApiEndPoint = `${this.config.API_TAXHUB}/taxref/search/lb_nom`;
   plotForm: FormGroup;
   scinameCodeControl: FormControl = new FormControl(null);
@@ -30,25 +30,25 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
+  }
+
+  ngOnChanges() {
     this.hasStrateCovering = false;
     this.hasTaxaCovering = false;
 
     this.initPlots();
     this.initTaxon();
     this.initStrates();
-  }
 
-  ngOnChanges() {
+    this.plotForm.enable();
+    if (this.disabledForm) {
+      this.plotForm.disable();
+    }
 
     this.relevePlotId = null;
     if (this.data) {
       this.relevePlotId = this.data.id_releve_plot;
       this.patchForm();
-    }
-
-    this.plotForm.enable();
-    if (this.disabledForm) {
-      this.plotForm.disable();
     }
 
     this.onChanges();
@@ -82,6 +82,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
     this.strates.sort((strateA, strateB) =>
       strateA.label_default.localeCompare(strateB.label_default)
     );
+
     this.strates.forEach(strate => {
       (this.plotForm.get('strates_releve') as FormArray).push(
         this.formBuilder.group({
@@ -151,7 +152,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
 
   private onChanges(): void {
     this.plotForm.valueChanges.subscribe(val => {
-      this.isModifeded = true;
+      this.isModified = true;
     });
   }
 
@@ -182,15 +183,15 @@ export class PlotReleveComponent implements OnInit, OnChanges {
           plot_data: this.plotForm.value,
           status: this.plotForm.valid,
         },
-        this.isModifeded,
+        this.isModified,
       ]);
     } else {
       this.plotReleve.emit([
         { id_plot: this.plotId, plot_data: this.plotForm.value, status: this.plotForm.valid },
-        this.isModifeded,
+        this.isModified,
       ]);
     }
-    this.isModifeded = false;
+    this.isModified = false;
   }
 
   addNewTaxon(event): void {
