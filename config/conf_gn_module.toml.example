@@ -2,7 +2,7 @@
 export_available_format = ['geojson', 'csv', 'shapefile']
 
 # Code (cd_nomenclature) de la nomenclature "TYPE_SITE" à utiliser.
-type_site_code = "HAB"
+site_type_code = "HAB"
 user_list_code = "OFS"
 municipality_type_code = "COM"
 habitat_list_name = "Suivi Habitat Station"
