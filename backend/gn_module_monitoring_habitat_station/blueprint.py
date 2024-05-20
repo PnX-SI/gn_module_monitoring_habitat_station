@@ -681,14 +681,10 @@ def export_visits():
             cor_hab_taxon = get_taxons_by_cd_hab(cd_hab)
             flag_cdhab = cd_hab
 
-        # remove geom Type
-        geom_wkt = to_shape(d.geom)
-        geom_array = array(geom_wkt)
-        visit["geom_wkt"] = geom_wkt
-        if export_format == "csv" or export_format == "shapefile":
-            visit["geom"] = d.geom
-            if geom_wkt.type.lower() == "linestring":
-                visit["geom"] = str(geom_array[0]) + " / " + str(geom_array[1])
+        # Geom
+        if export_format != "geojson":
+            geom_wkt = to_shape(d.geom)
+            visit["geom"] = geom_wkt
 
         # remove html tag
         visit["lbhab"] = strip_html(visit["lbhab"])
