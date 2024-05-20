@@ -742,7 +742,8 @@ def export_visits():
     else:
 
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
-
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
         FionaShapeService.create_shapes_struct(
             db_cols=ExportVisits.__mapper__.c,
             srid=4326,
