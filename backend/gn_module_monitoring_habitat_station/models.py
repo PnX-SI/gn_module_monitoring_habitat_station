@@ -194,7 +194,7 @@ class CorRelevePlotTaxon(MonitoringHabitatStation):
         nullable=True,
     )
     cd_nom = DB.Column(DB.ForeignKey(Taxref.cd_nom, onupdate="CASCADE"), nullable=False)
-    cover_pourcentage = DB.Column(DB.Integer)
+    cover_pourcentage = DB.Column(DB.Float)
 
     cor_hab_taxon = DB.relationship(CorHabTaxon)
     t_releve_plot = DB.relationship(TRelevePlot)

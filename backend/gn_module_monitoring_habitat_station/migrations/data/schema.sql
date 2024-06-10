@@ -69,7 +69,7 @@ CREATE TABLE cor_releve_plot_taxons (
     id_releve_plot integer NOT NULL,
     id_cor_hab_taxon integer NULL,
     cd_nom integer NOT NULL,
-    cover_pourcentage integer
+    cover_pourcentage float
 );
 COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons IS 'Taxons observés par placette';
 
