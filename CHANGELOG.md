@@ -2,8 +2,6 @@
 
 ## [Unreleased]
 
-## [1.2.0] - 2024-07-15
-
 ### Added
 
 - Compatibility with GeoNature 2.14
@@ -13,6 +11,8 @@
 - Added "Leaflet.Deflate" frontend dependency
 - Display message when no data after filtering
 - Add nomenclature "position centrée" to "position_placette" type
+- Added new nomenclature "*Lichens*" for *STRATE_PLACETTE* nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- Added new nomenclature "*Position centrée*" for *POSITION_PLACETTE* nomenclature type. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
 
 ### Changed
 
