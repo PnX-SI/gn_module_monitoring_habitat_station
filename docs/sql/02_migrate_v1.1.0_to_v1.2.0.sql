@@ -6,6 +6,14 @@ VALUES
 	 (ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rli', 'Recouvrement lichens', 'Recouvrement lichens', 'Recouvrement lichens',' Recouvrement lichens', 'Recouvrement lichens', '009')
 ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
 
+
+INSERT INTO ref_nomenclatures.t_nomenclatures
+    (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, "hierarchy")
+VALUES
+	 (ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pce', 'Position centrée', 'Position centrée', 'Positions de placette sur un transect: position centrée sur l''axe du transect.',' Position centrée', 'Positions de placette sur un transect: position centrée sur l''axe du transect.', '003')
+ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
+
+
 -- Drop view that uses 'cor_releve_plot_taxons.cover_pourcentage' value before changing the type of
 -- this column to not throw "ERROR : cannot modify the type of a column used in a view or rule"
 
