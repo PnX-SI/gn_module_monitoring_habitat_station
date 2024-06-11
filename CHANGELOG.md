@@ -5,7 +5,6 @@
 ### Added
 
 - Compatibility with GeoNature 2.14
-- Added new nomenclature "_Lichens_" for _STRATE_PLACETTE_ nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41)
 - Module permissions (CRUVED) declared in alembic branch
 - Added `MODULE_DB_BRANCH` parameter in packaged module
 - Added "Leaflet.Deflate" frontend dependency
@@ -26,7 +25,8 @@
 
 - Make shapefile export work if no dir_path exists
 - Make csv export work again
-* Allowed decimal numbers for recovery percentage of taxons on plots; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- Allowed decimal numbers for recovery percentage of taxons on plots; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- Deny adding a taxon already in habitat taxon list when creating/editing plot cover percentage. [#45](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/45)
 
 
 ## [1.1.0] - 2023-02-24
