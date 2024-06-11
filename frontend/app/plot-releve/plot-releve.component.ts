@@ -2,6 +2,7 @@ import { Component, OnInit, Output, Input, EventEmitter, OnChanges } from '@angu
 import { FormGroup, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { ConfigService } from '@geonature/services/config.service';
 import * as _ from 'lodash';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'plot-releve',
@@ -27,6 +28,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
   constructor(
     private formBuilder: FormBuilder,
     private config: ConfigService,
+    private toastr: ToastrService,
   ) { }
 
   ngOnInit() {
@@ -196,15 +198,21 @@ export class PlotReleveComponent implements OnInit, OnChanges {
 
   addNewTaxon(event): void {
     let taxon = event.item;
-    (this.plotForm.get('taxons_releve') as FormArray).push(
-      this.formBuilder.group({
-        id_cor_releve_plot_taxon: [null],
-        cd_nom: [taxon.cd_nom],
-        id_cor_hab_taxon: [null],
-        cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
-        nom_complet: [taxon.nom_complet_html],
-      })
-    );
+    let taxonsCdNom = this.plotForm.get('taxons_releve').value.map(taxon => taxon.cd_nom.toString());
+    if (!taxonsCdNom.includes(taxon.cd_nom.toString())) {
+      (this.plotForm.get('taxons_releve') as FormArray).push(
+        this.formBuilder.group({
+          id_cor_releve_plot_taxon: [null],
+          cd_nom: [taxon.cd_nom],
+          id_cor_hab_taxon: [null],
+          cover_pourcentage: [null, Validators.compose([Validators.min(0), Validators.max(100)])],
+          nom_complet: [taxon.nom_complet_html],
+        })
+      );
+    } else {
+      let msg = 'Ce taxon est déjà renseigné dans la liste';
+      this.toastr.error(msg, '', { positionClass: 'toast-bottom-right' });
+    }
     event.preventDefault();
     this.scinameCodeControl.reset();
   }

@@ -26,6 +26,8 @@
 
 - Make shapefile export work if no dir_path exists
 - Make csv export work again
+* Deny adding a taxon already in habitat taxon list when creating/editing plot cover percentage. [#45](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/45)
+
 
 ## [1.1.0] - 2023-02-24
 
