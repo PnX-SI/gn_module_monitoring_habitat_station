@@ -211,7 +211,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
       );
     } else {
       let msg = 'Ce taxon est déjà renseigné dans la liste';
-      this.toastr.error(msg, '', { positionClass: 'toast-bottom-right' });
+      this.toastr.warning(msg, '', { positionClass: 'toast-bottom-right' });
     }
     event.preventDefault();
     this.scinameCodeControl.reset();
