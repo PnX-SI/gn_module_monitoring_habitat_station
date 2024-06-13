@@ -119,9 +119,9 @@ export class ListVisitComponent implements OnInit, OnDestroy {
 
   initFormTransect(): FormGroup {
     const formTransect = this.formBuilder.group({
-      id_base_site: [null, Validators.required],
+      id_base_site: [null],
       base_site_description: [null],
-      id_transect: [null, Validators.required],
+      id_transect: [null],
       geom_end_lat: [null, Validators.required],
       geom_end_long: [null, Validators.required],
       geom_start_lat: [null, Validators.required],
