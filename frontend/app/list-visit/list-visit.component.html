@@ -19,6 +19,7 @@
             type="submit"
             class="btn btn-success btn-sm ml-3 pull-right box-shadow"
             (click)="onSubmitTransect()"
+            [disabled]="formTransect.invalid || formTransect.pristine"
           >
             <i class="fa fa-floppy-o"></i>
             Enregister
@@ -341,7 +342,7 @@
     <button
       type="button"
       class="btn btn-success btn-sm"
-      [disabled]="formPlot.invalid"
+      [disabled]="formPlot.invalid || formPlot.pristine"
       (click)="onSavePlot()"
     >
       Enregistrer
