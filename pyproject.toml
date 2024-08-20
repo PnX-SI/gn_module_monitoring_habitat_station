@@ -33,7 +33,7 @@ dependencies = [
     "pypnnomenclature",
     "pypnusershub>=1.5.9",
     "pypn_habref_api>=0.4.1",
-    "gn_conservation_backend_shared>=0.5.1",
+    "gn_conservation_backend_shared>=0.5.2",
     "geonature>=2.13"
 ]
 

@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+
+## [1.2.0] - 2024-08-20
+
 ### Added
 
 - Compatibility with GeoNature 2.14
