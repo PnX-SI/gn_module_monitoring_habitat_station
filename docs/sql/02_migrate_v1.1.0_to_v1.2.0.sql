@@ -1,17 +1,44 @@
 BEGIN;
 
-INSERT INTO ref_nomenclatures.t_nomenclatures
-    (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, "hierarchy")
-VALUES
-	 (ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'), 'Rli', 'Recouvrement lichens', 'Recouvrement lichens', 'Recouvrement lichens',' Recouvrement lichens', 'Recouvrement lichens', '009')
-ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
+INSERT INTO ref_nomenclatures.t_nomenclatures (
+    id_type,
+    cd_nomenclature,
+    mnemonique,
+    label_default,
+    definition_default,
+    label_fr,
+    definition_fr,
+    "hierarchy"
+)  VALUES (
+    ref_nomenclatures.get_id_nomenclature_type('STRATE_PLACETTE'),
+    'Rli',
+    'Recouvrement lichens',
+    'Recouvrement lichens',
+    'Recouvrement lichens',
+    'Recouvrement lichens',
+    'Recouvrement lichens',
+    '009'
+) ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
 
-
-INSERT INTO ref_nomenclatures.t_nomenclatures
-    (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, "hierarchy")
-VALUES
-	 (ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'), 'Pce', 'Position centrée', 'Position centrée', 'Positions de placette sur un transect: position centrée sur l''axe du transect.',' Position centrée', 'Positions de placette sur un transect: position centrée sur l''axe du transect.', '003')
-ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
+INSERT INTO ref_nomenclatures.t_nomenclatures (
+    id_type,
+    cd_nomenclature,
+    mnemonique,
+    label_default,
+    definition_default,
+    label_fr,
+    definition_fr,
+    "hierarchy"
+) VALUES (
+    ref_nomenclatures.get_id_nomenclature_type('POSITION_PLACETTE'),
+    'Pce',
+    'Position centrée',
+    'Position centrée',
+    'Positions de placette sur un transect: position centrée sur l''axe du transect.',
+    'Position centrée',
+    'Positions de placette sur un transect: position centrée sur l''axe du transect.',
+    '003'
+) ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
 
 
 -- Drop view that uses 'cor_releve_plot_taxons.cover_pourcentage' value before changing the type of
@@ -19,7 +46,8 @@ ON CONFLICT ON CONSTRAINT unique_id_type_cd_nomenclature DO NOTHING ;
 
 DROP VIEW pr_monitoring_habitat_station.export_visits;
 
-ALTER TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons ALTER COLUMN cover_pourcentage TYPE float4 USING cover_pourcentage::float4;
+ALTER TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons
+ALTER COLUMN cover_pourcentage TYPE float4 USING cover_pourcentage::float4 ;
 
 CREATE OR REPLACE VIEW pr_monitoring_habitat_station.export_visits AS
 WITH observers AS (
@@ -50,8 +78,8 @@ taxons AS (
         id_base_visit,
         id_releve_plot,
         id_plot,
-        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) cover_taxon,
-        json_object_agg( cd_nom, cover_pourcentage ORDER BY cd_nom) cover_cdnom
+        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) AS cover_taxon,
+        json_object_agg( cd_nom, cover_pourcentage ORDER BY cd_nom) AS cover_cdnom
     FROM (
         SELECT
             v.id_base_visit,
@@ -80,8 +108,8 @@ strates AS (
         id_base_visit,
         id_releve_plot,
         id_plot,
-        json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate,
-        json_object_agg( cd_nomenclature, cover_pourcentage ORDER BY cd_nomenclature)  cover_code_strate
+        json_object_agg( label_default, cover_pourcentage ORDER BY label_default) AS cover_strate,
+        json_object_agg( cd_nomenclature, cover_pourcentage ORDER BY cd_nomenclature) AS cover_code_strate
     FROM (
         SELECT
             v.id_base_visit,
@@ -106,20 +134,20 @@ strates AS (
 )
 -- All the meshes of a site with their visits
 SELECT sites.id_base_site AS idbsite,
-	visits.id_base_visit AS idbvisit,
-	visits.visit_date_min AS visitdate,
-	releve.id_releve_plot AS idreleve,
-	releve.excretes_presence AS crotte,
-	plot.code_plot AS codeplot,
-	per.label_perturbation AS lbperturb,
-	obs.observateurs AS observers,
-	obs.organisme,
-	tax.cover_taxon AS covtaxons,
+    visits.id_base_visit AS idbvisit,
+    visits.visit_date_min AS visitdate,
+    releve.id_releve_plot AS idreleve,
+    releve.excretes_presence AS crotte,
+    plot.code_plot AS codeplot,
+    per.label_perturbation AS lbperturb,
+    obs.observateurs AS observers,
+    obs.organisme,
+    tax.cover_taxon AS covtaxons,
     tax.cover_cdnom AS covcdnom,
-	strate.cover_strate AS covstrate,
+    strate.cover_strate AS covstrate,
     strate.cover_code_strate AS covcodestrate,
-	habref.lb_hab_fr AS lbhab,
-	habref.cd_hab,
+    habref.lb_hab_fr AS lbhab,
+    habref.cd_hab,
     transect.transect_label AS transectlb,
     transect.plot_size AS plotsize,
     nomenclature.label_default AS plotpos,
