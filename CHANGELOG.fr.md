@@ -16,11 +16,11 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Compatibilité avec GeoNature 2.14
 - Permissions de module (CRUVED) déclarées dans une branche Alembic
 - Ajout du paramètre `MODULE_DB_BRANCH` pour nommer la branche Alembic
-- Ajout au frontend de la dépendance "Leaflet.Deflate"
+- Ajout au frontend de la dépendance `Leaflet.Deflate`
 - Afficher un message lorsqu'aucune donnée n'est disponible après filtrage
 - Ajout de la nomenclature "position centrée" au type "position_placette"
-- Ajout de la nouvelle nomenclature "*Lichens*" pour le type de nomenclature *STRATE_PLACETTE*. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). Si le module est déjà installé, vous devez exécuter les requêtes dans 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
-- Ajout d'une nouvelle nomenclature "*Position centrée*" pour le type de nomenclature *POSITION_PLACETTE*. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). Si le module est déjà installé, vous devez exécuter les requêtes dans 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- ⚠️ Ajout de la nouvelle nomenclature "*Lichens*" pour le type de nomenclature *STRATE_PLACETTE*. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Ajout d'une nouvelle nomenclature "*Position centrée*" pour le type de nomenclature *POSITION_PLACETTE*. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 
 ### 🔄 Modifié
 
@@ -34,7 +34,8 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Faire fonctionner l'exportation de Shapefile si aucun chemin `dir_path` n'existe
 - Faire fonctionner à nouveau l'exportation CSV
-- Nombres décimaux autorisés pour le pourcentage de récupération des taxons sur les parcelles ; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). Si le module est déjà installé, vous devez exécuter les requêtes dans 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- ⚠️ Nombres décimaux autorisés pour le pourcentage de récupération des taxons sur les parcelles ; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Mise à jour de la vue d'export des visites suite au changement sur la colonne pourcentage. Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 - Refuser l'ajout d'un taxon déjà présent dans la liste des taxons d'habitat lors de la création/modification du pourcentage de couverture de la parcelle. [#45](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/45)
 
 
@@ -74,14 +75,14 @@ Suivez l'ordre de mise à jour ci-dessous :
 1. **ATTENTION** : Seulement si vous n'avez **AUCUNE DONNÉE SAISIE** dans ce module, vous pouvez réinstaller le schéma et ses données associées (métadonnées, source, liste de taxons, ...). Si vous réinstallez le module, vous n'avez pas à suivre les autres étapes. La commande pour supprimer et réinstaller le module dans la base de données : `geonature db downgrade monitoring_habitat_station@base; geonature db upgrade monitoring_habitat_station@head`
 1. Dans la table `gn_commons.t_modules`, remplacez la valeur de `module_code` par "`MHS`" et la valeur de `module_path` par "`mhs`".
 1. Si vous avez modifié le chemin du module :
-- Modifiez les liens symboliques dans `geonature/external_modules/` et `geonature/frontend/src/external_assets/`. Utilisez le nouveau chemin du nom du module dans le lien symbolique.
-- Avertissez GeoNature de ce changement : `geonature update-configuration --build false && geonature generate-frontend-tsconfig && geonature generate-frontend-tsconfig-app && geonature generate-frontend-modules-route`
-1. Vérifiez la présence des types de nomenclature _POSITION_PLACETTE_ et _STRATE_PLACETTE_ dans la table `ref_nomenclatures.bib_nomenclatures_types` et les nomenclatures correspondantes dans `ref_nomenclatures.t_nomenclatures` (voir [révision c575c5436f6f](./backend/gn_module_monitoring_habitat_station/migrations/c575c5436f6f_add_nomenclatures .py)) :
-- S'ils ne sont pas présents, exécutez la commande suivante pour mettre à jour et installer les nomenclatures : `geonature db upgrade monitoring_habitat_station@c575c5436f6f`
-- Si elles sont présentes, modifier manuellement les titres et la définition de ces nomenclatures (voir [nomenclature.csv](./backend/gn_module_monitoring_habitat_station/migrations/data/nomenclatures.csv)). Tampon de révision Alembic : `geonature db stamp c575c5436f6f`
+   - Modifiez les liens symboliques dans `geonature/external_modules/` et `geonature/frontend/src/external_assets/`. Utilisez le nouveau chemin du nom du module dans le lien symbolique.
+   - Avertissez GeoNature de ce changement : `geonature update-configuration --build false && geonature generate-frontend-tsconfig && geonature generate-frontend-tsconfig-app && geonature generate-frontend-modules-route`
+1. Vérifiez la présence des types de nomenclature _POSITION_PLACETTE_ et _STRATE_PLACETTE_ dans la table `ref_nomenclatures.bib_nomenclatures_types` et les nomenclatures correspondantes dans `ref_nomenclatures.t_nomenclatures` (voir [révision c575c5436f6f](backend/gn_module_monitoring_habitat_station/migrations/c575c5436f6f_add_nomenclatures.py)) :
+   - S'ils ne sont pas présents, exécutez la commande suivante pour mettre à jour et installer les nomenclatures : `geonature db upgrade monitoring_habitat_station@c575c5436f6f`
+   - Si elles sont présentes, modifier manuellement les titres et la définition de ces nomenclatures (voir [nomenclature.csv](./backend/gn_module_monitoring_habitat_station/migrations/data/nomenclatures.csv)). Tampon de révision Alembic : `geonature db stamp c575c5436f6f`
 1. Vérifiez le cadre d'acquisition, le jeu de données, la source et les fonctions utilitaires `get_dataset_id()` et `get_source_id()` pour le module MHS (voir [révision b920fc95ac59](./backend/gn_module_monitoring_habitat_station/migrations/b920fc95ac59_add_default_metadata.py)) :
-- Si présent, tamponnez la révision Alembic : `geonature db stamp b920fc95ac59`
-- Si rien n'existe ou partiellement, vous pouvez mettre à jour la base de données via la commande Alembic puis effectuer manuellement les corrections nécessaires dans votre base de données : `geonature db upgrade monitoring_habitat_station@b920fc95ac59`
+   - Si présent, tamponnez la révision Alembic : `geonature db stamp b920fc95ac59`
+   - Si rien n'existe ou partiellement, vous pouvez mettre à jour la base de données via la commande Alembic puis effectuer manuellement les corrections nécessaires dans votre base de données : `geonature db upgrade monitoring_habitat_station@b920fc95ac59`
 1. Appliquez le script de migration SQL [01_migrate_v1.0.0_to_v1.1.0.sql](./docs/sql/01_migrate_v1.0.0_to_v1.1.0.sql): `psql -h localhost -U geonatadmin -d geonature2db -f ~/www/modules/mhs/docs/sql/01_migrate_v1.0.0_to_v1.1.0.sql`
 
 

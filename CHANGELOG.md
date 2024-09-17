@@ -13,8 +13,8 @@
 - Added "Leaflet.Deflate" frontend dependency
 - Display message when no data after filtering
 - Add nomenclature "position centrée" to "position_placette" type
-- Added new nomenclature "*Lichens*" for *STRATE_PLACETTE* nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
-- Added new nomenclature "*Position centrée*" for *POSITION_PLACETTE* nomenclature type. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- ⚠️ Added new nomenclature "*Lichens*" for *STRATE_PLACETTE* nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Added new nomenclature "*Position centrée*" for *POSITION_PLACETTE* nomenclature type. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 
 ### Changed
 
@@ -28,7 +28,8 @@
 
 - Make shapefile export work if no dir_path exists
 - Make csv export work again
-- Allowed decimal numbers for recovery percentage of taxons on plots; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). If module is already installed, you should run the queries in 'backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql'.
+- ⚠️ Allowed decimal numbers for recovery percentage of taxons on plots; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Update of visits export view due to change on percentage column. If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 - Deny adding a taxon already in habitat taxon list when creating/editing plot cover percentage. [#45](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/45)
 
 
@@ -70,7 +71,7 @@ Follow the update order below:
 1. If you have changed the path of the module:
    - Change symbolic links in `geonature/external_modules/` and `geonature/frontend/src/external_assets/`. Use new module name path in symbolic link.
    - Notify GeoNature of this change: `geonature update-configuration --build false && geonature generate-frontend-tsconfig && geonature generate-frontend-tsconfig-app && geonature generate-frontend-modules-route`
-1. Check the presence of _POSITION_PLACETTE_ and _STRATE_PLACETTE_ nomenclature types in the `ref_nomenclatures.bib_nomenclatures_types` table and the corresponding nomenclatures in `ref_nomenclatures.t_nomenclatures` (see [revision c575c5436f6f](./backend/gn_module_monitoring_habitat_station/migrations/c575c5436f6f_add_nomenclatures .py)):
+1. Check the presence of _POSITION_PLACETTE_ and _STRATE_PLACETTE_ nomenclature types in the `ref_nomenclatures.bib_nomenclatures_types` table and the corresponding nomenclatures in `ref_nomenclatures.t_nomenclatures` (see [revision c575c5436f6f](backend/gn_module_monitoring_habitat_station/migrations/c575c5436f6f_add_nomenclatures.py)):
    - If they are not present, run the following command to update and install the nomenclatures: `geonature db upgrade monitoring_habitat_station@c575c5436f6f`
    - If they are present, manually modify the titles and definition of these nomenclatures (see [nomenclature.csv](./backend/gn_module_monitoring_habitat_station/migrations/data/nomenclatures.csv)). Stamp Alembic revision: `geonature db stamp c575c5436f6f`
 1. Check for acquisition framework, dataset, source and utility functions `get_dataset_id()` and `get_source_id()` for MHS module (see [revision b920fc95ac59](./backend/gn_module_monitoring_habitat_station/migrations/b920fc95ac59_add_default_metadata.py)):
