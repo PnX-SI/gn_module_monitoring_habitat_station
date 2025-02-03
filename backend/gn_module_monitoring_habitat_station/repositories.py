@@ -187,7 +187,7 @@ def get_pro_column_name():
     "cd_hab": "cdhab",
     "covcdnom" : "covcdnom"
     """
-    return ["cdhab", "covcdnom", "geom_wkt", "covcodestrate"]
+    return ["cdhab", "covcdnom", "covcodestrate"]
 
 
 def get_mapping_columns():
