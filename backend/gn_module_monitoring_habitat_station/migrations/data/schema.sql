@@ -170,13 +170,15 @@ CREATE OR REPLACE VIEW pr_monitoring_habitat_station.export_visits AS
 WITH observers AS (
     SELECT
         v.id_base_visit,
-        string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs,
+        string_agg(DISTINCT (roles.prenom_role || ' ' || roles.nom_role || ' (' || bo.nom_organisme || ')'), ', ') AS observers,
         roles.id_organisme AS organisme
     FROM gn_monitoring.t_base_visits AS v
         JOIN gn_monitoring.cor_visit_observer AS observer
             ON observer.id_base_visit = v.id_base_visit
         JOIN utilisateurs.t_roles AS roles
             ON roles.id_role = observer.id_role
+        JOIN utilisateurs.bib_organismes AS bo
+            ON bo.id_organisme = roles.id_organisme
     GROUP BY v.id_base_visit, roles.id_organisme
 ),
 perturbations AS (
@@ -257,7 +259,7 @@ SELECT sites.id_base_site AS idbsite,
 	releve.excretes_presence AS crotte,
 	plot.code_plot AS codeplot,
 	per.label_perturbation AS lbperturb,
-	obs.observateurs AS observers,
+	obs.observers,
 	obs.organisme,
 	tax.cover_taxon AS covtaxons,
     tax.cover_cdnom AS covcdnom,
