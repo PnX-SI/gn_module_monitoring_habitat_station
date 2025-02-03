@@ -357,7 +357,6 @@ def get_all_visits(id_site):
     )
 
     page = request.args.get("page", 0, type=int)
-    print(f"PAGE : {page}")
     total_items = DB.session.scalar(select(func.count("*")).select_from(query))
     items_per_page = blueprint.config["items_per_page"]
     # we can't use DB.paginate() here because it use a .scalars() which return only the first item of the select
@@ -642,13 +641,14 @@ def get_all_taxa_by_habitats(cd_hab):
 @permissions.check_cruved_scope("E", module_code=MODULE_CODE)
 def export_visits():
     """
-    Télécharge les données d'une visite (ou des visites )
+    Télécharge les données d'une visite (ou des visites)
     """
 
     parameters = request.args
+
     export_format = parameters["export_format"] if "export_format" in request.args else "shapefile"
 
-    file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
+    # Build query and get data from db
     query = select(ExportVisits)
 
     if "id_base_visit" in parameters:
@@ -673,9 +673,9 @@ def export_visits():
         query = query.where(ExportVisits.cd_hab == parameters["cd_hab"])
 
     data = DB.session.scalars(query).all()
-    features = []
 
-    # formate data
+    # Format data
+    features = []
     cor_hab_taxon = []
     flag_cdhab = 0
 
@@ -685,7 +685,7 @@ def export_visits():
     mapping_columns = get_mapping_columns()
     strates_list = get_stratelist_plot()
 
-    tab_visit = []
+    output_items = []
 
     for d in data:
         visit = d.as_dict()
@@ -697,9 +697,9 @@ def export_visits():
             flag_cdhab = cd_hab
 
         # Geom
-        if export_format != "geojson":
-            geom_wkt = to_shape(d.geom)
-            visit["geom"] = geom_wkt
+        if export_format == "csv":
+            shape_geom = to_shape(d.geom)
+            visit["geom"] = shape_geom
 
         # remove html tag
         visit["lbhab"] = strip_html(visit["lbhab"])
@@ -725,33 +725,31 @@ def export_visits():
         if "covtaxons" in visit:
             visit.pop("covtaxons")
 
-        tab_visit.append(visit)
+        output_items.append(visit)
 
-    if export_format == "geojson":
+    # Return data
+    file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
 
-        for d in tab_visit:
-            feature = mapping(d["geom_wkt"])
-            d.pop("geom_wkt", None)
-            properties = d
-            features.append(feature)
-            features.append(properties)
-        result = FeatureCollection(features)
-
-        return to_json_resp(result, as_file=True, filename=file_name, indent=4)
-
-    elif export_format == "csv":
-
-        tab_header = (
+    if export_format == "csv":
+        headers = (
             column_name
             + [clean_string(x) for x in strates_list]
             + [clean_string(x) for x in cor_hab_taxon]
             + column_name_pro
         )
+        return to_csv_resp(file_name, output_items, headers, ";")
 
-        return to_csv_resp(file_name, tab_visit, tab_header, ";")
+    if export_format == "geojson":
+        features = []
+        for visit in data:
+            feature = visit.as_geofeature("geom", "idbsite", False)
+            features.append(feature)
+        geojson = FeatureCollection(features)
+        return to_json_resp(
+            geojson, as_file=True, filename=file_name, indent=4, extension="geojson"
+        )
 
     else:
-
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
