@@ -5,9 +5,26 @@ Toutes les modifications notables apportées à ce projet seront documentées da
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Inédit]
 
+### 🚀 Ajouté
+
+### 🔄 Modifié
+
+- Le champ "Taille placette mètres" a été renommé en "Surface en m²"
+- Les valeurs des champs "observers et "organismes" ont été regroupés sous le champ unique "observers"
+
+### 🗑 Supprimé
+
+- Le champ "geom_wkt" a été retiré de l'export car il faisait doublon avec le champ "Points de départ et arrivée (geom).
+
+### ⚠️ Migration
+
+- La vue d'export "export_visits" a été modifiée, il faut la re-créer en récupérant le code dans [schema.sql](backend/gn_module_monitoring_habitat_station/migrations/data/schema.sql#L169).
+
+### 🐛 Corrigé
+
+- export Geojson fonctionnel
 
 ## [1.2.0] - 2024-08-20
 
@@ -19,8 +36,8 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Ajout au frontend de la dépendance `Leaflet.Deflate`
 - Afficher un message lorsqu'aucune donnée n'est disponible après filtrage
 - Ajout de la nomenclature "position centrée" au type "position_placette"
-- ⚠️ Ajout de la nouvelle nomenclature "*Lichens*" pour le type de nomenclature *STRATE_PLACETTE*. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
-- ⚠️ Ajout d'une nouvelle nomenclature "*Position centrée*" pour le type de nomenclature *POSITION_PLACETTE*. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Ajout de la nouvelle nomenclature "_Lichens_" pour le type de nomenclature _STRATE_PLACETTE_. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Ajout d'une nouvelle nomenclature "_Position centrée_" pour le type de nomenclature _POSITION_PLACETTE_. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 
 ### 🔄 Modifié
 
@@ -37,7 +54,6 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - ⚠️ Nombres décimaux autorisés pour le pourcentage de récupération des taxons sur les parcelles ; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 - ⚠️ Mise à jour de la vue d'export des visites suite au changement sur la colonne pourcentage. Si le module est déjà installé, vous devez exécuter les requêtes dans [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 - Refuser l'ajout d'un taxon déjà présent dans la liste des taxons d'habitat lors de la création/modification du pourcentage de couverture de la parcelle. [#45](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/45)
-
 
 ## [1.1.0] - 2023-02-24
 
@@ -85,7 +101,6 @@ Suivez l'ordre de mise à jour ci-dessous :
    - Si rien n'existe ou partiellement, vous pouvez mettre à jour la base de données via la commande Alembic puis effectuer manuellement les corrections nécessaires dans votre base de données : `geonature db upgrade monitoring_habitat_station@b920fc95ac59`
 1. Appliquez le script de migration SQL [01_migrate_v1.0.0_to_v1.1.0.sql](./docs/sql/01_migrate_v1.0.0_to_v1.1.0.sql): `psql -h localhost -U geonatadmin -d geonature2db -f ~/www/modules/mhs/docs/sql/01_migrate_v1.0.0_to_v1.1.0.sql`
 
-
 ## [1.0.0] - 2022-09-22
 
 ### 🚀 Ajouté
@@ -104,13 +119,11 @@ Suivez l'ordre de mise à jour ci-dessous :
 - Résoudre les problèmes dus à la mise à niveau vers Angular 7.
 - Nettoyer les fichiers de tâches.
 
-
 ## [1.0.0-rc.1] - 2019-07-30
 
 ### 🚀 Ajouté
 
 - Première version stable. Compatibilité avec GeoNature v2.3.2.
-
 
 ## [0.0.1] - 2019-04-11
 
