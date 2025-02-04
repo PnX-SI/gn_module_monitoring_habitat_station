@@ -720,14 +720,14 @@ def export_visits():
         # pivot strate
         if visit["covstrate"]:
             for strate, cover in visit["covstrate"].items():
-                visit[strate] = " % " + str(cover)
+                visit[strate] = cover
         if "covstrate" in visit:
             visit.pop("covstrate")
 
         # pivot taxons
         if visit["covtaxons"]:
             for taxon, cover in visit["covtaxons"].items():
-                visit[taxon] = " % " + str(cover)
+                visit[taxon] = cover
         if "covtaxons" in visit:
             visit.pop("covtaxons")
 
