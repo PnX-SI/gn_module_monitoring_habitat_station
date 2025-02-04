@@ -158,7 +158,7 @@ def get_base_column_name():
     "observers": "Observateurs",
     "lbhab": "Habitat",
     "geom": "Points de départ et arrivée",
-    "lbperturb": "Perturbation",
+    "lbperturb": "Perturbations",
     "crotte": "Présence de crottes"
 
     """
@@ -174,7 +174,7 @@ def get_base_column_name():
         "Observateurs",
         "Habitat",
         "Points de départ et arrivée",
-        "Perturbation",
+        "Perturbations",
         "Présence de crottes",
     ]
 
@@ -202,7 +202,7 @@ def get_mapping_columns():
         "lbhab": "Habitat",
         "geom_start": "geom_start",
         "geom_end": "geom_end",
-        "lbperturb": "Perturbation",
+        "lbperturb": "Perturbations",
         "crotte": "Présence de crottes",
         "cd_hab": "cdhab",
         "geom": "Points de départ et arrivée",
