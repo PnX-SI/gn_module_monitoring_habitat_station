@@ -277,34 +277,40 @@ def add_transect(scope):
     Poster un nouveau transect
     """
     data = dict(request.get_json())
-    tab_plots = []
-    if "cor_plots" in data:
-        tab_plots = data.pop("cor_plots")
-    site_data = {
-        "id_nomenclature_type_site": get_id_type_site(blueprint.config["site_type_code"]),
-        "base_site_name": f"HAB - {MODULE_CODE} - {data['transect_label']}",
-        "base_site_description": data.pop("base_site_description", None),
-        "first_use_date": datetime.datetime.now(),
-        "id_digitiser": g.current_user.id_role,
-        "geom": func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")),
-    }
-    site = TBaseSites(**site_data)
-    DB.session.add(site)
-    DB.session.commit()
+    tab_plots = data.pop("cor_plots", [])
 
-    data["id_base_site"] = site.as_dict().get("id_base_site")
-    site.base_site_code = f"HAB-{MODULE_CODE}-{data['id_base_site']}"
-    DB.session.merge(site)
-    DB.session.commit()
+    try:
+        # Create Site
+        site = TBaseSites(
+            id_nomenclature_type_site=get_id_type_site(blueprint.config["site_type_code"]),
+            base_site_name=f"HAB - {MODULE_CODE} - {data['transect_label']}",
+            base_site_description=data.pop("base_site_description", None),
+            first_use_date=datetime.datetime.now(),
+            id_digitiser=g.current_user.id_role,
+            geom=func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")),
+        )
+        DB.session.add(site)
+        DB.session.flush()  # Get site ID before commit
 
-    transect = TTransect(**data)
-    for plot in tab_plots:
-        transect_plot = TPlot(**plot)
-        transect.cor_plots.append(transect_plot)
-    DB.session.add(transect)
-    DB.session.commit()
+        # Assign site ID and generate site code
+        data["id_base_site"] = site.id_base_site
+        site.base_site_code = f"HAB-{MODULE_CODE}-{site.id_base_site}"
 
-    return load_transect(data.get("id_base_site"))
+        # Create Transect and associated plots
+        transect = TTransect(**data)
+
+        for plot in tab_plots:
+            transect_plot = TPlot(**plot)
+            transect.cor_plots.append(transect_plot)
+
+        DB.session.add(transect)
+        DB.session.commit()
+
+        return load_transect(site.id_base_site)
+
+    except Exception as e:
+        DB.session.rollback()
+        return {"error": str(e)}, 500
 
 
 @blueprint.route("/transects/<id_transect>", methods=["PATCH"])
