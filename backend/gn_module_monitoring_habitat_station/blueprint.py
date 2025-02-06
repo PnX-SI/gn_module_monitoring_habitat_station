@@ -731,6 +731,9 @@ def export_visits():
         if "covtaxons" in visit:
             visit.pop("covtaxons")
 
+        # replace booleans values true/false by 1/0
+        visit = {k: int(v) if isinstance(v, bool) else v for k, v in visit.items()}
+
         output_items.append(visit)
 
     # Return data
