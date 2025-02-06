@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+### 🚀 Added
+
+### 🔄 Modified
+
+The export has been modified:
+
+- Field names have been modified: spaces replaced by underscores and no more accents.
+- The “Plot size meters” field has been renamed to “Area in m²”.
+- The values of the “observers” and “organisms” fields have been grouped together under the single “observers” field.
+- Boolean field values have been replaced by 1 or 0
+- The “%” sign has been removed from percent overlap values
+- The “Perturbation” field has been renamed “Perturbations”.
+
+### 🗑 Removed
+
+- The “geom_wkt” field has been removed from the export as it duplicated the “Start and end points (geom)” field.
+
+### ⚠️ Migration
+
+- The “export_visits” export view has been modified, it must be re-created by retrieving the code from [schema.sql](backend/gn_module_monitoring_habitat_station/migrations/data/schema.sql#L169).
+
+### 🐛 Fixed
+
+- functional Geojson export
 
 ## [1.2.0] - 2024-08-20
 
@@ -13,8 +37,8 @@
 - Added "Leaflet.Deflate" frontend dependency
 - Display message when no data after filtering
 - Add nomenclature "position centrée" to "position_placette" type
-- ⚠️ Added new nomenclature "*Lichens*" for *STRATE_PLACETTE* nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
-- ⚠️ Added new nomenclature "*Position centrée*" for *POSITION_PLACETTE* nomenclature type. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Added new nomenclature "_Lichens_" for _STRATE_PLACETTE_ nomenclature type. [#41](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/41). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
+- ⚠️ Added new nomenclature "_Position centrée_" for _POSITION_PLACETTE_ nomenclature type. [#43](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/43). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 
 ### Changed
 
@@ -31,7 +55,6 @@
 - ⚠️ Allowed decimal numbers for recovery percentage of taxons on plots; [#44](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/44). If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 - ⚠️ Update of visits export view due to change on percentage column. If module is already installed, you should run the queries in [02_migrate_v1.1.0_to_v1.2.0.sql](backend/gn_module_monitoring_habitat_station/docs/sql/02_migrate_v1.1.0_to_v1.2.0.sql).
 - Deny adding a taxon already in habitat taxon list when creating/editing plot cover percentage. [#45](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/45)
-
 
 ## [1.1.0] - 2023-02-24
 

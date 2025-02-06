@@ -11,8 +11,14 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### 🔄 Modifié
 
+L'export a été modifié :
+
+- Les noms des champs ont été modifiés : espaces remplacés par des underscores et plus d'accents.
 - Le champ "Taille placette mètres" a été renommé en "Surface en m²"
 - Les valeurs des champs "observers et "organismes" ont été regroupés sous le champ unique "observers"
+- Les valeurs des champs booléens sont remplacés par 1 ou 0
+- Le signe "%" a été retiré des valeurs des pourcentages de recouvrement
+- Le champ "Perturbation" a été renommé "Perturbations"
 
 ### 🗑 Supprimé
 
