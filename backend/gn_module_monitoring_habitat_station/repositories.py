@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 from sqlalchemy.sql.expression import func
 from sqlalchemy import select
@@ -131,11 +132,14 @@ def get_stratelist_plot():
 
 def clean_string(my_string):
     my_string = my_string.strip()
-    chars_to_remove = ";,"
-    for c in chars_to_remove:
-        my_string = my_string.replace(c, "-")
 
-    return my_string
+    my_string_unaccent = ''.join(c for c in unicodedata.normalize('NFD', my_string) if unicodedata.category(c) != 'Mn')
+
+    chars_to_remove = ";, "
+    for c in chars_to_remove:
+        my_string_unaccent = my_string_unaccent.replace(c, "_")
+
+    return my_string_unaccent
 
 
 def strip_html(data):
@@ -163,19 +167,19 @@ def get_base_column_name():
 
     """
     return [
-        "Identifiant site",
-        "Label transect",
-        "Date visite",
-        "Identifiant visite",
-        "Identifiant relevé",
-        "Code placette",
-        "Position placette",
-        "Surface en m²",
+        "Identifiant_site",
+        "Label_transect",
+        "Date_visite",
+        "Identifiant_visite",
+        "Identifiant_releve",
+        "Code_placette",
+        "Position_placette",
+        "Surface_en_m2",
         "Observateurs",
         "Habitat",
-        "Points de départ et arrivée",
+        "Points_depart_et_arrivee",
         "Perturbations",
-        "Présence de crottes",
+        "Presence_de_crottes",
     ]
 
 
@@ -190,22 +194,22 @@ def get_pro_column_name():
 
 def get_mapping_columns():
     return {
-        "idbsite": "Identifiant site",
-        "transectlb": "Label transect",
-        "visitdate": "Date visite",
-        "idbvisit": "Identifiant visite",
-        "idreleve": "Identifiant relevé",
-        "codeplot": "Code placette",
-        "plotpos": "Position placette",
-        "plotsize": "Surface en m²",
+        "idbsite": "Identifiant_site",
+        "transectlb": "Label_transect",
+        "visitdate": "Date_visite",
+        "idbvisit": "Identifiant_visite",
+        "idreleve": "Identifiant_releve",
+        "codeplot": "Code_placette",
+        "plotpos": "Position_placette",
+        "plotsize": "Surface_en_m2",
         "observers": "Observateurs",
         "lbhab": "Habitat",
         "geom_start": "geom_start",
         "geom_end": "geom_end",
         "lbperturb": "Perturbations",
-        "crotte": "Présence de crottes",
+        "crotte": "Presence_de_crottes",
         "cd_hab": "cdhab",
-        "geom": "Points de départ et arrivée",
+        "geom": "Points_depart_et_arrivee",
         "geom_wkt": "geom_wkt",
         "covstrate": "covstrate",
         "covcodestrate": "covcodestrate",
