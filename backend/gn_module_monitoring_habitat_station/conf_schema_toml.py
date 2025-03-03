@@ -27,15 +27,14 @@ default_list_visit_columns = [
     {"name": "Observateur(s)", "prop": "observers", "width": "350"},
 ]
 
+
 class GnModuleSchemaConf(Schema):
     site_message = fields.Dict(load_default=site_message)
     list_visit_message = fields.Dict(load_default=list_visit_message)
     detail_list_visit_message = fields.Dict(load_default=detail_list_visit_message)
     export_available_format = fields.List(fields.String(), load_default=export_available_format)
     default_site_columns = fields.List(fields.Dict(), load_default=default_site_columns)
-    default_list_visit_columns = fields.List(
-        fields.Dict(), load_default=default_list_visit_columns
-    )
+    default_list_visit_columns = fields.List(fields.Dict(), load_default=default_list_visit_columns)
     export_srid = fields.Integer(load_default=2154)
     zoom_center = fields.List(fields.Float(), load_default=[44.863664, 6.268670])
     zoom = fields.Integer(load_default=10)

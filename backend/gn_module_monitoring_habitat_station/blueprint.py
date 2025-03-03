@@ -84,21 +84,19 @@ def get_all_sites():
         .outerjoin(TTransect, TBaseSites.id_base_site == TTransect.id_base_site)
         .where(
             and_(
-            TBaseSites.id_nomenclature_type_site == get_id_type_site(blueprint.config["site_type_code"]),
-            TTransect.id_base_site == None
-                )
+                TBaseSites.id_nomenclature_type_site
+                == get_id_type_site(blueprint.config["site_type_code"]),
+                TTransect.id_base_site == None,
             )
         )
+    )
 
     data = DB.session.scalars(q).unique().all()
 
     if "id_base_site" in parameters:
-        current_site = (
-            DB.session.scalars(
-                select(TBaseSites)
-            .where(TBaseSites.id_base_site == parameters["id_base_site"])
-            ).first()
-        )
+        current_site = DB.session.scalars(
+            select(TBaseSites).where(TBaseSites.id_base_site == parameters["id_base_site"])
+        ).first()
         if current_site:
             data.append(current_site)
     if data:
@@ -155,7 +153,9 @@ def get_all_transects():
     pagination_serverside = blueprint.config["pagination_serverside"]
     total_items = DB.session.scalar(select(func.count("*")).select_from(q))
     # we can't use DB.paginate() here because it use a .scalars() which return only the first item of the select
-    results = DB.session.execute(q.limit(items_per_page).offset(page * items_per_page)).unique().all()
+    results = (
+        DB.session.execute(q.limit(items_per_page).offset(page * items_per_page)).unique().all()
+    )
 
     if pagination_serverside:
         data = results.items
@@ -277,7 +277,7 @@ def add_transect(scope):
     Poster un nouveau transect
     """
     data = dict(request.get_json())
-    tab_plots = data.pop("cor_plots", [])
+    plots = data.pop("cor_plots", [])
 
     try:
         # Create Site
@@ -299,7 +299,7 @@ def add_transect(scope):
         # Create Transect and associated plots
         transect = TTransect(**data)
 
-        for plot in tab_plots:
+        for plot in plots:
             transect_plot = TPlot(**plot)
             transect.cor_plots.append(transect_plot)
 
@@ -326,18 +326,17 @@ def update_transect(id_transect, scope):
     DB.session.execute(
         update(TBaseSites)
         .filter_by(id_base_site=data.get("id_base_site"))
-        .values(base_site_description=data.pop("base_site_description", None),
-                geom=func.ST_MakeLine(data.get("geom_start"), data.get("geom_end"))
-        .execution_options(
-            synchronize_session="fetch"
-        )
+        .values(
+            base_site_description=data.pop("base_site_description", None),
+            geom=func.ST_MakeLine(data.get("geom_start"), data.get("geom_end")).execution_options(
+                synchronize_session="fetch"
+            ),
         )
     )
 
-
     plots = []
     if "cor_plots" in data:
-       plots = data.pop("cor_plots")
+        plots = data.pop("cor_plots")
 
     transect = TTransect(**data)
     for plot in plots:
@@ -356,11 +355,7 @@ def get_all_visits(id_site):
     """
     Retourne les visites d'un site par son id
     """
-    query = (
-        select(Visit)
-        .filter_by(id_base_site=id_site)
-        .order_by(Visit.visit_date_min.desc())
-    )
+    query = select(Visit).filter_by(id_base_site=id_site).order_by(Visit.visit_date_min.desc())
 
     page = request.args.get("page", 0, type=int)
     total_items = DB.session.scalar(select(func.count("*")).select_from(query))
@@ -375,13 +370,7 @@ def get_all_visits(id_site):
 
     fields = ["cor_releve_plot", "cor_visit_perturbation", "observers"]
     if data:
-        return [
-            pageInfo,
-            [
-                d.as_dict(fields=fields)
-                for d in data
-            ]
-        ]
+        return [pageInfo, [d.as_dict(fields=fields) for d in data]]
     return None
 
 
@@ -450,18 +439,16 @@ def add_visit(scope):
     if "id_dataset" not in data or data["id_dataset"] == "":
         dataset_code = METADATA_CODE
         Dataset = DB.session.scalars(
-            select(TDatasets)
-            .where(TDatasets.dataset_shortname == dataset_code)
-            ).first()
+            select(TDatasets).where(TDatasets.dataset_shortname == dataset_code)
+        ).first()
         if Dataset:
             data["id_dataset"] = Dataset.id_dataset
         else:
             raise BadRequest(f"Module dataset shortname '{dataset_code}' was not found !")
 
     if "id_module" not in data or data["id_module"] == "":
-        data["id_module"] =  DB.session.execute(
-            select(TModules.id_module)
-            .where(TModules.module_code == MODULE_CODE)
+        data["id_module"] = DB.session.execute(
+            select(TModules.id_module).where(TModules.module_code == MODULE_CODE)
         ).scalar_one()
 
     if "id_digitiser" not in data or data["id_digitiser"] == "":
@@ -491,7 +478,9 @@ def add_visit(scope):
 
         visit.cor_releve_plot.append(releve_plot)
 
-    observers = DB.session.scalars(select(User).where(User.id_role.in_(observers_ids))).unique().all()
+    observers = (
+        DB.session.scalars(select(User).where(User.id_role.in_(observers_ids))).unique().all()
+    )
     for observer in observers:
         visit.observers.append(observer)
 
@@ -539,17 +528,19 @@ def update_visit(id_visit):
         if "plot_data" in releve:
             releve["excretes_presence"] = releve["plot_data"]["excretes_presence"]
             plot_data = releve.pop("plot_data")
-        print("-"*78)
+        print("-" * 78)
         fprint(releve)
         releve_plot = TRelevePlot(**releve)
         for strat in plot_data["strates_releve"]:
             if strat["cover_pourcentage"] != None and strat["cover_pourcentage"] != 0:
                 strat_item = CorRelevePlotStrat(**strat)
                 releve_plot.cor_releve_strats.append(strat_item)
-            elif "id_releve_plot_strat" in strat and (strat["cover_pourcentage"] == None or strat["cover_pourcentage"] == 0):
-                delete_cor_releve_plot_strat = delete(
-                    CorRelevePlotStrat
-                    ).filter_by(id_releve_plot_strat = strat["id_releve_plot_strat"])
+            elif "id_releve_plot_strat" in strat and (
+                strat["cover_pourcentage"] == None or strat["cover_pourcentage"] == 0
+            ):
+                delete_cor_releve_plot_strat = delete(CorRelevePlotStrat).filter_by(
+                    id_releve_plot_strat=strat["id_releve_plot_strat"]
+                )
                 DB.session.execute(delete_cor_releve_plot_strat)
         for taxon in plot_data["taxons_releve"]:
             if "sciname" in taxon:
@@ -557,22 +548,26 @@ def update_visit(id_visit):
             if taxon["cover_pourcentage"] != None and taxon["cover_pourcentage"] != 0:
                 taxon_item = CorRelevePlotTaxon(**taxon)
                 releve_plot.cor_releve_taxons.append(taxon_item)
-            elif "id_cor_releve_plot_taxon" in taxon and (taxon["cover_pourcentage"] == None or taxon["cover_pourcentage"] == 0):
-                delete_cor_releve_plot_taxon = delete(
-                    CorRelevePlotTaxon
-                    ).filter_by(id_cor_releve_plot_taxon = taxon["id_cor_releve_plot_taxon"])
+            elif "id_cor_releve_plot_taxon" in taxon and (
+                taxon["cover_pourcentage"] == None or taxon["cover_pourcentage"] == 0
+            ):
+                delete_cor_releve_plot_taxon = delete(CorRelevePlotTaxon).filter_by(
+                    id_cor_releve_plot_taxon=taxon["id_cor_releve_plot_taxon"]
+                )
                 DB.session.execute(delete_cor_releve_plot_taxon)
         visit.cor_releve_plot.append(releve_plot)
 
-    delete_cor_transect_visit_perturbation = delete(
-        CorTransectVisitPerturbation
-        ).filter_by(id_base_visit = id_visit)
+    delete_cor_transect_visit_perturbation = delete(CorTransectVisitPerturbation).filter_by(
+        id_base_visit=id_visit
+    )
     DB.session.execute(delete_cor_transect_visit_perturbation)
     for perturbation in perturbations:
         visit_perturbation = CorTransectVisitPerturbation(**perturbation)
         visit.cor_visit_perturbation.append(visit_perturbation)
 
-    observers = DB.session.scalars(select(User).where(User.id_role.in_(observers_ids))).unique().all()
+    observers = (
+        DB.session.scalars(select(User).where(User.id_role.in_(observers_ids))).unique().all()
+    )
     for observer in observers:
         visit.observers.append(observer)
 
@@ -658,23 +653,15 @@ def export_visits():
     query = select(ExportVisits)
 
     if "id_base_visit" in parameters:
-        query = query.where(
-            ExportVisits.idbvisit == parameters["id_base_visit"]
-        )
+        query = query.where(ExportVisits.idbvisit == parameters["id_base_visit"])
     elif "id_releve_plot" in parameters:
-        query = query.where(
-            ExportVisits.idreleve == parameters["id_releve_plot"]
-        )
+        query = query.where(ExportVisits.idreleve == parameters["id_releve_plot"])
     elif "id_base_site" in parameters:
-        query = query.where(
-            ExportVisits.idbsite == parameters["id_base_site"]
-        )
+        query = query.where(ExportVisits.idbsite == parameters["id_base_site"])
     elif "organisme" in parameters:
         query = query.where(ExportVisits.organisme == parameters["organisme"])
     elif "year" in parameters:
-        query = query.where(
-            func.date_part("year", ExportVisits.visitdate) == parameters["year"]
-        )
+        query = query.where(func.date_part("year", ExportVisits.visitdate) == parameters["year"])
     elif "cd_hab" in parameters:
         query = query.where(ExportVisits.cd_hab == parameters["cd_hab"])
 
@@ -692,7 +679,6 @@ def export_visits():
     strates_list = get_stratelist_plot()
 
     output_items = []
-
     for d in data:
         visit = d.as_dict()
 
@@ -707,7 +693,7 @@ def export_visits():
             shape_geom = to_shape(d.geom)
             visit["geom"] = shape_geom
 
-        # remove html tag
+        # Remove html tag
         visit["lbhab"] = strip_html(visit["lbhab"])
 
         # Translate label column
@@ -717,21 +703,21 @@ def export_visits():
             if key in mapping_columns
         )
 
-        # pivot strate
+        # Pivot strate
         if visit["covstrate"]:
             for strate, cover in visit["covstrate"].items():
                 visit[strate.replace(" ", "_")] = cover
         if "covstrate" in visit:
             visit.pop("covstrate")
 
-        # pivot taxons
+        # Pivot taxons
         if visit["covtaxons"]:
             for taxon, cover in visit["covtaxons"].items():
                 visit[taxon.replace(" ", "_")] = cover
         if "covtaxons" in visit:
             visit.pop("covtaxons")
 
-        # replace booleans values true/false by 1/0
+        # Replace booleans values true/false by 1/0
         visit = {k: int(v) if isinstance(v, bool) else v for k, v in visit.items()}
 
         output_items.append(visit)
@@ -747,8 +733,7 @@ def export_visits():
             + column_name_pro
         )
         return to_csv_resp(file_name, output_items, headers, ";")
-
-    if export_format == "geojson":
+    elif export_format == "geojson":
         features = []
         for visit in data:
             feature = visit.as_geofeature("geom", "idbsite", False)
@@ -757,7 +742,6 @@ def export_visits():
         return to_json_resp(
             geojson, as_file=True, filename=file_name, indent=4, extension="geojson"
         )
-
     else:
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
         if not os.path.exists(dir_path):

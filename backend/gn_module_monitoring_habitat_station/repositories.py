@@ -25,7 +25,6 @@ def check_user_cruved_visit(user, visit, cruved_level):
     if not, raise 403 error
     if allowed return void
     """
-
     is_allowed = False
     if cruved_level == "1":
 
@@ -71,9 +70,7 @@ def check_year_visit(id_base_site, new_visit_date, id_base_visit=None):
     Check if there is already a visit of the same year.
     If yes, observer is not allowed to post the new visit
     """
-    query = select(
-        func.date_part("year", TBaseVisits.visit_date_min)
-        ).where(
+    query = select(func.date_part("year", TBaseVisits.visit_date_min)).where(
         TBaseVisits.id_base_site == id_base_site
     )
     if id_base_visit is not None:
@@ -114,11 +111,9 @@ def get_taxons_by_cd_hab(habitat_code):
 
 
 def get_stratelist_plot():
-    q = select(
-        TNomenclatures.label_default
-        ).join(
+    q = select(TNomenclatures.label_default).join(
         BibNomenclaturesTypes, BibNomenclaturesTypes.id_type == TNomenclatures.id_type
-        )
+    )
 
     q = q.where(BibNomenclaturesTypes.mnemonique == "STRATE_PLACETTE")
     data = DB.session.execute(q).all()
@@ -133,7 +128,9 @@ def get_stratelist_plot():
 def clean_string(my_string):
     my_string = my_string.strip()
 
-    my_string_unaccent = ''.join(c for c in unicodedata.normalize('NFD', my_string) if unicodedata.category(c) != 'Mn')
+    my_string_unaccent = "".join(
+        c for c in unicodedata.normalize("NFD", my_string) if unicodedata.category(c) != "Mn"
+    )
 
     chars_to_remove = ";, "
     for c in chars_to_remove:
@@ -164,8 +161,8 @@ def get_base_column_name():
     "geom": "Points de départ et arrivée",
     "lbperturb": "Perturbations",
     "crotte": "Présence de crottes"
-
     """
+
     return [
         "Identifiant_site",
         "Label_transect",

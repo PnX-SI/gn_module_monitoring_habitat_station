@@ -32,9 +32,11 @@ CREATE TABLE t_transects (
     plot_size character varying(50),
     plot_shape text NULL
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.t_transects IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
+COMMENT ON TABLE pr_monitoring_habitat_station.t_transects
+IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
 
-COMMENT ON COLUMN pr_monitoring_habitat_station.t_transects.plot_shape IS 'Description de la forme des placettes.';
+COMMENT ON COLUMN pr_monitoring_habitat_station.t_transects.plot_shape
+IS 'Description de la forme des placettes.';
 
 -- Table `t_plots`
 CREATE TABLE t_plots (
@@ -43,7 +45,8 @@ CREATE TABLE t_plots (
     code_plot character varying(50),
     distance_plot integer
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.t_plots IS 'Placettes associées au transect';
+COMMENT ON TABLE pr_monitoring_habitat_station.t_plots
+IS 'Placettes associées au transect';
 
 -- Table `t_releve_plots`
 CREATE TABLE t_releve_plots (
@@ -52,7 +55,8 @@ CREATE TABLE t_releve_plots (
     id_base_visit integer NOT NULL,
     excretes_presence boolean
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.t_releve_plots IS 'Visites sur placette';
+COMMENT ON TABLE pr_monitoring_habitat_station.t_releve_plots
+IS 'Visites sur placette';
 
 -- Table `cor_releve_plot_strats`
 CREATE TABLE cor_releve_plot_strats (
@@ -61,7 +65,8 @@ CREATE TABLE cor_releve_plot_strats (
     id_nomenclature_strate integer NOT NULL,
     cover_pourcentage integer
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_strats IS 'Strates par placette';
+COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_strats
+IS 'Strates par placette';
 
 -- Table `cor_releve_plot_taxons`
 CREATE TABLE cor_releve_plot_taxons (
@@ -71,9 +76,11 @@ CREATE TABLE cor_releve_plot_taxons (
     cd_nom integer NOT NULL,
     cover_pourcentage float
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons IS 'Taxons observés par placette';
+COMMENT ON TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons
+IS 'Taxons observés par placette';
 
-COMMENT ON COLUMN pr_monitoring_habitat_station.cor_releve_plot_taxons.cd_nom IS 'Code du nom scientifique du taxon.';
+COMMENT ON COLUMN pr_monitoring_habitat_station.cor_releve_plot_taxons.cd_nom
+IS 'Code du nom scientifique du taxon.';
 
 -- Table `cor_hab_taxon`
 CREATE TABLE cor_hab_taxon (
@@ -81,7 +88,8 @@ CREATE TABLE cor_hab_taxon (
     cd_nom integer NOT NULL,
     id_habitat integer NOT NULL
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.cor_hab_taxon IS 'Liste taxons par habitat';
+COMMENT ON TABLE pr_monitoring_habitat_station.cor_hab_taxon
+IS 'Liste taxons par habitat';
 
 -- Table `cor_transect_visit_perturbation`
 CREATE TABLE cor_transect_visit_perturbation (
@@ -89,7 +97,8 @@ CREATE TABLE cor_transect_visit_perturbation (
     id_base_visit integer NOT NULL,
     id_nomenclature_perturb integer NOT NULL
 );
-COMMENT ON TABLE pr_monitoring_habitat_station.cor_transect_visit_perturbation IS 'Perturbations lors visite transect';
+COMMENT ON TABLE pr_monitoring_habitat_station.cor_transect_visit_perturbation
+IS 'Perturbations lors visite transect';
 
 
 -- -----------------------------------------------------------------------------
@@ -120,40 +129,82 @@ ALTER TABLE ONLY cor_transect_visit_perturbation
 --FOREIGN KEY
 
 ALTER TABLE ONLY t_transects
-    ADD CONSTRAINT fk_t_transects_id_base_site FOREIGN KEY (id_base_site) REFERENCES gn_monitoring.t_base_sites (id_base_site) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_t_transects_id_base_site
+    FOREIGN KEY (id_base_site)
+    REFERENCES gn_monitoring.t_base_sites (id_base_site)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 ALTER TABLE ONLY t_transects
-    ADD CONSTRAINT fk_t_transects_cd_hab FOREIGN KEY (cd_hab) REFERENCES ref_habitats.habref (cd_hab) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_t_transects_cd_hab
+    FOREIGN KEY (cd_hab)
+    REFERENCES ref_habitats.habref (cd_hab)
+    ON UPDATE CASCADE ;
 
 ALTER TABLE ONLY t_plots
-    ADD CONSTRAINT fk_t_plots_id_transect FOREIGN KEY (id_transect) REFERENCES pr_monitoring_habitat_station.t_transects (id_transect) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_t_plots_id_transect
+    FOREIGN KEY (id_transect)
+    REFERENCES pr_monitoring_habitat_station.t_transects (id_transect)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 
 ALTER TABLE ONLY t_releve_plots
-    ADD CONSTRAINT fk_t_releve_plots_id_plot FOREIGN KEY (id_plot) REFERENCES pr_monitoring_habitat_station.t_plots (id_plot) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_t_releve_plots_id_plot
+    FOREIGN KEY (id_plot)
+    REFERENCES pr_monitoring_habitat_station.t_plots (id_plot)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 ALTER TABLE ONLY t_releve_plots
-    ADD CONSTRAINT fk_t_releve_plots_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_t_releve_plots_id_base_visit
+    FOREIGN KEY (id_base_visit)
+    REFERENCES gn_monitoring.t_base_visits (id_base_visit)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 
 ALTER TABLE ONLY cor_releve_plot_strats
-    ADD CONSTRAINT fk_cor_releve_plot_strats_id_releve_plot FOREIGN KEY (id_releve_plot) REFERENCES pr_monitoring_habitat_station.t_releve_plots (id_releve_plot) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_releve_plot_strats_id_releve_plot
+    FOREIGN KEY (id_releve_plot)
+    REFERENCES pr_monitoring_habitat_station.t_releve_plots (id_releve_plot)
+    ON UPDATE CASCADE ;
 ALTER TABLE ONLY cor_releve_plot_strats
-    ADD CONSTRAINT fk_cor_releve_plot_strats_id_nomenclature_strate FOREIGN KEY (id_nomenclature_strate) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_releve_plot_strats_id_nomenclature_strate
+    FOREIGN KEY (id_nomenclature_strate)
+    REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature)
+    ON UPDATE CASCADE ;
 
 ALTER TABLE ONLY cor_releve_plot_taxons
-    ADD CONSTRAINT fk_cor_releve_plot_taxons_id_releve_plot FOREIGN KEY (id_releve_plot) REFERENCES pr_monitoring_habitat_station.t_releve_plots (id_releve_plot) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_cor_releve_plot_taxons_id_releve_plot
+    FOREIGN KEY (id_releve_plot)
+    REFERENCES pr_monitoring_habitat_station.t_releve_plots (id_releve_plot)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 ALTER TABLE ONLY cor_releve_plot_taxons
-    ADD CONSTRAINT fk_cor_releve_plot_taxons_id_cor_hab_taxon FOREIGN KEY (id_cor_hab_taxon) REFERENCES pr_monitoring_habitat_station.cor_hab_taxon (id_cor_hab_taxon) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_releve_plot_taxons_id_cor_hab_taxon
+    FOREIGN KEY (id_cor_hab_taxon)
+    REFERENCES pr_monitoring_habitat_station.cor_hab_taxon (id_cor_hab_taxon)
+    ON UPDATE CASCADE ;
 ALTER TABLE pr_monitoring_habitat_station.cor_releve_plot_taxons
-    ADD CONSTRAINT fk_cor_releve_plot_taxons_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref(cd_nom) ON UPDATE CASCADE ;
+    ADD CONSTRAINT fk_cor_releve_plot_taxons_cd_nom
+    FOREIGN KEY (cd_nom)
+    REFERENCES taxonomie.taxref(cd_nom)
+    ON UPDATE CASCADE ;
 
 ALTER TABLE ONLY cor_hab_taxon
-    ADD CONSTRAINT fk_cor_hab_taxon_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_hab_taxon_cd_nom
+    FOREIGN KEY (cd_nom)
+    REFERENCES taxonomie.taxref (cd_nom)
+    ON UPDATE CASCADE ;
 ALTER TABLE ONLY cor_hab_taxon
-    ADD CONSTRAINT fk_cor_hab_taxon_id_habitat FOREIGN KEY (id_habitat) REFERENCES ref_habitats.habref (cd_hab) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_hab_taxon_id_habitat
+    FOREIGN KEY (id_habitat)
+    REFERENCES ref_habitats.habref (cd_hab)
+    ON UPDATE CASCADE ;
 
 ALTER TABLE ONLY cor_transect_visit_perturbation
-    ADD CONSTRAINT fk_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_id_base_visit
+    FOREIGN KEY (id_base_visit)
+    REFERENCES gn_monitoring.t_base_visits (id_base_visit)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 
 ALTER TABLE ONLY cor_transect_visit_perturbation
-    ADD CONSTRAINT fk_id_nomenclature_perturb FOREIGN KEY (id_nomenclature_perturb) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_id_nomenclature_perturb
+    FOREIGN KEY (id_nomenclature_perturb)
+    REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature)
+    ON UPDATE CASCADE ON DELETE CASCADE ;
 
 -- -----------------------------------------------------------------------------
 -- UNIQUE CONSTRAINTS
@@ -170,8 +221,13 @@ CREATE OR REPLACE VIEW pr_monitoring_habitat_station.export_visits AS
 WITH observers AS (
     SELECT
         v.id_base_visit,
-        string_agg(DISTINCT (roles.prenom_role || ' ' || roles.nom_role || ' (' || bo.nom_organisme || ')'), ', ') AS observers,
-        roles.id_organisme AS organisme
+        roles.id_organisme AS organisme,
+        string_agg(
+            DISTINCT (
+                roles.prenom_role || ' ' || roles.nom_role || ' (' || bo.nom_organisme || ')'
+            ),
+            ', '
+        ) AS observers
     FROM gn_monitoring.t_base_visits AS v
         JOIN gn_monitoring.cor_visit_observer AS observer
             ON observer.id_base_visit = v.id_base_visit
@@ -197,8 +253,8 @@ taxons AS (
         id_base_visit,
         id_releve_plot,
         id_plot,
-        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) cover_taxon,
-        json_object_agg( cd_nom, cover_pourcentage ORDER BY cd_nom) cover_cdnom
+        json_object_agg( lb_nom, cover_pourcentage ORDER BY lb_nom) AS cover_taxon,
+        json_object_agg( cd_nom, cover_pourcentage ORDER BY cd_nom) AS cover_cdnom
     FROM (
         SELECT
             v.id_base_visit,
@@ -217,7 +273,8 @@ taxons AS (
             JOIN taxonomie.taxref AS tr
                 ON tr.cd_nom = cht.cd_nom
         WHERE t.cover_pourcentage IS NOT NULL
-        GROUP BY v.id_base_visit, tr.lb_nom, tr.cd_nom, t.cover_pourcentage, r.id_plot, r.id_releve_plot
+        GROUP BY v.id_base_visit, tr.lb_nom, tr.cd_nom, t.cover_pourcentage, r.id_plot,
+            r.id_releve_plot
     ) AS s
     GROUP BY id_base_visit, id_plot, id_releve_plot
     ORDER BY id_base_visit
@@ -227,8 +284,12 @@ strates AS (
         id_base_visit,
         id_releve_plot,
         id_plot,
-        json_object_agg( label_default, cover_pourcentage ORDER BY label_default)  cover_strate,
-        json_object_agg( cd_nomenclature, cover_pourcentage ORDER BY cd_nomenclature)  cover_code_strate
+        json_object_agg(
+            label_default, cover_pourcentage ORDER BY label_default
+        ) AS cover_strate,
+        json_object_agg(
+            cd_nomenclature, cover_pourcentage ORDER BY cd_nomenclature
+        ) AS cover_code_strate
     FROM (
         SELECT
             v.id_base_visit,
@@ -246,7 +307,8 @@ strates AS (
             JOIN ref_nomenclatures.t_nomenclatures AS n
                 ON n.id_nomenclature = t.id_nomenclature_strate
         WHERE t.cover_pourcentage IS NOT NULL
-        GROUP BY v.id_base_visit, n.label_default, t.id_nomenclature_strate,t.cover_pourcentage, r.id_releve_plot, n.cd_nomenclature
+        GROUP BY v.id_base_visit, n.label_default, t.id_nomenclature_strate, t.cover_pourcentage,
+            r.id_releve_plot, n.cd_nomenclature
     ) AS s
     GROUP BY id_base_visit, id_releve_plot, id_plot
     ORDER BY id_base_visit

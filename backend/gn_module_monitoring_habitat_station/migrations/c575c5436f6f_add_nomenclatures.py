@@ -5,6 +5,7 @@ Revises: 3717dcfeed23
 Create Date: 2022-12-01 20:35:42.573077
 
 """
+
 from importlib.resources import open_text
 
 from gn_conservation_backend_shared.migrations.utils import csv, nomenclatures

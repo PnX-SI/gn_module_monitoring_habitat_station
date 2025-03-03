@@ -150,9 +150,7 @@ class CorRelevePlotStrat(MonitoringHabitatStation):
     __tablename__ = "cor_releve_plot_strats"
     __table_args__ = {"schema": "pr_monitoring_habitat_station"}
 
-    id_releve_plot_strat = DB.Column(
-        DB.Integer, primary_key=True, server_default=DB.FetchedValue()
-    )
+    id_releve_plot_strat = DB.Column(DB.Integer, primary_key=True, server_default=DB.FetchedValue())
     id_releve_plot = DB.Column(
         DB.ForeignKey(
             "pr_monitoring_habitat_station.t_releve_plots.id_releve_plot",
@@ -237,9 +235,7 @@ class Visit(TBaseVisits):
     def __str__(self):
         return str(self.__class__) + ": " + str(self.__dict__)
 
-    cor_visit_perturbation = DB.relationship(
-        CorTransectVisitPerturbation, backref="t_base_visits"
-    )
+    cor_visit_perturbation = DB.relationship(CorTransectVisitPerturbation, backref="t_base_visits")
     cor_releve_plot = DB.relationship(TRelevePlot, backref="t_base_visits")
 
 
