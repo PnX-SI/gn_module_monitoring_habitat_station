@@ -5,19 +5,20 @@ Revises: b920fc95ac59
 Create Date: 2024-04-26 14:12:58.809577
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '352a1cc0b350'
-down_revision = 'b920fc95ac59'
+revision = "352a1cc0b350"
+down_revision = "b920fc95ac59"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-     op.execute(
+    op.execute(
         """
         INSERT INTO
             gn_permissions.t_permissions_available (
@@ -50,7 +51,7 @@ def upgrade():
             gn_permissions.bib_actions a ON a.code_action = v.action_code
         """
     )
-     op.execute(
+    op.execute(
         """
         WITH bad_permissions AS (
             SELECT

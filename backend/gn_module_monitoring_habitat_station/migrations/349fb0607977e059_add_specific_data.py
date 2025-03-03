@@ -4,6 +4,7 @@ Revision ID: 349fb0607977e059
 Create Date: 2022-08-09 11:58:17.392946
 
 """
+
 from importlib.resources import read_text
 
 from gn_conservation_backend_shared.migrations.utils import monitoring, habitats, commons
