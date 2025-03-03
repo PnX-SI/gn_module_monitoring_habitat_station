@@ -2,30 +2,27 @@
 
 ## [Unreleased]
 
-### 🚀 Added
+## [1.3.0] - 2025-03-03
 
 ### 🔄 Modified
 
-The export has been modified:
-
+The export has been modified [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40):
 - Field names have been modified: spaces replaced by underscores and no more accents.
-- The “Plot size meters” field has been renamed to “Area in m²”.
-- The values of the “observers” and “organisms” fields have been grouped together under the single “observers” field.
-- Boolean field values have been replaced by 1 or 0
-- The “%” sign has been removed from percent overlap values
-- The “Perturbation” field has been renamed “Perturbations”.
+- The _Plot size meters_ field has been renamed to _Area in m²_.
+- The values of the `observers` and `organisms` fields have been grouped together under the single `observers` field.
+- Boolean field values have been replaced by `1` or `0`.
+- The `%` sign has been removed from percent overlap values.
+- The `Perturbation` field has been renamed `Perturbations`.
+- ⚠️ The `export_visits` export view has been modified, it must be re-created by retrieving the code from [schema.sql](backend/gn_module_monitoring_habitat_station/migrations/data/schema.sql#L169).
 
 ### 🗑 Removed
 
-- The “geom_wkt” field has been removed from the export as it duplicated the “Start and end points (geom)” field.
-
-### ⚠️ Migration
-
-- The “export_visits” export view has been modified, it must be re-created by retrieving the code from [schema.sql](backend/gn_module_monitoring_habitat_station/migrations/data/schema.sql#L169).
+- The `geom_wkt` field has been removed from the export as it duplicated the `Start and end points (geom)` field. [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40)
 
 ### 🐛 Fixed
 
-- functional Geojson export
+- Geojson export is working again. [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40)
+
 
 ## [1.2.0] - 2024-08-20
 
@@ -85,7 +82,7 @@ The export has been modified:
 
 - Nomenclatures _bas_ et _haut_ were removed from _POSITION_PLACETTE_. [#33](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/33)
 
-### ⚠️ Migrate
+### ⚠️ Upgrade
 
 Follow the update order below:
 
