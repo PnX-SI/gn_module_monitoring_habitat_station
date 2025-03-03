@@ -295,6 +295,7 @@ def add_transect(scope):
         # Assign site ID and generate site code
         data["id_base_site"] = site.id_base_site
         site.base_site_code = f"HAB-{MODULE_CODE}-{site.id_base_site}"
+        DB.session.merge(site)
 
         # Create Transect and associated plots
         transect = TTransect(**data)
