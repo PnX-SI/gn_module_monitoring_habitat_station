@@ -21,9 +21,7 @@ depends_on = None
 
 def upgrade():
     operations = text(
-        read_text(
-            "gn_module_monitoring_habitat_station.migrations.data", "schema.sql"
-        )
+        read_text("gn_module_monitoring_habitat_station.migrations.data", "schema.sql")
     )
     op.get_bind().execute(operations)
 

@@ -5,6 +5,7 @@ Revises: c575c5436f6f
 Create Date: 2023-02-17 18:23:37.002533
 
 """
+
 import importlib
 
 from alembic import op
@@ -15,15 +16,17 @@ from gn_conservation_backend_shared.migrations.utils import monitoring
 from gn_module_monitoring_habitat_station import METADATA_CODE, METADATA_NAME
 
 # revision identifiers, used by Alembic.
-revision = 'b920fc95ac59'
-down_revision = 'c575c5436f6f'
+revision = "b920fc95ac59"
+down_revision = "c575c5436f6f"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
     operations = text(
-        importlib.resources.read_text("gn_module_monitoring_habitat_station.migrations.data", "metadata.sql")
+        importlib.resources.read_text(
+            "gn_module_monitoring_habitat_station.migrations.data", "metadata.sql"
+        )
     )
 
     op.get_bind().execute(

@@ -25,7 +25,6 @@ def check_user_cruved_visit(user, visit, cruved_level):
     if not, raise 403 error
     if allowed return void
     """
-
     is_allowed = False
     if cruved_level == "1":
 
@@ -133,7 +132,9 @@ def get_stratelist_plot():
 def clean_string(my_string):
     my_string = my_string.strip()
 
-    my_string_unaccent = ''.join(c for c in unicodedata.normalize('NFD', my_string) if unicodedata.category(c) != 'Mn')
+    my_string_unaccent = "".join(
+        c for c in unicodedata.normalize("NFD", my_string) if unicodedata.category(c) != "Mn"
+    )
 
     chars_to_remove = ";, "
     for c in chars_to_remove:
@@ -164,8 +165,8 @@ def get_base_column_name():
     "geom": "Points de départ et arrivée",
     "lbperturb": "Perturbations",
     "crotte": "Présence de crottes"
-
     """
+
     return [
         "Identifiant_site",
         "Label_transect",
