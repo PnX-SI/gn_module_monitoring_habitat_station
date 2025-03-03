@@ -12,7 +12,7 @@ Module GeoNature de suivi des habitats sur une station, piloté par le CBNA.
 ## Licence
 
 * [Licence OpenSource GPL v3](./LICENSE.txt)
-* Copyleft 2018-2023 - Parc National des Écrins - Conservatoire National Botanique Alpin
+* Copyleft 2018-2025 - Parc National des Écrins - Conservatoire National Botanique Alpin
 
 [![Logo PNE](http://geonature.fr/img/logo-pne.jpg)](http://www.ecrins-parcnational.fr)
 
