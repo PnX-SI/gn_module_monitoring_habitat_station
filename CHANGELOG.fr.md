@@ -7,30 +7,26 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Inédit]
 
-### 🚀 Ajouté
+## [1.3.0] - 2025-03-03
 
 ### 🔄 Modifié
 
-L'export a été modifié :
-
+L'export a été modifié [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40):
 - Les noms des champs ont été modifiés : espaces remplacés par des underscores et plus d'accents.
-- Le champ "Taille placette mètres" a été renommé en "Surface en m²"
-- Les valeurs des champs "observers et "organismes" ont été regroupés sous le champ unique "observers"
-- Les valeurs des champs booléens sont remplacés par 1 ou 0
-- Le signe "%" a été retiré des valeurs des pourcentages de recouvrement
-- Le champ "Perturbation" a été renommé "Perturbations"
+- Le champ _Taille placette mètres_ a été renommé en _Surface en m²_.
+- Les valeurs des champs `observers` et `organismes` ont été regroupés sous le champ unique `observers`.
+- Les valeurs des champs booléens sont remplacés par `1` ou `0`.
+- Le signe "`%`" a été retiré des valeurs des pourcentages de recouvrement.
+- Le champ `Perturbation` a été renommé `Perturbations`.
+- ⚠️ La vue d'export `export_visits` a été modifiée, il faut la re-créer en récupérant le code dans [schema.sql](backend/gn_module_monitoring_habitat_station/migrations/data/schema.sql#L169).
 
 ### 🗑 Supprimé
 
-- Le champ "geom_wkt" a été retiré de l'export car il faisait doublon avec le champ "Points de départ et arrivée (geom).
-
-### ⚠️ Migration
-
-- La vue d'export "export_visits" a été modifiée, il faut la re-créer en récupérant le code dans [schema.sql](backend/gn_module_monitoring_habitat_station/migrations/data/schema.sql#L169).
+- Le champ `geom_wkt` a été retiré de l'export car il faisait doublon avec le champ `Points de départ et arrivée` (geom). [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40)
 
 ### 🐛 Corrigé
 
-- export Geojson fonctionnel
+- Export au format Geojson à nouveau fonctionnel. [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40)
 
 ## [1.2.0] - 2024-08-20
 
@@ -90,7 +86,7 @@ L'export a été modifié :
 
 - Les nomenclatures _bas_ et _haut_ ont été supprimées de _POSITION_PLACETTE_. [#33](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/33)
 
-### ⚠️ Migration
+### ⚠️ Mise à niveau
 
 Suivez l'ordre de mise à jour ci-dessous :
 
