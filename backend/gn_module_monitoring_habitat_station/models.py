@@ -261,7 +261,7 @@ class ExportVisits(MonitoringHabitatStation):
     geom_start = DB.Column(Geometry("GEOMETRY", 4326))
     geom_end = DB.Column(Geometry("GEOMETRY", 4326))
     lbperturb = DB.Column(DB.Unicode)
-    crotte = DB.Column(DB.Boolean)
+    crottes = DB.Column(DB.Boolean)
     cd_hab = DB.Column(DB.Integer)
     geom = DB.Column(Geometry("GEOMETRY", 4326))
     covstrate = DB.Column(DB.Unicode)

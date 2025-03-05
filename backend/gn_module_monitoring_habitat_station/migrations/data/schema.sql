@@ -221,7 +221,6 @@ CREATE OR REPLACE VIEW pr_monitoring_habitat_station.export_visits AS
 WITH observers AS (
     SELECT
         v.id_base_visit,
-        roles.id_organisme AS organisme,
         string_agg(
             DISTINCT (
                 roles.prenom_role || ' ' || roles.nom_role || ' (' || bo.nom_organisme || ')'
@@ -235,7 +234,7 @@ WITH observers AS (
             ON roles.id_role = observer.id_role
         JOIN utilisateurs.bib_organismes AS bo
             ON bo.id_organisme = roles.id_organisme
-    GROUP BY v.id_base_visit, roles.id_organisme
+    GROUP BY v.id_base_visit
 ),
 perturbations AS (
     SELECT
@@ -315,19 +314,19 @@ strates AS (
 )
 -- All the meshes of a site with their visits
 SELECT sites.id_base_site AS idbsite,
-	visits.id_base_visit AS idbvisit,
-	visits.visit_date_min AS visitdate,
-	releve.id_releve_plot AS idreleve,
-	releve.excretes_presence AS crotte,
-	plot.code_plot AS codeplot,
-	per.label_perturbation AS lbperturb,
-	obs.observers,
-	tax.cover_taxon AS covtaxons,
+    visits.id_base_visit AS idbvisit,
+    visits.visit_date_min AS visitdate,
+    releve.id_releve_plot AS idreleve,
+    releve.excretes_presence AS crottes,
+    plot.code_plot AS codeplot,
+    per.label_perturbation AS lbperturb,
+    obs.observers,
+    tax.cover_taxon AS covtaxons,
     tax.cover_cdnom AS covcdnom,
-	strate.cover_strate AS covstrate,
+    strate.cover_strate AS covstrate,
     strate.cover_code_strate AS covcodestrate,
-	habref.lb_hab_fr AS lbhab,
-	habref.cd_hab,
+    habref.lb_hab_fr AS lbhab,
+    habref.cd_hab,
     transect.transect_label AS transectlb,
     transect.plot_size AS plotsize,
     nomenclature.label_default AS plotpos,
@@ -355,4 +354,4 @@ FROM gn_monitoring.t_base_sites AS sites
         ON habref.cd_hab = transect.cd_hab
     JOIN ref_nomenclatures.t_nomenclatures AS nomenclature
         ON nomenclature.id_nomenclature = transect.id_nomenclature_plot_position
-ORDER BY visits.id_base_visit;
+ORDER BY visits.visit_date_min, plot.distance_plot, plot.code_plot;
