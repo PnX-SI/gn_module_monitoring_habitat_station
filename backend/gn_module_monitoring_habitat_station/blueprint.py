@@ -295,6 +295,9 @@ def add_transect(scope):
         # Assign site ID and generate site code
         data["id_base_site"] = site.id_base_site
         site.base_site_code = f"HAB-{MODULE_CODE}-{site.id_base_site}"
+        # TODO: use the session.commit() instead of merge() wherever it is relevant
+        # Useless to use merge() here because session.commit() do the same with the site object
+        # DB.session.merge(site)
 
         # Create Transect and associated plots
         transect = TTransect(**data)
@@ -522,14 +525,12 @@ def update_visit(id_visit):
 
     visit = Visit(**data)
 
-    fprint(releve_plots)
     plot_data = []
     for releve in releve_plots:
         if "plot_data" in releve:
             releve["excretes_presence"] = releve["plot_data"]["excretes_presence"]
             plot_data = releve.pop("plot_data")
-        print("-" * 78)
-        fprint(releve)
+
         releve_plot = TRelevePlot(**releve)
         for strat in plot_data["strates_releve"]:
             if strat["cover_pourcentage"] != None and strat["cover_pourcentage"] != 0:
@@ -668,16 +669,9 @@ def export_visits():
     data = DB.session.scalars(query).all()
 
     # Format data
-    features = []
     cor_hab_taxon = []
     flag_cdhab = 0
-
-    tab_header = []
-    column_name = get_base_column_name()
-    column_name_pro = get_pro_column_name()
     mapping_columns = get_mapping_columns()
-    strates_list = get_stratelist_plot()
-
     output_items = []
     for d in data:
         visit = d.as_dict()
@@ -693,7 +687,7 @@ def export_visits():
             shape_geom = to_shape(d.geom)
             visit["geom"] = shape_geom
 
-        # Remove html tag
+        # Remove HTML tags
         visit["lbhab"] = strip_html(visit["lbhab"])
 
         # Translate label column
@@ -726,6 +720,10 @@ def export_visits():
     file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
 
     if export_format == "csv":
+        column_name = get_base_column_name()
+        column_name_pro = get_pro_column_name()
+        strates_list = get_stratelist_plot()
+
         headers = (
             column_name
             + [clean_string(x) for x in strates_list]
