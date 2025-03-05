@@ -697,19 +697,19 @@ def export_visits():
             if key in mapping_columns
         )
 
-        # Pivot strate
-        if visit["covstrate"]:
-            for strate, cover in visit["covstrate"].items():
-                visit[strate.replace(" ", "_")] = cover
-        if "covstrate" in visit:
-            visit.pop("covstrate")
+        # Pivot some values for CSV
+        if export_format == "csv":
+            # Pivot strate
+            if visit["covstrate"]:
+                for strate, cover in visit["covstrate"].items():
+                    visit[clean_string(strate).lower()] = cover
+                visit.pop("covstrate")
 
-        # Pivot taxons
-        if visit["covtaxons"]:
-            for taxon, cover in visit["covtaxons"].items():
-                visit[taxon.replace(" ", "_")] = cover
-        if "covtaxons" in visit:
-            visit.pop("covtaxons")
+            # Pivot taxons
+            if visit["covtaxons"]:
+                for taxon, cover in visit["covtaxons"].items():
+                    visit[clean_string(taxon)] = cover
+                visit.pop("covtaxons")
 
         # Replace booleans values true/false by 1/0
         visit = {k: int(v) if isinstance(v, bool) else v for k, v in visit.items()}
@@ -726,7 +726,7 @@ def export_visits():
 
         headers = (
             column_name
-            + [clean_string(x) for x in strates_list]
+            + [clean_string(x).lower() for x in strates_list]
             + [clean_string(x) for x in cor_hab_taxon]
             + column_name_pro
         )

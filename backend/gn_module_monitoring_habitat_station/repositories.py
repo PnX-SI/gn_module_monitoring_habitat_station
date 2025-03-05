@@ -125,18 +125,22 @@ def get_stratelist_plot():
     return None
 
 
-def clean_string(my_string):
-    my_string = my_string.strip()
+def clean_string(dirty_string):
+    cleaned_string = dirty_string.strip()
 
-    my_string_unaccent = "".join(
-        c for c in unicodedata.normalize("NFD", my_string) if unicodedata.category(c) != "Mn"
+    cleaned_string = "".join(
+        c for c in unicodedata.normalize("NFD", cleaned_string) if unicodedata.category(c) != "Mn"
     )
 
-    chars_to_remove = ";, "
-    for c in chars_to_remove:
-        my_string_unaccent = my_string_unaccent.replace(c, "_")
+    chars_to_replace = "/;, "
+    for c in chars_to_replace:
+        cleaned_string = cleaned_string.replace(c, "_")
 
-    return my_string_unaccent
+    chars_to_remove = "."
+    for c in chars_to_remove:
+        cleaned_string = cleaned_string.replace(c, "")
+
+    return cleaned_string
 
 
 def strip_html(data):
@@ -204,7 +208,7 @@ def get_mapping_columns():
         "geom_start": "geom_start",
         "geom_end": "geom_end",
         "lbperturb": "perturbations",
-        "crotte": "presence_de_crottes",
+        "crottes": "presence_de_crottes",
         "cd_hab": "cdhab",
         "geom": "points_depart_et_arrivee",
         "geom_wkt": "geom_wkt",
