@@ -653,14 +653,12 @@ def export_visits():
     # Build query and get data from db
     query = select(ExportVisits)
 
-    if "id_base_visit" in parameters:
+    if "id_base_site" in parameters:
+        query = query.where(ExportVisits.idbsite == parameters["id_base_site"])
+    elif "id_base_visit" in parameters:
         query = query.where(ExportVisits.idbvisit == parameters["id_base_visit"])
     elif "id_releve_plot" in parameters:
         query = query.where(ExportVisits.idreleve == parameters["id_releve_plot"])
-    elif "id_base_site" in parameters:
-        query = query.where(ExportVisits.idbsite == parameters["id_base_site"])
-    elif "organisme" in parameters:
-        query = query.where(ExportVisits.organisme == parameters["organisme"])
     elif "year" in parameters:
         query = query.where(func.date_part("year", ExportVisits.visitdate) == parameters["year"])
     elif "cd_hab" in parameters:
@@ -751,8 +749,8 @@ def export_visits():
             file_name=file_name,
         )
 
-        for row in data:
-            FionaShapeService.create_feature(row.as_dict(), row.geom)
+        for visit in data:
+            FionaShapeService.create_feature(visit.as_dict(), visit.geom)
 
         FionaShapeService.save_and_zip_shapefiles()
 
