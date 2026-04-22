@@ -92,7 +92,7 @@ class TTransect(MonitoringHabitatStation):
 
     t_base_site = DB.relationship("TBaseSites")
     cor_plots = DB.relationship("TPlot")
-    station = DB.relationship("Station")
+    station = DB.relationship("Station", overlaps="cor_transect")
 
     def get_geofeature(self, fields=[]):
         line = self.points_to_linestring()
@@ -311,7 +311,7 @@ class Station(MonitoringHabitatStation):
         ),
         nullable = False,
     )
-    cor_transect = DB.relationship(TTransect)
+    cor_transect = DB.relationship(TTransect, overlaps="station")
     
 
 @serializable
