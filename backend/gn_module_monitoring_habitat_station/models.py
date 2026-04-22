@@ -44,8 +44,14 @@ class TPlot(MonitoringHabitatStation):
         ),
         nullable=False,
     )
-    code_plot = DB.Column(DB.String(50))
+    code_plot = DB.Column(DB.String(50), nullable = False)
     distance_plot = DB.Column(DB.Integer)
+    id_parent = DB.Column(
+        DB.ForeignKey(
+            "pr_monitoring_habitat_station.t_plots.id_plot",
+        ),   
+    )
+    parent = DB.relationship("TPlot", remote_side = [id_plot])
 
 
 @serializable
@@ -72,9 +78,21 @@ class TTransect(MonitoringHabitatStation):
     )
     plot_size = DB.Column(DB.String(50))
     plot_shape = DB.Column(DB.Unicode())
+    id_station = DB.Column(
+        DB.ForeignKey(
+            "pr_monitoring_habitat_station.t_stations.id_station",
+            onupdate= "CASCADE",
+            ondelete= "SET NULL",
+        )
+    )
+    azimut = DB.Column(
+        DB.Integer, 
+        nullable = True,
+    )
 
     t_base_site = DB.relationship("TBaseSites")
     cor_plots = DB.relationship("TPlot")
+    station = DB.relationship("Station")
 
     def get_geofeature(self, fields=[]):
         line = self.points_to_linestring()
@@ -268,3 +286,62 @@ class ExportVisits(MonitoringHabitatStation):
     covtaxons = DB.Column(DB.Unicode)
     covcdnom = DB.Column(DB.Unicode)
     covcodestrate = DB.Column(DB.Unicode)
+
+@serializable
+@geoserializable
+class Station(MonitoringHabitatStation):
+    __tablename__= "t_stations"
+    __table_args__ = {
+        "schema": "pr_monitoring_habitat_station",
+    }
+    id_station = DB.Column(
+        DB.Integer, primary_key=True, server_default=DB.FetchedValue()
+    )
+    remarks = DB.Column(
+        DB.Text,
+        nullable = True,
+    )
+    geom = DB.Column(
+        Geometry("GEOMETRY",4326)
+    )
+    cd_hab = DB.Column(
+        DB.ForeignKey(
+            "ref_habitats.habref.cd_hab",
+            onupdate="CASCADE",
+        ),
+        nullable = False,
+    )
+    cor_transect = DB.relationship(TTransect)
+    
+
+@serializable
+class TemperatureSensor(MonitoringHabitatStation):
+    __tablename__= "t_temperature_sensors"
+    __table_args__ = (
+        DB.UniqueConstraint("serial_number","id_transect","install_date"),
+       { "schema": "pr_monitoring_habitat_station"},
+        
+    )
+    id_sensor = DB.Column(
+        DB.Integer, primary_key=True, server_default = DB.FetchedValue()
+    )
+    id_transect = DB.Column(
+        DB.ForeignKey(
+            "pr_monitoring_habitat_station.t_transects.id_transect",
+            ondelete = "CASCADE",
+            onupdate = "CASCADE",
+        ),
+        nullable = False,
+    )
+    serial_number = DB.Column(
+        DB.String(50),
+        nullable = False
+    )
+    install_date = DB.Column(
+        DB.Date,
+        nullable = False
+    )
+    transect = DB.relationship (TTransect)
+    
+      
+
