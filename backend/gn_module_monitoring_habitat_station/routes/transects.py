@@ -24,6 +24,41 @@ from gn_module_monitoring_habitat_station import MODULE_CODE
 
 
 
+
+@blueprint.route("/sites", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code=MODULE_CODE)
+@json_resp
+def get_all_sites():
+    """
+    Retourne tous les sites qui n'ont pas de transects
+    """
+    parameters = request.args
+
+    q = (
+        select(TBaseSites)
+        .outerjoin(TTransect, TBaseSites.id_base_site == TTransect.id_base_site)
+        .where(
+            and_(
+                TBaseSites.id_nomenclature_type_site
+                == get_id_type_site(blueprint.config["site_type_code"]),
+                TTransect.id_base_site == None,
+            )
+        )
+    )
+
+    data = DB.session.scalars(q).unique().all()
+
+    if "id_base_site" in parameters:
+        current_site = DB.session.scalars(
+            select(TBaseSites).where(TBaseSites.id_base_site == parameters["id_base_site"])
+        ).first()
+        if current_site:
+            data.append(current_site)
+    if data:
+        return [d.as_dict() for d in data]
+    return ("sites_not_found"), 404
+
+
 def load_transect(id_site):
     data = DB.session.execute(
         select(
