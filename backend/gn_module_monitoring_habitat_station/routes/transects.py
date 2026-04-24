@@ -21,7 +21,8 @@ from ..blueprint import blueprint
 from ..models import TTransect, TPlot
 from ..repositories import get_id_type_site
 from gn_module_monitoring_habitat_station import MODULE_CODE
-
+import datetime
+from .plots import create_plot
 
 
 
@@ -47,6 +48,7 @@ def get_all_sites():
     )
 
     data = DB.session.scalars(q).unique().all()
+    
 
     if "id_base_site" in parameters:
         current_site = DB.session.scalars(
@@ -117,7 +119,7 @@ def load_transect(id_site):
 @json_resp
 def get_all_transects():
     """
-    Retourne tous les transects
+        get all the transects
     """
     parameters = request.args
 
@@ -218,7 +220,7 @@ def get_all_transects():
 @json_resp
 def get_one_transect(id_site):
     """
-    Retourne un transect à l'aide de son id_site
+        get one transect using his ID
     """
     return load_transect(id_site)
 
@@ -228,7 +230,7 @@ def get_one_transect(id_site):
 @json_resp
 def add_transect(scope):
     """
-    Poster un nouveau transect
+    create a new transect
     """
     data = dict(request.get_json())
     plots = data.pop("cor_plots", [])
@@ -253,14 +255,16 @@ def add_transect(scope):
         # Useless to use merge() here because session.commit() do the same with the site object
         # DB.session.merge(site)
 
-        # Create Transect and associated plots
+        # Create Transect 
         transect = TTransect(**data)
-
-        for plot in plots:
-            transect_plot = TPlot(**plot)
-            transect.cor_plots.append(transect_plot)
-
         DB.session.add(transect)
+        DB.session.flush()
+
+        #Create associated plots
+        for plot_data in plots:
+            plot_data["id_transect"] = transect.id_transect
+            create_plot(plot_data)
+
         DB.session.commit()
 
         return load_transect(site.id_base_site)
@@ -275,7 +279,7 @@ def add_transect(scope):
 @json_resp
 def update_transect(id_transect, scope):
     """
-    Mettre à jour un transect
+    update a transect
     """
     data = dict(request.get_json())
 
@@ -296,10 +300,28 @@ def update_transect(id_transect, scope):
         plots = data.pop("cor_plots")
 
     transect = TTransect(**data)
-    for plot in plots:
-        transect_plot = TPlot(**plot)
-        transect.cor_plots.append(transect_plot)
     DB.session.merge(transect)
+    for plot_data in plots:
+        plot_data["id_transect"] = transect.id_transect
+        create_plot(plot_data)
+    
     DB.session.commit()
 
     return load_transect(data.get("id_base_site"))
+
+@blueprint.route("/transects/<id_transect>", methods=["DELETE"])
+@permissions.check_cruved_scope("D", module_code=MODULE_CODE)
+@json_resp
+def delete_transect(id_transect):
+   try:
+        
+        transect = DB.session.get(TTransect, id_transect)
+        if transect == None:
+            raise NotFound(f"Transect {id_transect} does not exist")
+        else:
+          DB.session.delete(transect) 
+          DB.session.commit() 
+          return {"message": "Transect deleted successfully"}
+   except Exception as e:
+       DB.session.rollback()
+       return {"error": str(e)}, 500
