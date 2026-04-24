@@ -71,7 +71,7 @@ class TTransect(MonitoringHabitatStation):
     )
 
     t_base_site = DB.relationship("TBaseSites")
-    cor_plots = DB.relationship("TPlot")
+    cor_plots = DB.relationship("TPlot", passive_deletes=True)
     station = DB.relationship("Station", overlaps="cor_transect")
 
 
