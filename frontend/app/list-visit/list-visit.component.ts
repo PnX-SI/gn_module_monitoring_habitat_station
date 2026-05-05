@@ -437,9 +437,11 @@ onEdit() {
       }
     )
   }
-  togglePlot(id_plot:number){
-   this.expandedPlots[id_plot] = !this.expandedPlots[id_plot];
-   
+ togglePlot(id_plot: number){
+    this.expandedPlots = {
+        ...this.expandedPlots,
+        [id_plot]: !this.expandedPlots[id_plot]
+    };
   }
 
   onAddSensor(content){

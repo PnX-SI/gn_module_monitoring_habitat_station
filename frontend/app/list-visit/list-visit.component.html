@@ -299,8 +299,9 @@
                         </div>
                     </li>
                     <!-- Sous-placettes -->
-                    <li *ngFor="let subPlot of plot.sub_plots"
-                        [hidden]="!expandedPlots[plot.id_plot]"
+                     <ng-container  *ngIf = "expandedPlots[plot.id_plot]">
+                        <li *ngFor="let subPlot of plot.sub_plots"
+                       
                         class="list-group-item ml-4 d-flex justify-content-between align-items-center"
                         style="background-color: #f8f9fa; border-left: 3px solid #6c757d;">
                         <span class="plot-item">
@@ -319,6 +320,8 @@
                             </button>
                         </div>
                     </li>
+                     </ng-container>
+                    
                 </ng-container>
             </ul>
       </form>
