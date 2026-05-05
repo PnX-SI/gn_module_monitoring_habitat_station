@@ -29,10 +29,12 @@ class TPlot(MonitoringHabitatStation):
     id_parent = DB.Column(
         DB.ForeignKey(
             "pr_monitoring_habitat_station.t_plots.id_plot",
-        ),   
+            ondelete = "CASCADE", 
+        ),
+         
     )
     parent = DB.relationship("TPlot", remote_side = [id_plot])
-
+    sub_plots = DB.relationship("TPlot", foreign_keys=[id_parent], passive_deletes=True, overlaps="parent")
 
 @serializable
 @geoserializable

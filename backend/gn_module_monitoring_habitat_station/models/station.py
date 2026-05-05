@@ -22,6 +22,10 @@ class Station(MonitoringHabitatStation):
         DB.Text,
         nullable = True,
     )
+    name = DB.Column(
+        DB.String(50),
+        nullable = False
+    )
     geom = DB.Column(
         Geometry("GEOMETRY",4326)
     )
