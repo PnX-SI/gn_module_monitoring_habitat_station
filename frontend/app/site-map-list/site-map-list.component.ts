@@ -353,12 +353,12 @@ getTransects(params?) {
     let filter = _.clone(this.filterForm.value);
     filter.date_low = this.dateParser.format(this.filterForm.value.date_low);
     filter.date_up = this.dateParser.format(this.filterForm.value.date_up);
-    this.getTransects(filter);
+    this.getStations(filter);
   }
 
   resetFilters() {
     this.filterForm.reset();
-    this.getTransects();
+    this.getStations();
     this.resetMinMaxDate();
     setTimeout(() => {
       this._map.setView(this.center, this.zoom);
