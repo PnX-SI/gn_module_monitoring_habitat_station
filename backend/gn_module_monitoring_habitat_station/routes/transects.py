@@ -18,11 +18,12 @@ from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp
 
 from ..blueprint import blueprint
-from ..models import TTransect, TPlot
+from ..models import TTransect, TPlot, TemperatureSensor, Station
 from ..repositories import get_id_type_site
 from gn_module_monitoring_habitat_station import MODULE_CODE
 import datetime
 from .plots import create_plot
+
 
 
 
@@ -234,6 +235,7 @@ def add_transect(scope):
     """
     data = dict(request.get_json())
     plots = data.pop("cor_plots", [])
+    sensors = data.pop("sensors", [])
 
     try:
         # Create Site
@@ -264,6 +266,10 @@ def add_transect(scope):
         for plot_data in plots:
             plot_data["id_transect"] = transect.id_transect
             create_plot(plot_data)
+        for sensor_data in sensors:
+            sensor_data["id_transect"] = transect.id_transect
+            sensor = TemperatureSensor(**sensor_data)
+            DB.session.add(sensor)
 
         DB.session.commit()
 
@@ -303,7 +309,8 @@ def update_transect(id_transect, scope):
     DB.session.merge(transect)
     for plot_data in plots:
         plot_data["id_transect"] = transect.id_transect
-        create_plot(plot_data)
+        if not plot_data.get("id_plot"):
+            create_plot(plot_data)
     
     DB.session.commit()
 
@@ -325,3 +332,33 @@ def delete_transect(id_transect):
    except Exception as e:
        DB.session.rollback()
        return {"error": str(e)}, 500
+
+@blueprint.route("/stations/<id_station>/transects", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code=MODULE_CODE)
+@json_resp
+def get_transects_by_station(id_station):
+    """
+    return transect data by station
+    """
+    q = (
+        select(
+            TTransect,
+            func.count(distinct(TBaseVisits.id_base_visit)).label("nb_visits"),
+            func.max(TBaseVisits.visit_date_min).label("last_visit"),
+        )
+        .where(TTransect.id_station == id_station)
+        .outerjoin(TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site)
+        .group_by(TTransect.id_transect)
+    )
+
+    data = DB.session.execute(q).unique().all()
+
+    if data:
+        result = []
+        for d in data:
+            transect = d[0].as_dict()
+            transect["nb_visits"] = d[1]
+            transect["last_visit"] = str(d[2]) if d[2] else "Aucune visite"
+            result.append(transect)
+        return result
+    return []
