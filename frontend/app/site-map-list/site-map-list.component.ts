@@ -93,6 +93,8 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public page = new Page();
   minDate: any;
   maxDate: any;
+  public stations = [];
+  public expandedStations: {[key: number]: any[]} = {};
 
   constructor(
     private config:ConfigService,
@@ -114,7 +116,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.checkPermission();
-    this.getTransects();
+    this.getStations();
     this.center = this.storeService.mhsConfig.zoom_center;
     this.zoom = this.storeService.mhsConfig.zoom;
     this.initFilters();
@@ -140,7 +142,69 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  getTransects(params?) {
+  getStations(params?: any) {
+    this._api.getAllStations(params).subscribe(
+        data => {
+            if (data !== null) {
+                this.sites = data[1];
+                this.page.totalElements = data[0].totalItems;
+                this.page.size = data[0].itemsPerPage;
+                this.sites.features.forEach(site => {
+                    if (!_.find(this.tabHab, (habitat: Habitat) => {
+                        return habitat.cd_hab == site.properties.cd_hab;
+                    })) {
+                        this.tabHab.push({
+                            cd_hab: site.properties.cd_hab,
+                            nom_habitat: site.properties.habitat_name,
+                        });
+                        this.tabHab = _.sortBy(this.tabHab, [(habitat: Habitat) => {
+                            return habitat.nom_habitat;
+                        }]);
+                    }
+                });
+                this.filteredData = data[1].features;
+                this.page.totalElements = data[0].totalItems;
+                this.page.size = data[0].itemsPerPage;
+            } else {
+                this.filteredData = [];
+            }
+            this.dataLoaded = true;
+        },
+        error => {
+            let msg = 'Une erreur est survenue lors de la récupération des informations sur le serveur.';
+            if (error.status == 404) {
+                this.page.totalElements = 0;
+                this.page.size = 0;
+                this.filteredData = [];
+            } else if (error.status == 403) {
+                msg = "Vous n'êtes pas autorisé à afficher ces données.";
+            } else {
+                this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
+            }
+            this.dataLoaded = true;
+        }
+    );
+}
+onViewStation(id_station: number) {
+    if (this.expandedStations[id_station]) {
+        delete this.expandedStations[id_station];
+    } else {
+        this._api.getTransectsByStation(id_station).subscribe(
+            (data: any[]) => {
+                this.expandedStations[id_station] = data;
+            },
+            error => {
+                this.toastr.error('Erreur lors de la récupération des transects', '', { positionClass: 'toast-top-right' });
+            }
+        );
+    }
+}
+
+onInfo(id_base_site: any) {
+    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, id_base_site]);
+}
+
+getTransects(params?) {
     this._api.getAllTransects(params).subscribe(
       data => {
         if (data !== null) {
@@ -212,10 +276,10 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPage(pageInfo) {
-    this.page.pageNumber = pageInfo.offset;
+    this.page.pageNumber = pageInfo.offset + 1;
     if (this.storeService.mhsConfig.pagination_serverside) {
       this.onSetParams('page', pageInfo.offset + 1);
-      this.getTransects(this.storeService.queryString.toString());
+      this.getStations(this.storeService.queryString.toString());
     }
   }
   // Map-list
@@ -259,10 +323,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  onInfo(id_base_site) {
-    this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, id_base_site]);
-  }
-
+  
   addCustomControl() {
     let initzoomcontrol = new L.Control();
     initzoomcontrol.setPosition('topleft');
@@ -316,6 +377,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.maxDate = { year: 2200, month: 1, day: 1 };
     this.minDate = null;
   }
+  
 
   ngOnDestroy() {
     let filterkey = this.storeService.queryString.keys();

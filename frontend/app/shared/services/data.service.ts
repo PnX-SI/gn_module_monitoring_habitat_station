@@ -12,7 +12,7 @@ export class DataService {
     private config: ConfigService,
   ) { }
 
-  getAllTransects(params?) {
+  getAllTransects(params:any) {
     let myParams = new HttpParams();
     for (let key in params) {
       if (params[key]) myParams = myParams.set(key, params[key]);
@@ -22,41 +22,41 @@ export class DataService {
     });
   }
 
-  getOneTransect(idSite) {
+  getOneTransect(idSite:any) {
     return this._http.get(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/transects/${idSite}`
     );
   }
 
-  addTransect(transect) {
+  addTransect(transect:any) {
     return this._http.post(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/transects`,
       transect
     );
   }
 
-  updateTransect(transect) {
+  updateTransect(transect:any) {
     return this._http.patch(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/transects/${transect.id_transect}`,
       transect
     );
   }
 
-  getAllVisits(id_site) {
+  getAllVisits(id_site:any) {
     return this._http.get(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/sites/${id_site}/visits`
     );
   }
 
-  getOneVisit(id_visit) {
+  getOneVisit(id_visit:any) {
     return this._http.get(`${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/visits/${id_visit}`);
   }
 
-  addVisit(visit) {
+  addVisit(visit:any) {
     return this._http.post(`${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/visits`, visit);
   }
 
-  updateVisit(visit) {
+  updateVisit(visit:any) {
     return this._http.patch(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/visits/${visit.idVisit}`,
       visit.data
@@ -83,7 +83,7 @@ export class DataService {
     };
   }
 
-  getAllSites(params) {
+  getAllSites(params:any) {
     let myParams = new HttpParams();
     for (let key in params) {
       if (params[key]) myParams = myParams.set(key, params[key]);
@@ -97,7 +97,7 @@ export class DataService {
     return this._http.get(`${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/habitats`);
   }
 
-  getTaxonsByHabitat(cd_hab) {
+  getTaxonsByHabitat(cd_hab:any) {
     return this._http.get(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/habitats/${cd_hab}/taxons`
     );
@@ -107,5 +107,64 @@ export class DataService {
     return this._http.get<any>(
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/users/current/cruved`
     );
+  }
+  getSensorsByTransect(id_transect:any){
+    return this._http.get(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/transects/${id_transect}/sensors`
+    )
+  }
+  getPlotByTransect(id_transect:any){
+    return this._http.get(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/transects/${id_transect}/plots`
+    )
+  }
+  addSensor(sensor:any){
+    return this._http.post(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/sensors`,
+      sensor
+    )
+  }
+  updateSensor(sensor:any){
+    return this._http.patch(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/sensors/${sensor.id_sensor}`, 
+      sensor
+    )
+  }
+  deleteSensor(id_sensor:any){
+    return this._http.delete(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/sensors/${id_sensor}`
+    )
+  }
+  addPlot(plot: any){
+    return this._http.post(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/plots`,
+      plot
+    )
+  }
+  updatePlot(plot:any){
+    return this._http.patch(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/plots/${plot.id_plot}`, 
+      plot
+    )
+  }
+  deletePlot(id_plot:any){
+     return this._http.delete(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/plots/${id_plot}`
+    )
+  }
+  getAllStations(params?: any) {
+    let myParams = new HttpParams();
+    for (let key in params) {
+        if (params[key]) myParams = myParams.set(key, params[key]);
+    }
+    return this._http.get(`${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations`, {
+        params: myParams,
+    });
+  }
+
+  getTransectsByStation(id_station: any) {
+      return this._http.get(
+          `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/${id_station}/transects`
+      );
   }
 }
