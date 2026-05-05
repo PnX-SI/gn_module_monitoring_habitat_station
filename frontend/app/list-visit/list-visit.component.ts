@@ -7,6 +7,9 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { map } from 'rxjs/operators';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 import * as _ from 'lodash';
+import { FlatTreeControl } from '@angular/cdk/tree';
+import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
+import { PlotNode, FlatPlotNode } from '../shared/models/plot-node.model';
 
 import { DataFormService } from '@geonature_common/form/data-form.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
@@ -42,6 +45,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   addIsAllowed = false;
   dataLoaded = false;
   formTransect: FormGroup;
+  formSensor : FormGroup;
   edit_btn: string = 'Editer';
   habitats: any;
   isNew: boolean;
@@ -49,7 +53,40 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   addVisitIsAllowed = false;
   formPlot: FormGroup;
   private modalRef: NgbModalRef;
+  public sensors = [];
+  sensorToDelete: number = null;
+  private confirmModalRef: NgbModalRef;
+  sensorToEdit: number = null;
+  public plotHierarchy = [];
+  public expandedPlots: {[key: number]: boolean} = {};
+  public subplots = [];
+  plotToDelete: number = null;
+  private confirmPlotModalRef: NgbModalRef;
+  plotToEdit: any = null;
+  formEditPlot: FormGroup;
+   private _transformer = (node: PlotNode, level: number): FlatPlotNode => ({
+    expandable: !!node.sub_plots && node.sub_plots.length > 0,
+    id_plot: node.id_plot,
+    code_plot: node.code_plot,
+    distance_plot: node.distance_plot,
+    level: level,
+  });
 
+  treeControl = new FlatTreeControl<FlatPlotNode>(
+      node => node.level,
+      node => node.expandable
+  );
+
+  treeFlattener = new MatTreeFlattener(
+      this._transformer,
+      node => node.level,
+      node => node.expandable,
+      node => node.sub_plots
+  );
+
+  plotDataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+
+  hasChild = (_: number, node: FlatPlotNode) => node.expandable;
   constructor(
     private config: ConfigService,
     public storeService: StoreService,
@@ -188,15 +225,17 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.api.getOneTransect(this.idSite).subscribe(
       site => {
         this.currentSite = site;
-        if (!this.currentSite.properties.cor_plots) {
+        if (!this.currentSite.properties?.cor_plots) {
           let msg = 'Ajouter des placettes à votre transect pour y associer des visites.';
           this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
           this.addVisitIsAllowed = false;
         } else {
           this.plots = _.cloneDeep(this.currentSite.properties.cor_plots);
         }
-        this.transect_title = this.transect_title + this.currentSite.properties.transect_label;
+        this.transect_title = this.transect_title + this.currentSite.properties?.transect_label;
         this.storeService.setCurrentSite(this.currentSite);
+        this.getSensors();
+        this.getPlots();
         this.pachForm();
         this.getVisits();
       },
@@ -248,19 +287,69 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   }
 
   onAddPlot(content) {
+    this.subplots = [];
     this.formPlot = this.formBuilder.group({
       code_plot: [null, Validators.required],
       distance_plot: [null, Validators.required],
+      id_parent: [null],
     });
+    this.formPlot.controls['id_parent'].valueChanges.subscribe(value =>{
+      if(value){
+        this.formPlot.controls['distance_plot'].clearValidators();
+
+      }else{
+        this.formPlot.controls['distance_plot'].setValidators(Validators.required);
+      }
+      this.formPlot.controls['distance_plot'].updateValueAndValidity();
+
+    })
     this.modalRef = this.modalService.open(content, { centered: true });
   }
 
-  onSavePlot() {
-    this.plots.push(this.formPlot.value);
-    this.modalRef.close();
+  onAddSubPlot(){
+    this.subplots = [...this.subplots, {code_plot: ''}];
+  }
+  onRemoveSubPlot(index : number ){
+    this.subplots.splice(index, 1);
   }
 
-  onEdit() {
+onSavePlot() {
+    let plot = this.formPlot.value;
+    plot.id_transect = this.currentSite.properties?.id_transect;
+    this.api.addPlot(plot).subscribe(
+        data => {
+            this.getPlots();
+            this.modalRef.close();
+            this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+            this.toastr.error('Erreur lors de l\'ajout de la placette', '', { positionClass: 'toast-top-right' });
+        }
+    );
+}
+onSaveAndContinuePlot() {
+    let plot = this.formPlot.value;
+    let savedParent = plot.id_parent;  
+    plot.id_transect = this.currentSite.properties?.id_transect;
+    this.api.addPlot(plot).subscribe(
+        data => {
+            this.getPlots();
+            
+            this.formPlot.patchValue({
+                code_plot: null,
+                distance_plot: null,
+                id_parent: savedParent,
+            });
+            this.formPlot.markAsPristine();
+            this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+            this.toastr.error('Erreur lors de l\'ajout de la placette', '', { positionClass: 'toast-top-right' });
+        }
+    );
+}
+
+onEdit() {
     this.disabledForm = !this.disabledForm;
     if (!this.disabledForm) {
       this.edit_btn = 'Annuler';
@@ -269,11 +358,12 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       this.pachForm();
       this.edit_btn = 'Éditer';
     }
-  }
+}
 
   onSubmitTransect() {
     let transect = this.formTransect.value;
     transect.cor_plots = this.plots;
+    
 
     transect.geom_start = `SRID=4326;POINT(${transect.geom_start_long} ${transect.geom_start_lat})`;
     transect.geom_end = `SRID=4326;POINT(${transect.geom_end_long} ${transect.geom_end_lat})`;
@@ -283,6 +373,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     delete transect.geom_start_lat;
 
     if (this.isNew) {
+      transect.sensors = this.sensors;
       this.api.addTransect(transect).subscribe(
         data => {
           this.toastr.success('Le transect a été ajouté avec succès', '', {
@@ -314,6 +405,167 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       );
     }
   }
+  getSensors(){
+    this.api.getSensorsByTransect(this.currentSite.properties?.id_transect)
+    .subscribe(
+      data =>{
+
+        this.sensors = data[1].sort((a, b) => 
+        new Date(b.install_date).getTime() - new Date(a.install_date).getTime()
+        );
+
+      },
+      error =>{
+         this.toastr.error('Une erreur est survenue lors de la récupération des capteurs', '', {
+            positionClass: 'toast-top-right',
+          });
+
+      }
+    )
+  }
+  getPlots(){
+    this.api.getPlotByTransect(this.currentSite.properties?.id_transect)
+    .subscribe(
+      data =>{
+        this.plotHierarchy = data as any[];
+        this.plotDataSource.data = this.plotHierarchy;
+      },
+      error =>{
+        this.toastr.error('Erreur lors de la récupération des placettes', '', {
+          positionClass : 'toast-top-right',
+        });
+      }
+    )
+  }
+  togglePlot(id_plot:number){
+   this.expandedPlots[id_plot] = !this.expandedPlots[id_plot];
+   
+  }
+
+  onAddSensor(content){
+    this.sensorToEdit = null; 
+    this.formSensor = this.formBuilder.group({
+      serial_number : [null, Validators.required],
+      install_date:[null, Validators.required],
+
+    });
+    
+    this.modalRef = this.modalService.open(content, {centered: true});
+  }
+  onSaveSensor(){
+    let sensor = this.formSensor.value;
+
+    if(this.isNew){
+      this.sensors.push(sensor);
+      this.modalRef.close();
+    } else if (this.sensorToEdit) {
+      // Modification d'un capteur existant
+      sensor.id_sensor = this.sensorToEdit;
+      sensor.id_transect = this.currentSite.properties?.id_transect;
+      this.api.updateSensor(sensor).subscribe(
+        data => {
+          this.modalRef.close();
+          this.getSensors();
+          this.sensorToEdit = null;
+          this.formTransect.markAsDirty();
+          this.toastr.success('Capteur modifié avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+          this.toastr.error('Erreur lors de la modification du capteur', '', { positionClass: 'toast-top-right' });
+        }
+      );
+    } else {
+      // Création d'un nouveau capteur
+      sensor.id_transect = this.currentSite.properties?.id_transect;
+      this.api.addSensor(sensor).subscribe(
+        data => {
+          this.modalRef.close();
+          this.getSensors();
+          this.formTransect.markAsDirty();
+          this.toastr.success('Capteur ajouté avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+          this.toastr.error('Erreur lors de l\'ajout du capteur', '', { positionClass: 'toast-top-right' });
+        }
+      );
+    }
+  }
+
+  onDeleteSensor(id_sensor:any){
+    this.api.deleteSensor(id_sensor).subscribe(
+      data =>{
+        this.getSensors();
+        this.toastr.success('Capteur supprimé avec succès', '', { positionClass: 'toast-top-right' });
+      },
+      error =>{
+      this.toastr.error('Erreur lors de la suppression du capteur', '', { positionClass: 'toast-top-right' });
+    }
+    )
+   
+  }
+  onConfirmDelete(id_sensor:any, confirmContent:any) {
+    this.sensorToDelete = id_sensor;
+    this.confirmModalRef = this.modalService.open(confirmContent, { centered: true });
+  }
+
+  onConfirmDeleteSensor() {
+    this.onDeleteSensor(this.sensorToDelete);
+    this.confirmModalRef.close();
+  }
+  onEditSensor(sensor:any, content:any) {
+    this.sensorToEdit = sensor.id_sensor;
+    this.formSensor = this.formBuilder.group({
+        serial_number: [sensor.serial_number, Validators.required],
+        install_date: [sensor.install_date, Validators.required],
+    });
+    this.modalRef = this.modalService.open(content, { centered: true });
+  }
+  onConfirmDeletePlot(id_plot: number, confirmContent: any) {
+    this.plotToDelete = id_plot;
+    this.confirmPlotModalRef = this.modalService.open(confirmContent, { centered: true });
+}
+
+onConfirmDeletePlotAction() {
+    this.api.deletePlot(this.plotToDelete).subscribe(
+        data => {
+            this.getPlots();
+            this.confirmPlotModalRef.close();
+            this.toastr.success('Placette supprimée avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+            this.toastr.error('Erreur lors de la suppression de la placette', '', { positionClass: 'toast-top-right' });
+        }
+    );
+}
+
+onEditPlot(plot: any, content: any) {
+    this.plotToEdit = plot;
+    this.formEditPlot = this.formBuilder.group({
+        code_plot: [plot.code_plot, Validators.required],
+        distance_plot: [plot.distance_plot],
+    });
+    this.modalRef = this.modalService.open(content, { centered: true });
+}
+
+onSaveEditPlot() {
+    let plot = this.formEditPlot.value;
+    plot.id_plot = this.plotToEdit.id_plot;
+    plot.id_transect = this.currentSite.properties?.id_transect;
+    this.api.updatePlot(plot).subscribe(
+        data => {
+            this.modalRef.close();
+            this.getPlots();
+            this.toastr.success('Placette modifiée avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+            this.toastr.error('Erreur lors de la modification de la placette', '', { positionClass: 'toast-top-right' });
+        }
+    );
+}
+getParentCode(id_parent: number): string {
+    const parent = this.plotHierarchy.find(p => p.id_plot === id_parent);
+    return parent ? parent.code_plot : '';
+}
 
   ngOnDestroy() {
     this.storeService.queryString = this.storeService.queryString.delete('id_base_site');

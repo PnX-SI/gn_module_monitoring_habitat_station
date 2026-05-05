@@ -62,34 +62,7 @@
             </div>
           </div>
 
-          <div class="row">
-            <div *ngIf="disabledForm" class="col-sm-12 col-md-6">
-              <div class="form-group">
-                <label>Commune</label>
-                <input
-                  value="{{ currentSite.properties.nom_commune }}"
-                  class="form-control form-control-sm"
-                />
-              </div>
-            </div>
-            <div class="col-sm-12 col-md-6">
-              <div class="form-group">
-                <label>Habitat</label>
-                <select
-                  class="form-control form-control-sm"
-                  [formControl]="formTransect.controls.cd_hab"
-                >
-                  <option [ngValue]="null"> -- Sélectionnez un habitat -- </option>
-                  <option
-                    *ngFor="let habitat of habitats"
-                    [ngValue]="habitat.cd_hab"
-                    [innerHTML]="habitat.nom_complet"
-                  >
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
+          
         </fieldset>
 
         <fieldset class="mb-3" [disabled]="disabledForm">
@@ -167,6 +140,18 @@
           <div class="form-group">
             <div class="row">
               <div class="col">
+                <label>Azimut</label>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  [formControl]="formTransect.controls.azimut"
+                  max="90"
+                  min="-90"
+                  step="0.001"
+                  placeholder="Y"
+                />
+              </div>
+              <div class="col">
                 <label> Informations complémentaires de localisation </label>
                 <textarea
                   class="form-control form-control-sm"
@@ -177,6 +162,54 @@
               </div>
             </div>
           </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>
+            Capteurs de température
+          </legend>
+          <div class="d-flex">
+            <button
+              *ngIf="!disabledForm"
+              class="btn btn-sm btn-success pull-left box-shadow mx-5 mt-2"
+              (click)="onAddSensor(sensorContent)"
+            >
+              <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+              Ajouter un capteur
+            </button>
+          </div>
+          <ul class="list-group mx-5 mt-3">
+            <li *ngFor="let sensor of sensors |slice : 0:3; let i = index"
+             class="list-group-item"
+             [style.background-color]="i === 0 ? '#d4edda' : ''">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <small class="text-muted">N° série</small>
+                        <div>{{ sensor.serial_number }}</div>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted">Date d'installation</small>
+                        <div>{{ sensor.install_date }}</div>
+                    </div>
+                    <div class="col-auto">
+                      <button
+                            *ngIf="!disabledForm"
+                            class="btn btn-sm btn-warning mr-1"
+                            (click)="onEditSensor(sensor, sensorContent)"
+                        >
+                            <i class="fa fa-edit"></i>
+                      </button>
+                        <button
+                            *ngIf="!disabledForm"
+                            class="btn btn-sm btn-danger"
+                            (click)="onConfirmDelete(sensor.id_sensor, confirmContent)"
+                        >
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </li>
+          </ul>
         </fieldset>
 
         <fieldset [disabled]="disabledForm">
@@ -224,30 +257,70 @@
               ></textarea>
             </div>
           </div>
-
-          <label> Liste des placettes </label>
-          <div class="d-flex">
-            <button
-              *ngIf="!disabledForm"
-              class="btn btn-sm btn-success pull-left box-shadow mx-5 mt-2"
-              (click)="onAddPlot(content)"
-            >
-              <i class="fa fa-plus-circle" aria-hidden="true"> </i>
-              Ajouter une placette
-            </button>
-          </div>
-          <ul class="list-group mx-5 mt-3">
-            <li *ngFor="let plot of plots" class="list-group-item">
-              <span class="plot-item"
-                ><i class="fa fa-hashtag"></i> Code placette {{ plot.code_plot }}
-              </span>
-              <span class="plot-item"
-                ><i class="material-icons gps-icon">location_on</i> Distance :
-                {{ plot.distance_plot }} mètres</span
-              >
-            </li>
-          </ul>
+         
         </fieldset>
+         <label> Liste des placettes </label>
+            <div class="d-flex">
+                <button
+                    *ngIf="!disabledForm"
+                    class="btn btn-sm btn-success pull-left box-shadow mx-5 mt-2"
+                    (click)="onAddPlot(plotContent)"
+                >
+                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                    Ajouter une placette
+                </button>
+            </div>
+
+            <ul class="list-group mx-5 mt-3">
+                <ng-container *ngFor="let plot of plotHierarchy">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="plot-item">
+                            <i class="fa fa-hashtag"></i> {{ plot.code_plot }}
+                        </span>
+                        <span class="plot-item" *ngIf="plot.distance_plot">
+                            <i class="material-icons gps-icon">location_on</i> {{ plot.distance_plot }} mètres
+                        </span>
+                        <div class="d-flex align-items-center">
+                            <div *ngIf="plot.sub_plots?.length > 0"
+                                class="btn btn-sm btn-link"
+                                (click)="togglePlot(plot.id_plot)">
+                                <i class="fa" [ngClass]="expandedPlots[plot.id_plot] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </div>
+                            <button *ngIf="!disabledForm"
+                                class="btn btn-sm btn-warning mr-1"
+                                (click)="onEditPlot(plot, editPlotContent)">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button *ngIf="!disabledForm"
+                                class="btn btn-sm btn-danger"
+                                (click)="onConfirmDeletePlot(plot.id_plot, confirmPlotContent)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                    <!-- Sous-placettes -->
+                    <li *ngFor="let subPlot of plot.sub_plots"
+                        [hidden]="!expandedPlots[plot.id_plot]"
+                        class="list-group-item ml-4 d-flex justify-content-between align-items-center"
+                        style="background-color: #f8f9fa; border-left: 3px solid #6c757d;">
+                        <span class="plot-item">
+                            <i class="fa fa-level-down"></i> {{ subPlot.code_plot }}
+                        </span>
+                        <div class="d-flex">
+                            <button *ngIf="!disabledForm"
+                                class="btn btn-sm btn-warning mr-1"
+                                (click)="onEditPlot(subPlot, editPlotContent)">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button *ngIf="!disabledForm"
+                                class="btn btn-sm btn-danger"
+                                (click)="onConfirmDeletePlot(subPlot.id_plot, confirmPlotContent)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                </ng-container>
+            </ul>
       </form>
     </div>
   </div>
@@ -314,25 +387,27 @@
   </ng-container>
 </div>
 
-<ng-template #content let-d="dismiss">
+
+
+<ng-template #sensorContent let-d="dismiss">
   <div class="modal-header">
-    <h5 class="modal-title">Ajouter une placette</h5>
+    <h5 class="modal-title">Ajouter un capteur de température</h5>
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="formPlot">
+    <form [formGroup]="formSensor">
       <div class="form-group">
-        <small>Code placette :</small>
-        <input class="form-control form-control-sm" [formControl]="formPlot.controls.code_plot" />
+        <small>Numéro de série :</small>
+        <input class="form-control form-control-sm" [formControl]="formSensor.controls.serial_number" />
       </div>
       <div class="form-group">
-        <small>Distance ( mètres ) : </small>
+        <small>Date d'installation :</small>
         <input
-          type="number"
+          type="date"
           class="form-control form-control-sm"
-          [formControl]="formPlot.controls.distance_plot"
+          [formControl]="formSensor.controls.install_date"
         />
       </div>
     </form>
@@ -342,10 +417,102 @@
     <button
       type="button"
       class="btn btn-success btn-sm"
-      [disabled]="formPlot.invalid || formPlot.pristine"
-      (click)="onSavePlot()"
+      [disabled]="formSensor.invalid || formSensor.pristine"
+      (click)="onSaveSensor()"
     >
       Enregistrer
     </button>
+  </div>
+</ng-template>
+<ng-template #confirmContent let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmer la suppression</h5>
+  </div>
+  <div class="modal-body">
+    Êtes-vous sûr de vouloir supprimer ce capteur ?
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default btn-sm" (click)="d('Close click')">Annuler</button>
+    <button class="btn btn-danger btn-sm" (click)="onConfirmDeleteSensor()">Supprimer</button>
+  </div>
+</ng-template>
+
+<!-- Modal édition placette -->
+<ng-template #plotContent let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Ajouter une placette</h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="formPlot">
+      <div class="form-group">
+        <small>Code placette parente (optionnel) :</small>
+        <select class="form-control form-control-sm" [formControl]="formPlot.controls.id_parent">
+          <option [ngValue]="null">-- Aucune (placette principale) --</option>
+          <option *ngFor="let plot of plotHierarchy" [ngValue]="plot.id_plot">
+            {{ plot.code_plot }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Petit texte si parent sélectionné -->
+      <div *ngIf="formPlot.controls.id_parent.value" class="alert alert-info py-1 px-2 mb-2">
+        <small><i class="fa fa-info-circle"></i> Vous créez une sous-placette de 
+          <strong>{{ getParentCode(formPlot.controls.id_parent.value) }}</strong>
+        </small>
+      </div>
+
+      <div class="form-group">
+        <small>Code placette :</small>
+        <input class="form-control form-control-sm" [formControl]="formPlot.controls.code_plot" />
+      </div>
+
+      <!-- Distance visible seulement si pas de parent -->
+      <div class="form-group" *ngIf="!formPlot.controls.id_parent.value">
+        <small>Distance ( mètres ) :</small>
+        <input
+          type="number"
+          class="form-control form-control-sm"
+          [formControl]="formPlot.controls.distance_plot"
+        />
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-default btn-sm" (click)="d('Close click')">Fermer</button>
+    <div>
+      <button
+        type="button"
+        class="btn btn-outline-success btn-sm mr-2"
+        [disabled]="formPlot.invalid "
+        (click)="onSaveAndContinuePlot()"
+      >
+        Enregistrer et continuer
+      </button>
+      <button
+        type="button"
+        class="btn btn-success btn-sm"
+        [disabled]="formPlot.invalid"
+        (click)="onSavePlot()"
+      >
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Modal confirmation suppression placette -->
+<ng-template #confirmPlotContent let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmer la suppression</h5>
+  </div>
+  <div class="modal-body">
+    Êtes-vous sûr de vouloir supprimer cette placette ? Les sous-placettes associées seront aussi supprimées.
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default btn-sm" (click)="d('Close click')">Annuler</button>
+    <button class="btn btn-danger btn-sm" (click)="onConfirmDeletePlotAction()">Supprimer</button>
   </div>
 </ng-template>

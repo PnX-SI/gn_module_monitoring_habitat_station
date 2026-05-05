@@ -20,9 +20,15 @@ import { PlotReleveComponent } from './plot-releve/plot-releve.component';
 // Routes
 import { routes } from './gnModule.routes';
 
+//Angular Material
+
+import {MatTreeModule} from '@angular/material/tree'
+import {MatIconModule} from '@angular/material/icon'
+import {MatButtonModule} from '@angular/material/button'
+
 @NgModule({
   declarations: [SiteMapListComponent, ListVisitComponent, ReleveComponent, PlotReleveComponent],
-  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule],
+  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule],
   providers: [HttpClient, DataService, StoreService, UserService],
   bootstrap: [],
 })
