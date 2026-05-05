@@ -47,40 +47,53 @@
               </div>
             </fieldset>
           </form>
-
-          <form>
-            <fieldset>
-              <legend>
-                Placettes
-              </legend>
-              <div class="list-plots">
-                <button
-                  *ngFor="let plot of currentSite?.properties.cor_plots"
-                  class="plot"
-                  [class.active]="isActive(plot)"
-                  (click)="onChangePlot(plot)"
-                >
-                  <i
-                    class="fa fa-angle-right plot-icon"
-                    [class.plot-active]="isActive(plot)"
-                    aria-hidden="true"
-                  ></i>
-                  <span class="plot-item"
-                    ><i class="fa fa-hashtag"></i> Code placette : {{ plot.code_plot }}</span
-                  >
-                  <span class="plot-item"
-                    ><i class="material-icons gps-icon">location_on</i> Distance :
-                    {{ plot.distance_plot }} mètres</span
-                  >
-                  <span *ngIf="plot.isModifided && plot.status == true" class="badge  badge-warning"
-                    >Modifiée</span
-                  >
-                  <span *ngIf="plot.status == false" class="badge  badge-danger">Erreur</span>
-                  <span *ngIf="plot.isEmpty" class="badge  badge-secondary">Vide</span>
-                </button>
-              </div>
-            </fieldset>
+            <form>
+              <fieldset>
+                  <legend>Placettes</legend>
+                  <div class="list-plots">
+                      <ng-container *ngFor="let plot of plotHierarchy">
+                          <!-- Placette principale -->
+                          <button
+                              class="plot"
+                              [class.active]="isActive(plot)"
+                              (click)="onChangePlot(plot)"
+                          >
+                              <i class="fa fa-angle-right plot-icon" [class.plot-active]="isActive(plot)"></i>
+                              <span class="plot-item"><i class="fa fa-hashtag"></i> {{ plot.code_plot }}</span>
+                              <span class="plot-item" *ngIf="plot.distance_plot">
+                                  <i class="material-icons gps-icon">location_on</i> {{ plot.distance_plot }} mètres
+                              </span>
+                              <!-- Bouton toggle si sous-placettes -->
+                              <span *ngIf="plot.sub_plots?.length > 0"
+                                  class="ml-2"
+                                  (click)="$event.stopPropagation(); togglePlot(plot.id_plot)">
+                                  <i class="fa" [ngClass]="expandedPlots[plot.id_plot] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                              </span>
+                              <span *ngIf="plot.isModifided && plot.status == true" class="badge badge-warning">Modifiée</span>
+                              <span *ngIf="plot.status == false" class="badge badge-danger">Erreur</span>
+                              <span *ngIf="plot.isEmpty" class="badge badge-secondary">Vide</span>
+                          </button>
+                          <!-- Sous-placettes -->
+                          <ng-container *ngIf="expandedPlots[plot.id_plot]">
+                              <button
+                                  *ngFor="let subPlot of plot.sub_plots"
+                                  class="plot ml-4"
+                                  [class.active]="isActive(subPlot)"
+                                  (click)="onChangePlot(subPlot)"
+                                  style="border-left: 3px solid #6c757d;"
+                              >
+                                  <i class="fa fa-level-down mr-2"></i>
+                                  <span class="plot-item"><i class="fa fa-hashtag"></i> {{ subPlot.code_plot }}</span>
+                                  <span *ngIf="subPlot.isModifided && subPlot.status == true" class="badge badge-warning">Modifiée</span>
+                                  <span *ngIf="subPlot.status == false" class="badge badge-danger">Erreur</span>
+                                  <span *ngIf="subPlot.isEmpty" class="badge badge-secondary">Vide</span>
+                              </button>
+                          </ng-container>
+                      </ng-container>
+                  </div>
+              </fieldset>
           </form>
+         
         </div>
       </div>
 

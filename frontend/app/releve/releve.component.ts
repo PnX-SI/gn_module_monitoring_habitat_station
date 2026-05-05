@@ -47,6 +47,8 @@ export class ReleveComponent implements OnInit {
   public edit_btn: string = 'Editer';
   public updateIsAllowed: boolean = false;
   public addIsAllowed: boolean = false;
+  public plotHierarchy = [];
+  public expandedPlots : {[key: number]: boolean} = {}
 
   constructor(
     private config: ConfigService,
@@ -79,6 +81,7 @@ export class ReleveComponent implements OnInit {
           this.strates = results[0].values;
           this.renameKey(this.strates);
           this.currentSite = results[1];
+          this.getPlots();
           this.id_base_site = this.currentSite.properties.id_base_site;
           this.plotId = this.currentSite.properties.cor_plots[0].id_plot;
           this.plotTitle = this.currentSite.properties.cor_plots[0].code_plot;
@@ -110,6 +113,7 @@ export class ReleveComponent implements OnInit {
       this.plotId = this.currentSite.properties.cor_plots[0].id_plot;
       this.plotTitle = this.currentSite.properties.cor_plots[0].code_plot;
       this.id_base_site = this.currentSite.properties.id_base_site;
+      this.getPlots();
       forkJoin([
         this.nomenclatureServ.getNomenclature('STRATE_PLACETTE', null, null, null, {
           orderby: 'label_default',
@@ -353,5 +357,24 @@ export class ReleveComponent implements OnInit {
 
   resizeCard() {
     return this.updateIsAllowed || this.addIsAllowed;
+  }
+    getPlots() {
+      this._api.getPlotByTransect(this.currentSite.properties?.id_transect)
+      .subscribe(
+          data => {
+              this.plotHierarchy = data as any[];
+          },
+          error => {
+              this.toastr.error('Erreur lors de la récupération des placettes', '', {
+                  positionClass: 'toast-top-right',
+              });
+          }
+      );
+  }
+   togglePlot(id_plot: number){
+    this.expandedPlots = {
+        ...this.expandedPlots,
+        [id_plot]: !this.expandedPlots[id_plot]
+    };
   }
 }
