@@ -1,6 +1,6 @@
 from flask import request
 from geojson import FeatureCollection
-from sqlalchemy import select
+from sqlalchemy import select, func, distinct
 from sqlalchemy.sql.expression import func
 from werkzeug.exceptions import NotFound
 
@@ -8,9 +8,10 @@ from geonature.utils.env import DB
 from geonature.core.gn_permissions import decorators as permissions
 from utils_flask_sqla.response import json_resp
 from pypn_habref_api.models import Habref
+from geonature.core.gn_monitoring.models import TBaseVisits
 
 from ..blueprint import blueprint
-from ..models import Station
+from ..models import Station, TTransect
 from gn_module_monitoring_habitat_station import MODULE_CODE
 
 
@@ -56,8 +57,13 @@ def get_all_sations():
         select(
             Station,
             Habref.lb_hab_fr,
+            func.count(distinct(TBaseVisits.id_base_visit)).label("nb_visits"),
+            func.max(TBaseVisits.visit_date_min).label("last_visit"),
         )
         .outerjoin(Habref, Station.cd_hab == Habref.cd_hab) 
+        .outerjoin(TTransect, TTransect.id_station == Station.id_station)
+        .outerjoin(TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site)
+        .group_by(Station.id_station, Habref.lb_hab_fr)
     )
     if "filterHab" in parameters:
         q = q.where(Station.cd_hab == parameters["filterHab"])
@@ -85,6 +91,8 @@ def get_all_sations():
         for d in data:
             feature = d[0].as_geofeature("geom","id_station")
             feature["properties"]["habitat_name"] = str(d[1])
+            feature["properties"]["nb_visits"] = d[2]
+            feature["properties"]["last_visit"] = str(d[3]) if d[3] else "Aucune visite"
             features.append(feature)
         return [pageInfo, FeatureCollection(features)]
     return None
