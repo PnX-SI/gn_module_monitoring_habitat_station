@@ -1,7 +1,7 @@
 <div id="cover-spin" *ngIf="!dataLoaded"></div>
 <div class="row row-0">
   <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <h4 class="card-title">Liste des stations</h4>
       <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewTransect()" *ngIf="addIsAllowed">
         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
@@ -92,90 +92,65 @@
         </form>
       </fieldset>
       <br />
-      <div class="wrapper wrapper-datatable">
-    <table class="table table-hover table-sm">
-        <thead style="background-color: #4a7c59; color: white;">
-            <tr>
-                <th>Nom station</th>
-                <th>Habitat</th>
-                <th>Nb visites</th>
-                <th>Dernière visite</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <ng-container *ngFor="let station of filteredData | slice: (page.pageNumber-1)*page.size : page.pageNumber*page.size">
-                <tr>
-                    <td><strong>{{ station.properties.name || 'Sans nom' }}</strong></td>
-                    <td><small>{{ station.properties.habitat_name }}</small></td>
-                    <td>
-                        <span >{{ station.properties.nb_visits }}</span>
-                    </td>
-                    <td>{{ station.properties.last_visit }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-success"
-                            (click)="onViewStation(station.properties.id_station)"
-                            title="Voir les transects">
-                            <i class="fa fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-                <!-- Transects de la station -->
-                <tr *ngIf="expandedStations[station.properties.id_station]">
-                    <td colspan="5" class="p-0">
-                        <table class="table table-sm mb-0">
-                            <thead style="background-color: #e8f5e9;">
-                                <tr>
-                                    <th class="pl-5">Nom transect</th>
-                                    <th>Nb visites</th>
-                                    <th>Dernière visite</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let transect of expandedStations[station.properties.id_station]"
-                                    style="background-color: #f9fbe7;">
-                                    <td class="pl-5">
-                                        
-                                        {{ transect.transect_label }}
-                                    </td>
-                                    <td>
-                                        <span >{{ transect.nb_visits }}</span>
-                                    </td>
-                                    <td>{{ transect.last_visit }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-info"
-                                            (click)="onInfo(transect.id_base_site)"
-                                            title="Plus d'infos">
-                                            <i class="fa fa-info-circle"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
+      <div class="wrapper wrapper-datatable mt-3" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden;">
+       <table mat-table
+            [dataSource] = "dataSource" multiTemplateDataRows
+            class = "mat-elevation-28">
+            <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+              <th mat-header-cell *matHeaderCellDef class = "mat-header-cell"> {{column}} </th>
+              <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
             </ng-container>
-        </tbody>
-    </table>
+            <ng-container matColumnDef="expand">
+              <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-icon-button aria-label="expand row" matTooltip="Voir les transects" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation(); onViewStation(element.id_station)" >
+                  <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+                  <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="expandedDetail">
+                <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
+                    <div class= "element_detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                        <!-- sous-table des transects -->
+                         <table class = "table">
+                            <thead class="sub-table-header">
+                              <tr>
+                                <th scope = "col">Nom transect</th>
+                                <th scope = "col">Nb visites</th>
+                                <th scope = "col">Dernières visites</th>
+                                <th scope = "col">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody class = "sub-table-body">
+                              <tr *ngFor = "let transect of expandedStations[element.id_station]">
+                                <th scope="row">{{transect.transect_label}}</th>
+                                <td>{{transect.nb_visits}}</td>
+                                <td>{{transect.last_visit}}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" (click)="onInfo(transect.id_base_site)" matTooltip="Info transect">
+                                        <i class="fa fa-info-circle"></i>
+                                    </button>
+                                </td>
+                              </tr>
+                            </tbody>
+                         </table>
+                    </div>
+                </td>
+            </ng-container>
+             <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"
+             class = "mat-header-row"></tr>
+              <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+                  class="example-element-row"
+                  [class.example-expanded-row]="expandedElement === element"
+                  (click)="expandedElement = expandedElement === element ? null : element">
+              </tr>
+              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+             
+       </table>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-content-between align-items-center mt-2">
-        <small class="text-muted">
-            {{ filteredData.length }} station(s) au total
-        </small>
-        <ngb-pagination
-            [collectionSize]="page.totalElements"
-            [(page)]="page.pageNumber"
-            [pageSize]="page.size"
-            [maxSize]="5"
-            [rotate]="true"
-            [boundaryLinks]="true"  
-            class="mb-0 "
-            >
-        </ngb-pagination>
-    </div>
-</div>
+       
+      </div>
     </div>
     
   </div>

@@ -17,6 +17,7 @@ import { ListVisitComponent } from './list-visit/list-visit.component';
 import { ReleveComponent } from './releve/releve.component';
 import { PlotReleveComponent } from './plot-releve/plot-releve.component';
 
+
 // Routes
 import { routes } from './gnModule.routes';
 
@@ -25,10 +26,13 @@ import { routes } from './gnModule.routes';
 import {MatTreeModule} from '@angular/material/tree'
 import {MatIconModule} from '@angular/material/icon'
 import {MatButtonModule} from '@angular/material/button'
+import {MatTableModule} from '@angular/material/table';
+
+
 
 @NgModule({
   declarations: [SiteMapListComponent, ListVisitComponent, ReleveComponent, PlotReleveComponent],
-  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule],
+  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule,MatTableModule],
   providers: [HttpClient, DataService, StoreService, UserService],
   bootstrap: [],
 })

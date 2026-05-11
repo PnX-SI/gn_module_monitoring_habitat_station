@@ -21,7 +21,10 @@ import { StoreService } from '../shared/services/store.service';
 import { UserService } from '../shared/services/user.service';
 import * as _ from 'lodash';
 import { Habitat } from '../shared/models/habitat.model';
+import { Station } from '../shared/models/station.model';
 import { TranslationWidth } from '@angular/common';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import { MatTableDataSource } from '@angular/material/table';
 
 const I18N_VALUES = {
   fr: {
@@ -78,6 +81,13 @@ export class NgbDateCustomParserFormatter extends NgbDateParserFormatter {
     { provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter },
     { provide: NgbDatepickerI18n, useClass: CustomDatepickerI18n },
   ],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
 })
 export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public sites;
@@ -95,6 +105,10 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   maxDate: any;
   public stations = [];
   public expandedStations: {[key: number]: any[]} = {};
+  public dataSource = new MatTableDataSource([])
+  public columnsToDisplay = ['Station', 'Nombre_de_transect', 'Nombre_de_visite', 'Derniere_visite']
+  public columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+  public expandedElement : any;
 
   constructor(
     private config:ConfigService,
@@ -162,7 +176,18 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                         }]);
                     }
                 });
-                this.filteredData = data[1].features;
+                this.filteredData = data[1].features.map(feature => {
+                  return {
+                    Station : feature.properties.name !== "" ? feature.properties.name : "Sans nom",
+                    Nombre_de_visite : feature.properties.nb_visits,
+                    Nombre_de_transect: feature.properties.nb_transect,
+                    Derniere_visite: feature.properties.last_visit,
+                    id_station : feature.properties.id_station
+
+                  };
+                });
+                
+                this.dataSource.data = this.filteredData;
                 this.page.totalElements = data[0].totalItems;
                 this.page.size = data[0].itemsPerPage;
             } else {

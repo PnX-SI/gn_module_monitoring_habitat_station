@@ -92,3 +92,27 @@ legend {
   border: 1px solid #ced4da;
 }
 
+:host ::ng-deep .mat-header-row {
+    background-color: #4a7c59 !important;
+}
+:host ::ng-deep .mat-header-cell {
+    color: white !important;
+    font-weight: bold !important;
+}
+
+tr.example-detail-row { height: 0; }
+.element-detail { overflow: hidden; }
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: #efefef;
+}
+.sub-table-header th {
+    background-color: #e8f5e9;
+    font-weight: bold;
+}
+.sub-table-body tr:hover {
+    background-color: #f9fbe7;
+}

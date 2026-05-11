@@ -50,7 +50,7 @@ def add_station(scope):
 @blueprint.route("/stations", methods = ["GET"])
 @permissions.check_cruved_scope("R", module_code=MODULE_CODE)
 @json_resp
-def get_all_sations():
+def get_all_stations():
     parameters = request.args
 
     q = (
@@ -59,6 +59,7 @@ def get_all_sations():
             Habref.lb_hab_fr,
             func.count(distinct(TBaseVisits.id_base_visit)).label("nb_visits"),
             func.max(TBaseVisits.visit_date_min).label("last_visit"),
+            func.count(distinct(TTransect.id_transect)).label("nb_transect"),
         )
         .outerjoin(Habref, Station.cd_hab == Habref.cd_hab) 
         .outerjoin(TTransect, TTransect.id_station == Station.id_station)
@@ -93,6 +94,7 @@ def get_all_sations():
             feature["properties"]["habitat_name"] = str(d[1])
             feature["properties"]["nb_visits"] = d[2]
             feature["properties"]["last_visit"] = str(d[3]) if d[3] else "Aucune visite"
+            feature["properties"]["nb_transect"] = d[4]
             features.append(feature)
         return [pageInfo, FeatureCollection(features)]
     return None
