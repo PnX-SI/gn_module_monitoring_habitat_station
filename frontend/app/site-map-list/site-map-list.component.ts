@@ -1,4 +1,4 @@
-import { Component, OnInit, Injectable, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, Injectable, AfterViewInit, OnDestroy,ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   NgbDateParserFormatter,
@@ -25,6 +25,8 @@ import { Station } from '../shared/models/station.model';
 import { TranslationWidth } from '@angular/common';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort'
 
 const I18N_VALUES = {
   fr: {
@@ -33,6 +35,7 @@ const I18N_VALUES = {
   },
   // other languages you would support
 };
+
 
 @Injectable()
 export class I18n {
@@ -106,9 +109,14 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public stations = [];
   public expandedStations: {[key: number]: any[]} = {};
   public dataSource = new MatTableDataSource([])
-  public columnsToDisplay = ['Station', 'Nombre_de_transect', 'Nombre_de_visite', 'Derniere_visite']
+  public columnsToDisplay = ['Station', 'Habitat', 'Nbre transect', 'Nbre visite', 'Derniere visite']
   public columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
   public expandedElement : any;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+  public tabYear = [];
+  public tabArea = [];
+  public tabOrganism = [];
 
   constructor(
     private config:ConfigService,
@@ -148,6 +156,23 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     this._deflate_features = L.deflate({ minSize: 10, markerOptions: { icon: iconMarker } });
     this._deflate_features.addTo(this._map);
     this.addCustomControl();
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this._api.getStationsYears().subscribe(
+     (data : any[])=>{
+        this.tabYear = data;
+      }
+    );
+    this._api.getStationsArea().subscribe(
+      (data: any[]) =>{
+        this.tabArea = data;
+      }
+    )
+    this._api.getOrganism().subscribe(
+      (data : any[])=>{
+        this.tabOrganism = data;
+      }
+    )
   }
 
   checkPermission() {
@@ -178,11 +203,12 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                 });
                 this.filteredData = data[1].features.map(feature => {
                   return {
-                    Station : feature.properties.name !== "" ? feature.properties.name : "Sans nom",
-                    Nombre_de_visite : feature.properties.nb_visits,
-                    Nombre_de_transect: feature.properties.nb_transect,
-                    Derniere_visite: feature.properties.last_visit,
-                    id_station : feature.properties.id_station
+                    'Station' : feature.properties.name !== "" ? feature.properties.name : "Sans nom",
+                    "Habitat" : feature.properties.habitat_name,
+                    'Nbre visite': feature.properties.nb_visits,
+                    'Nbre transect': feature.properties.nb_transect,
+                    'Derniere visite': feature.properties.last_visit,
+                    'id_station' : feature.properties.id_station
 
                   };
                 });
@@ -192,6 +218,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.page.size = data[0].itemsPerPage;
             } else {
                 this.filteredData = [];
+                this.dataSource.data = [];
             }
             this.dataLoaded = true;
         },
@@ -283,6 +310,10 @@ getTransects(params?) {
       date_low: null,
       date_up: null,
       filterHab: null,
+      year: null,
+      area_name: null,
+      organism: null,
+
     });
     this.filterForm.controls['date_low'].statusChanges.subscribe(() => {
       if (this.filterForm.controls['date_low'].value) {
@@ -378,6 +409,9 @@ getTransects(params?) {
     let filter = _.clone(this.filterForm.value);
     filter.date_low = this.dateParser.format(this.filterForm.value.date_low);
     filter.date_up = this.dateParser.format(this.filterForm.value.date_up);
+    filter.year = this.filterForm.value.year;
+    filter.area_name = this.filterForm.value.area_name;
+    filter.organism= this.filterForm.value.organism
     this.getStations(filter);
   }
 

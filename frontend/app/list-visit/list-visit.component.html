@@ -37,6 +37,63 @@
       </div>
 
       <form [formGroup]="formTransect">
+        <fieldset class="mb-3">
+    <legend>Station</legend>
+
+    <!-- Mode création -->
+    <div *ngIf="isNew">
+        <div class="form-group">
+            <label>Choisir une station existante</label>
+            <select class="form-control form-control-sm"
+                    (change)="onSelectStation($event.target.value)">
+                <option [ngValue]="null">-- Sélectionnez une station --</option>
+                <option *ngFor="let station of stations"
+                        [value]="station.properties.id_station">
+                    {{ station.properties.name }}
+                </option>
+            </select>
+        </div>
+
+        <!-- Infos station sélectionnée -->
+        <div *ngIf="selectedStation" class="mt-2">
+            <div class="form-group">
+                <label>Nom</label>
+                <p class="form-control form-control-sm">{{ selectedStation?.properties?.name }}</p>
+            </div>
+            <div class="form-group">
+                <label>Habitat</label>
+                <p class="form-control form-control-sm">{{ selectedStation?.properties?.habitat_name }}</p>
+            </div>
+            <div class="form-group">
+                <label>Commune</label>
+                <p class="form-control form-control-sm">{{ selectedStation?.properties?.nom_commune }}</p>
+            </div>
+        </div>
+
+        <!-- Bouton nouvelle station -->
+        <button type="button" class="btn btn-sm btn-outline-success mt-2"
+                (click)="onNewStation(stationContent)">
+            <i class="fa fa-plus-circle"></i> Nouvelle station
+        </button>
+    </div>
+
+    <!-- Mode consultation/édition -->
+    <div *ngIf="!isNew">
+        <div class="form-group">
+            <label>Nom station</label>
+            <p class="form-control form-control-sm">{{ currentSite?.properties?.base_site_name }}</p>
+        </div>
+        <div class="form-group">
+            <label>Habitat</label>
+            <p class="form-control form-control-sm">{{ currentSite?.properties?.nom_habitat }}</p>
+        </div>
+        <div class="form-group">
+            <label>Commune</label>
+            <p class="form-control form-control-sm">{{ currentSite?.properties?.nom_commune }}</p>
+        </div>
+    </div>
+
+</fieldset>
         <fieldset class="mb-3" [disabled]="disabledForm">
           <legend>
             Transect
@@ -518,4 +575,48 @@
     <button class="btn btn-default btn-sm" (click)="d('Close click')">Annuler</button>
     <button class="btn btn-danger btn-sm" (click)="onConfirmDeletePlotAction()">Supprimer</button>
   </div>
+</ng-template>
+<ng-template #stationContent let-d="dismiss">
+    <div class="modal-header">
+        <h5 class="modal-title">Créer une nouvelle station</h5>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formStation">
+            <div class="form-group">
+                <small>Nom de la station * :</small>
+                <input class="form-control form-control-sm" 
+                       [formControl]="formStation.controls.name" />
+            </div>
+            <div class="form-group">
+                <small>Remarques :</small>
+                <textarea class="form-control form-control-sm"
+                          [formControl]="formStation.controls.remarks"
+                          rows="3">
+                </textarea>
+            </div>
+            <div class="form-group">
+                <small>Habitat * :</small>
+                <select class="form-control form-control-sm"
+                        [formControl]="formStation.controls.cd_hab">
+                    <option [ngValue]="null">-- Sélectionnez un habitat --</option>
+                    <option *ngFor="let habitat of habitats"
+                            [ngValue]="habitat.cd_hab">
+                        {{ habitat.nom_complet }}
+                    </option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm" 
+                (click)="d('Close click')">Fermer</button>
+        <button type="button" class="btn btn-success btn-sm"
+                [disabled]="formStation.invalid"
+                (click)="onSaveStation()">
+            Enregistrer
+        </button>
+    </div>
 </ng-template>

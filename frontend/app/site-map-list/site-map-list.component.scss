@@ -116,3 +116,6 @@ tr.example-element-row:not(.example-expanded-row):active {
 .sub-table-body tr:hover {
     background-color: #f9fbe7;
 }
+:host ::ng-deep .mat-sort-header-arrow {
+  color: white;
+}

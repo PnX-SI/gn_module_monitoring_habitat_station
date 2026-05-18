@@ -27,6 +27,17 @@ export class DataService {
       `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/transects/${idSite}`
     );
   }
+  getOneStation(id_station:any) {
+    return this._http.get(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/${id_station}`
+    );
+  }
+  addStation(station: any) {
+    return this._http.post(
+        `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations`,
+        station
+    );
+}
 
   addTransect(transect:any) {
     return this._http.post(
@@ -166,5 +177,21 @@ export class DataService {
       return this._http.get(
           `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/${id_station}/transects`
       );
+  }
+  
+  getStationsYears(){
+    return this._http.get(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/years`
+    )
+  }
+  getStationsArea(){
+    return this._http.get(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/area`
+    )
+  }
+  getOrganism(){
+    return this._http.get(
+      `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/organism`
+    )
   }
 }

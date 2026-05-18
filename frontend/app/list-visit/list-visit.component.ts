@@ -28,8 +28,10 @@ import { ISite } from '../shared/models/site.model';
   styleUrls: ['./list-visit.component.scss'],
 })
 export class ListVisitComponent implements OnInit, OnDestroy {
+  public selectedStation: any = null;
   public currentSite: ISite;
-  sites;
+  public sites;
+  public stations = [];
   plots = [];
   transect_title: string = 'Consultation du transect ';
   public show = true;
@@ -63,6 +65,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   plotToDelete: number = null;
   private confirmPlotModalRef: NgbModalRef;
   plotToEdit: any = null;
+  formStation: FormGroup;
   formEditPlot: FormGroup;
    private _transformer = (node: PlotNode, level: number): FlatPlotNode => ({
     expandable: !!node.sub_plots && node.sub_plots.length > 0,
@@ -113,11 +116,13 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       this.nomenclatureServ.getNomenclature('POSITION_PLACETTE', null, null, null, {
         orderby: 'label_default',
       }),
+      this.api.getAllStations(),
     ]).subscribe(
       results => {
         this.sites = results[0];
         this.habitats = results[1];
         this.plot_position = results[2] ? results[2].values : [];
+        this.stations = results[3][1].features;
         this.formTransect = this.initFormTransect();
         if (!this.isNew) {
           this.loadTransect();
@@ -166,7 +171,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       plot_size: [null, Validators.required],
       plot_shape: [null],
       transect_label: [null, Validators.required],
-      cd_hab: [null, Validators.required],
+      id_station: [null],
       id_nomenclature_plot_position: [null, Validators.required],
     });
     return formTransect;
@@ -567,6 +572,44 @@ onSaveEditPlot() {
 getParentCode(id_parent: number): string {
     const parent = this.plotHierarchy.find(p => p.id_plot === id_parent);
     return parent ? parent.code_plot : '';
+}
+onSelectStation(id_station: any) {
+    this.api.getOneStation(id_station).subscribe(
+        (data: any) => {
+            this.selectedStation = data;
+            this.formTransect.patchValue({
+                id_station: id_station
+            });
+        },
+        error => {
+            this.toastr.error('Erreur lors de la récupération de la station', '', { positionClass: 'toast-top-right' });
+        }
+    );
+}
+onNewStation(content) {
+    this.formStation = this.formBuilder.group({
+        name: [null, Validators.required],
+        remarks: [null],
+        cd_hab: [null, Validators.required],
+    });
+    this.modalRef = this.modalService.open(content, { centered: true });
+}
+
+onSaveStation() {
+    let station = this.formStation.value;
+    this.api.addStation(station).subscribe(
+        (data: any) => {
+            this.selectedStation = data;
+            this.formTransect.patchValue({
+                id_station: data.properties.id_station
+            });
+            this.modalRef.close();
+            this.toastr.success('Station créée avec succès', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+            this.toastr.error('Erreur lors de la création de la station', '', { positionClass: 'toast-top-right' });
+        }
+    );
 }
 
   ngOnDestroy() {
