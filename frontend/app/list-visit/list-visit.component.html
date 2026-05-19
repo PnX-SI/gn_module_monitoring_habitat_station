@@ -252,14 +252,14 @@
                       <button
                             *ngIf="!disabledForm"
                             class="btn btn-sm btn-warning mr-1"
-                            (click)="onEditSensor(sensor, sensorContent)"
+                            (click)="onEditSensor(sensor, sensorContent, i)"
                         >
                             <i class="fa fa-edit"></i>
                       </button>
                         <button
                             *ngIf="!disabledForm"
                             class="btn btn-sm btn-danger"
-                            (click)="onConfirmDelete(sensor.id_sensor, confirmContent)"
+                            (click)="onConfirmDelete(sensor.id_sensor, confirmContent, i)"
                         >
                             <i class="fa fa-trash"></i>
                         </button>
@@ -329,7 +329,7 @@
             </div>
 
             <ul class="list-group mx-5 mt-3">
-                <ng-container *ngFor="let plot of plotHierarchy">
+                <ng-container *ngFor="let plot of plotHierarchy, let i= index">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span class="plot-item">
                             <i class="fa fa-hashtag"></i> {{ plot.code_plot }}
@@ -345,12 +345,12 @@
                             </div>
                             <button *ngIf="!disabledForm"
                                 class="btn btn-sm btn-warning mr-1"
-                                (click)="onEditPlot(plot, editPlotContent)">
+                                (click)="onEditPlot(plot, editPlotContent, i)">
                                 <i class="fa fa-edit"></i>
                             </button>
                             <button *ngIf="!disabledForm"
                                 class="btn btn-sm btn-danger"
-                                (click)="onConfirmDeletePlot(plot.id_plot, confirmPlotContent)">
+                                (click)="onConfirmDeletePlot(plot.id_plot, confirmPlotContent, i)">
                                 <i class="fa fa-trash"></i>
                             </button>
                         </div>
@@ -372,7 +372,7 @@
                             </button>
                             <button *ngIf="!disabledForm"
                                 class="btn btn-sm btn-danger"
-                                (click)="onConfirmDeletePlot(subPlot.id_plot, confirmPlotContent)">
+                                (click)="onConfirmDeletePlot(subPlot.id_plot, confirmPlotContent,i,subPlot)">
                                 <i class="fa fa-trash"></i>
                             </button>
                         </div>
@@ -511,14 +511,14 @@
         <small>Code placette parente (optionnel) :</small>
         <select class="form-control form-control-sm" [formControl]="formPlot.controls.id_parent">
           <option [ngValue]="null">-- Aucune (placette principale) --</option>
-          <option *ngFor="let plot of plotHierarchy" [ngValue]="plot.id_plot">
+          <option *ngFor="let plot of plotHierarchy ; let i = index "[ngValue]="isNew ? i :plot.id_plot">
             {{ plot.code_plot }}
           </option>
         </select>
       </div>
 
       <!-- Petit texte si parent sélectionné -->
-      <div *ngIf="formPlot.controls.id_parent.value" class="alert alert-info py-1 px-2 mb-2">
+      <div  *ngIf="formPlot.controls.id_parent.value !== null" class="alert alert-info py-1 px-2 mb-2">
         <small><i class="fa fa-info-circle"></i> Vous créez une sous-placette de 
           <strong>{{ getParentCode(formPlot.controls.id_parent.value) }}</strong>
         </small>
@@ -530,7 +530,7 @@
       </div>
 
       <!-- Distance visible seulement si pas de parent -->
-      <div class="form-group" *ngIf="!formPlot.controls.id_parent.value">
+      <div class="form-group"  *ngIf="formPlot.controls.id_parent.value === null">
         <small>Distance ( mètres ) :</small>
         <input
           type="number"
@@ -616,6 +616,32 @@
         <button type="button" class="btn btn-success btn-sm"
                 [disabled]="formStation.invalid"
                 (click)="onSaveStation()">
+            Enregistrer
+        </button>
+    </div>
+</ng-template>
+<ng-template #editPlotContent let-d="dismiss">
+    <div class="modal-header">
+        <h5 class="modal-title">Modifier une placette</h5>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formEditPlot">
+            <div class="form-group">
+                <small>Code placette :</small>
+                <input class="form-control form-control-sm" [formControl]="formEditPlot.controls.code_plot" />
+            </div>
+            <div class="form-group" *ngIf="plotToEdit?.id_parent === null || plotToEdit?.id_parent === undefined">
+                <small>Distance ( mètres ) :</small>
+                <input type="number" class="form-control form-control-sm" [formControl]="formEditPlot.controls.distance_plot" />
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm" (click)="d('Close click')">Fermer</button>
+        <button type="button" class="btn btn-success btn-sm" [disabled]="formEditPlot.invalid" (click)="onSaveEditPlot()">
             Enregistrer
         </button>
     </div>

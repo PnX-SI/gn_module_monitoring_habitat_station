@@ -16,6 +16,8 @@ from pypn_habref_api.models import Habref
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp
+from geoalchemy2 import functions as geo_funcs
+import json
 
 from ..blueprint import blueprint
 from ..models import TTransect, TPlot, TemperatureSensor, Station
@@ -271,12 +273,26 @@ def add_transect(scope):
             sensor = TemperatureSensor(**sensor_data)
             DB.session.add(sensor)
 
+       
+        if transect.id_station:
+            DB.session.execute(
+                update(Station)
+                .where(Station.id_station == transect.id_station)
+                .values(
+                    geom=DB.session.scalar(
+                        select(func.ST_Centroid(func.ST_Collect(TTransect.geom_start)))
+                        .where(TTransect.id_station == transect.id_station)
+                    )
+                )
+            )
         DB.session.commit()
-
         return load_transect(site.id_base_site)
 
     except Exception as e:
         DB.session.rollback()
+        print(f"ERREUR: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"error": str(e)}, 500
 
 
@@ -311,6 +327,18 @@ def update_transect(id_transect, scope):
         plot_data["id_transect"] = transect.id_transect
         if not plot_data.get("id_plot"):
             create_plot(plot_data)
+    
+    if transect.id_station:
+            DB.session.execute(
+                update(Station)
+                .where(Station.id_station == transect.id_station)
+                .values(
+                    geom=DB.session.scalar(
+                        select(func.ST_Centroid(func.ST_Collect(TTransect.geom_start)))
+                        .where(TTransect.id_station == transect.id_station)
+                    )
+                )
+            )
     
     DB.session.commit()
 
@@ -359,6 +387,15 @@ def get_transects_by_station(id_station):
             transect = d[0].as_dict()
             transect["nb_visits"] = d[1]
             transect["last_visit"] = str(d[2]) if d[2] else "Aucune visite"
+            if d[0].geom_start:
+                transect["geom_start"] = json.loads(
+                    DB.session.scalar(geo_funcs.ST_AsGeoJSON(d[0].geom_start))
+                )
+            if d[0].geom_end:
+                transect["geom_end"] = json.loads(
+                    DB.session.scalar(geo_funcs.ST_AsGeoJSON(d[0].geom_end))
+                )
+            
             result.append(transect)
         return result
     return []

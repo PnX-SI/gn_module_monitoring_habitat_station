@@ -56,7 +56,7 @@ class TTransect(MonitoringHabitatStation):
     geom_end = DB.Column(Geometry("POINT", 4326))
     id_nomenclature_plot_position = DB.Column(DB.Integer, nullable=False)
     cd_hab = DB.Column(
-        DB.ForeignKey("ref_habitats.habref.cd_hab", onupdate="CASCADE"), nullable=False
+        DB.ForeignKey("ref_habitats.habref.cd_hab", onupdate="CASCADE"), nullable=True
     )
     plot_size = DB.Column(DB.String(50))
     plot_shape = DB.Column(DB.Unicode())

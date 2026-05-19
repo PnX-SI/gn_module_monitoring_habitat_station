@@ -117,6 +117,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public tabYear = [];
   public tabArea = [];
   public tabOrganism = [];
+  private transectLayers: L.Layer[] =[]
 
   constructor(
     private config:ConfigService,
@@ -146,14 +147,22 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     let moduleCode = this.config['MHS']['MODULE_CODE'].toLocaleLowerCase();
-    let iconMarker = L.icon({
-      iconSize: [25, 41],
-      iconAnchor: [13, 41],
-      iconUrl: `./assets/${moduleCode}/assets/marker-icon.png`,
-      shadowUrl: `./assets/${moduleCode}/assets/marker-shadow.png`,
-    });
     this._map = this.mapService.getMap();
-    this._deflate_features = L.deflate({ minSize: 10, markerOptions: { icon: iconMarker } });
+    this._deflate_features = (L as any).deflate({
+        minSize: 10,
+        markerOptions: () => {
+            return {
+                icon: new L.Icon({
+                    iconUrl: `./assets/${moduleCode}/assets/marker-icon.png`,
+                    shadowUrl: `./assets/${moduleCode}/assets/marker-shadow.png`,
+                    iconSize: [25, 41],
+                    iconAnchor: [13, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41],
+                })
+            };
+        }
+    });
     this._deflate_features.addTo(this._map);
     this.addCustomControl();
     this.dataSource.paginator = this.paginator;
@@ -238,12 +247,21 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 }
 onViewStation(id_station: number) {
+  this.transectLayers.forEach(layer => this._map.removeLayer(layer));
+  this.transectLayers = [];
     if (this.expandedStations[id_station]) {
         delete this.expandedStations[id_station];
     } else {
         this._api.getTransectsByStation(id_station).subscribe(
             (data: any[]) => {
                 this.expandedStations[id_station] = data;
+                data.forEach((transect) =>{
+                  console.log('transect:', transect.transect_label, transect.geom_start, transect.geom_end);
+                 let line = L.polyline([[transect.geom_start.coordinates[1], transect.geom_start.coordinates[0]], [transect.geom_end.coordinates[1], transect.geom_end.coordinates[0]]])
+                  .bindTooltip(transect.transect_label)
+                  .addTo(this._map)
+                this.transectLayers.push(line)
+                })
             },
             error => {
                 this.toastr.error('Erreur lors de la récupération des transects', '', { positionClass: 'toast-top-right' });
@@ -341,20 +359,37 @@ getTransects(params?) {
   // Map-list
   onEachFeature(feature, layer) {
     let site = feature.properties;
-    this.mapListService.layerDict[feature.id] = layer;
-
-    const customPopup = '<div class="title">' + site.transect_label + '</div>';
-    const customOptions = {
-      className: 'custom-popup',
-    };
-
-    layer.bindPopup(customPopup, customOptions);
-    layer.on({
-      click: e => {
-        this.onMapClick(feature.id);
-      },
+    
+    // Créer un vrai marqueur avec l'icône goutte
+    let marker = L.marker(layer.getLatLng(), {
+        icon: new L.Icon({
+            iconUrl: './marker-icon.png',
+            shadowUrl: './marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [13, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+        })
     });
-    layer.addTo(this._deflate_features);
+
+    // Stocker le marker pour la synchronisation carte-tableau
+    this.mapListService.layerDict[feature.id] = marker;
+
+    // Popup au clic
+    marker.bindPopup('<div class="title">' + site.name + '</div>');
+    
+    // Tooltip au survol
+    marker.bindTooltip(site.name);
+
+    // Clic sur le marker
+    marker.on({
+        click: e => {
+            this.onMapClick(feature.id);
+        }
+    });
+
+    // Ajouter à la carte
+    marker.addTo(this._map);
   }
 
   onMapClick(id): void {

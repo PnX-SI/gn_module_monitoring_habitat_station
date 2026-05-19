@@ -24,6 +24,7 @@ def build_hierarchy(plots, parent_id=None):
     return result
 
 def create_plot(plot_data):
+      sub_plots = plot_data.pop('sub_plots', [])
       transect = DB.session.get(TTransect, plot_data.get("id_transect"))
       # verify if the transect exist
       if transect is None:
@@ -37,6 +38,12 @@ def create_plot(plot_data):
                 return {"error": "Parent plot does not belong to the same transect"}, 400
       plot = TPlot(**plot_data)
       DB.session.add(plot)
+      DB.session.flush()
+      
+      for sub_plot_data in sub_plots:
+        sub_plot_data['id_parent'] = plot.id_plot
+        sub_plot_data['id_transect'] = plot.id_transect
+        create_plot(sub_plot_data)
       return plot
 
 @blueprint.route("/transects/<id_transect>/plots", methods=["GET"])

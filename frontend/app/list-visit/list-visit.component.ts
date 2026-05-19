@@ -56,17 +56,22 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   formPlot: FormGroup;
   private modalRef: NgbModalRef;
   public sensors = [];
+  public sensorToDeleteIndex: number = null;
   sensorToDelete: number = null;
   private confirmModalRef: NgbModalRef;
-  sensorToEdit: number = null;
+  public sensorToEdit: number = null;
+  public sensorToEditIndex: number = null;
   public plotHierarchy = [];
   public expandedPlots: {[key: number]: boolean} = {};
   public subplots = [];
   plotToDelete: number = null;
+  plotToDeleteIndex:number=null;
   private confirmPlotModalRef: NgbModalRef;
   plotToEdit: any = null;
+  plotToEditIndex: number = null;
   formStation: FormGroup;
   formEditPlot: FormGroup;
+  plotToDeleteObject: any = null;
    private _transformer = (node: PlotNode, level: number): FlatPlotNode => ({
     expandable: !!node.sub_plots && node.sub_plots.length > 0,
     id_plot: node.id_plot,
@@ -299,7 +304,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       id_parent: [null],
     });
     this.formPlot.controls['id_parent'].valueChanges.subscribe(value =>{
-      if(value){
+      if(value !== null && value !== undefined){
         this.formPlot.controls['distance_plot'].clearValidators();
 
       }else{
@@ -317,29 +322,55 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   onRemoveSubPlot(index : number ){
     this.subplots.splice(index, 1);
   }
+  buildHierarchy(plots: any[]): any[] {
+    const roots = plots.filter(p => p.id_parent === null || p.id_parent === undefined);
+    roots.forEach(root => {
+        root.sub_plots = plots.filter(p => p.id_parent === plots.indexOf(root));
+    });
+    return roots;
+}
 
 onSavePlot() {
     let plot = this.formPlot.value;
-    plot.id_transect = this.currentSite.properties?.id_transect;
-    this.api.addPlot(plot).subscribe(
-        data => {
-            this.getPlots();
-            this.modalRef.close();
-            this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
+    
+    if(this.isNew){
+      this.plotHierarchy.push(plot);
+      this.plotHierarchy = this.buildHierarchy([...this.plotHierarchy]);
+      this.modalRef.close();
+      this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
+    }else{
+      plot.id_transect = this.currentSite.properties?.id_transect;
+      this.api.addPlot(plot).subscribe(
+        data =>{
+          this.getPlots();
+          this.modalRef.close();
+          this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
         },
-        error => {
-            this.toastr.error('Erreur lors de l\'ajout de la placette', '', { positionClass: 'toast-top-right' });
+        error=>{
+          this.toastr.error('Erreur lors de l \'ajout de la placette', '', {positionClass: 'toast-top-right'});
         }
-    );
+      )
+    }
+   
 }
 onSaveAndContinuePlot() {
     let plot = this.formPlot.value;
-    let savedParent = plot.id_parent;  
-    plot.id_transect = this.currentSite.properties?.id_transect;
-    this.api.addPlot(plot).subscribe(
+    let savedParent = plot.id_parent;
+    if(this.isNew){
+      this.plotHierarchy.push(plot);
+      this.plotHierarchy = this.buildHierarchy([...this.plotHierarchy]);
+      this.formPlot.patchValue({
+                code_plot: null,
+                distance_plot: null,
+                id_parent: savedParent,
+            });
+      this.formPlot.markAsPristine();
+      this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
+    }else{
+      plot.id_transect = this.currentSite.properties?.id_transect;
+      this.api.addPlot(plot).subscribe(
         data => {
             this.getPlots();
-            
             this.formPlot.patchValue({
                 code_plot: null,
                 distance_plot: null,
@@ -352,6 +383,9 @@ onSaveAndContinuePlot() {
             this.toastr.error('Erreur lors de l\'ajout de la placette', '', { positionClass: 'toast-top-right' });
         }
     );
+    }
+    
+    
 }
 
 onEdit() {
@@ -367,7 +401,7 @@ onEdit() {
 
   onSubmitTransect() {
     let transect = this.formTransect.value;
-    transect.cor_plots = this.plots;
+    transect.cor_plots = this.isNew ? this.plotHierarchy: this.plots;
     
 
     transect.geom_start = `SRID=4326;POINT(${transect.geom_start_long} ${transect.geom_start_lat})`;
@@ -463,10 +497,14 @@ onEdit() {
     let sensor = this.formSensor.value;
 
     if(this.isNew){
-      this.sensors.push(sensor);
+      if(this.sensorToEdit !== null){
+        this.sensors[this.sensorToEditIndex] = sensor;
+      }else{
+        this.sensors.push(sensor);
+      }
       this.modalRef.close();
     } else if (this.sensorToEdit) {
-      // Modification d'un capteur existant
+      
       sensor.id_sensor = this.sensorToEdit;
       sensor.id_transect = this.currentSite.properties?.id_transect;
       this.api.updateSensor(sensor).subscribe(
@@ -510,43 +548,71 @@ onEdit() {
     )
    
   }
-  onConfirmDelete(id_sensor:any, confirmContent:any) {
+  onConfirmDelete(id_sensor:any, confirmContent:any, index?:number) {
     this.sensorToDelete = id_sensor;
+    this.sensorToDeleteIndex = index;
     this.confirmModalRef = this.modalService.open(confirmContent, { centered: true });
   }
 
   onConfirmDeleteSensor() {
-    this.onDeleteSensor(this.sensorToDelete);
-    this.confirmModalRef.close();
-  }
-  onEditSensor(sensor:any, content:any) {
+    if(this.isNew){
+        this.sensors.splice(this.sensorToDeleteIndex, 1);
+        this.confirmModalRef.close();
+        this.toastr.success('Capteur supprimé avec succès', '', { positionClass: 'toast-top-right' });
+    } else {
+        this.onDeleteSensor(this.sensorToDelete);
+        this.confirmModalRef.close();
+    }
+}
+  onEditSensor(sensor:any, content:any, index?:number) {
     this.sensorToEdit = sensor.id_sensor;
+    this.sensorToEditIndex = index;
     this.formSensor = this.formBuilder.group({
         serial_number: [sensor.serial_number, Validators.required],
         install_date: [sensor.install_date, Validators.required],
     });
     this.modalRef = this.modalService.open(content, { centered: true });
   }
-  onConfirmDeletePlot(id_plot: number, confirmContent: any) {
+
+  onConfirmDeletePlot(id_plot: number, confirmContent: any, index?: number, plot?: any) {
     this.plotToDelete = id_plot;
+    this.plotToDeleteIndex = index;
+    this.plotToDeleteObject = plot;
     this.confirmPlotModalRef = this.modalService.open(confirmContent, { centered: true });
-}
+  }
+ 
 
 onConfirmDeletePlotAction() {
-    this.api.deletePlot(this.plotToDelete).subscribe(
-        data => {
-            this.getPlots();
-            this.confirmPlotModalRef.close();
-            this.toastr.success('Placette supprimée avec succès', '', { positionClass: 'toast-top-right' });
-        },
-        error => {
-            this.toastr.error('Erreur lors de la suppression de la placette', '', { positionClass: 'toast-top-right' });
+    if(this.isNew){
+        if(this.plotToDeleteObject?.id_parent !== null && this.plotToDeleteObject?.id_parent !== undefined){
+            
+            const parent = this.plotHierarchy[this.plotToDeleteObject.id_parent];
+            parent.sub_plots = parent.sub_plots.filter(s => s !== this.plotToDeleteObject);
+            this.plotHierarchy = [...this.plotHierarchy];
+        } else {
+            // Placette principale
+            this.plotHierarchy.splice(this.plotToDeleteIndex, 1);
+            this.plotHierarchy = [...this.plotHierarchy];
         }
-    );
+        this.confirmPlotModalRef.close();
+        this.toastr.success('Placette supprimée avec succès', '', { positionClass: 'toast-top-right' });
+    } else {
+        this.api.deletePlot(this.plotToDelete).subscribe(
+            data => {
+                this.getPlots();
+                this.confirmPlotModalRef.close();
+                this.toastr.success('Placette supprimée avec succès', '', { positionClass: 'toast-top-right' });
+            },
+            error => {
+                this.toastr.error('Erreur lors de la suppression de la placette', '', { positionClass: 'toast-top-right' });
+            }
+        );
+    }
 }
 
-onEditPlot(plot: any, content: any) {
+onEditPlot(plot: any, content: any, index?:number) {
     this.plotToEdit = plot;
+    this.plotToEditIndex= index
     this.formEditPlot = this.formBuilder.group({
         code_plot: [plot.code_plot, Validators.required],
         distance_plot: [plot.distance_plot],
@@ -557,8 +623,15 @@ onEditPlot(plot: any, content: any) {
 onSaveEditPlot() {
     let plot = this.formEditPlot.value;
     plot.id_plot = this.plotToEdit.id_plot;
-    plot.id_transect = this.currentSite.properties?.id_transect;
-    this.api.updatePlot(plot).subscribe(
+    if(this.isNew){
+      this.plotHierarchy[this.plotToEditIndex] = {...this.plotHierarchy[this.plotToEditIndex], ...this.formEditPlot.value};
+      this.plotHierarchy = [...this.plotHierarchy];
+      this.modalRef.close();
+      this.toastr.success('Placette modifiée avec succès', '', { positionClass: 'toast-top-right' });
+      
+    }else{
+      plot.id_transect = this.currentSite.properties?.id_transect;
+        this.api.updatePlot(plot).subscribe(
         data => {
             this.modalRef.close();
             this.getPlots();
@@ -568,9 +641,14 @@ onSaveEditPlot() {
             this.toastr.error('Erreur lors de la modification de la placette', '', { positionClass: 'toast-top-right' });
         }
     );
+    }
+  
 }
 getParentCode(id_parent: number): string {
-    const parent = this.plotHierarchy.find(p => p.id_plot === id_parent);
+  if(this.isNew){
+    return this.plotHierarchy[id_parent]?.code_plot || '';
+  }
+  const parent = this.plotHierarchy.find(p => p.id_plot === id_parent);
     return parent ? parent.code_plot : '';
 }
 onSelectStation(id_station: any) {
