@@ -117,7 +117,11 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public tabYear = [];
   public tabArea = [];
   public tabOrganism = [];
-  private transectLayers: L.Layer[] =[]
+  private transectLayers: L.Layer[] =[];
+  private selectedTransectLayer : L.Polyline = null; 
+  private transectLayerMap: Map<number, L.Polyline> = new Map();
+  private selectedTransectId : number = null;
+
 
   constructor(
     private config:ConfigService,
@@ -164,6 +168,50 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     });
     this._deflate_features.addTo(this._map);
+    this._map.on('zoomend', () => {
+    const zoom = this._map.getZoom();
+    
+    if (zoom >= 12) {
+        // Masquer les marqueurs
+        Object.values(this.mapListService.layerDict).forEach((marker: any) => {
+            marker.setOpacity(0);
+        });
+        
+        // Afficher les transects de toutes les stations visibles
+        this.filteredData.forEach(station => {
+            if (!this.expandedStations[station.id_station]) {
+                this._api.getTransectsByStation(station.id_station).subscribe(
+                    (data: any[]) => {
+                        this.expandedStations[station.id_station] = data;
+                        data.forEach(transect => {
+                            let line = L.polyline(
+                                [[transect.geom_start.coordinates[1], transect.geom_start.coordinates[0]],
+                                 [transect.geom_end.coordinates[1], transect.geom_end.coordinates[0]]],
+                                { color: '#3388ff' }
+                            )
+                            .bindTooltip(transect.transect_label)
+                            .addTo(this._map);
+                            this.transectLayerMap.set(transect.id_transect, line);
+                            this.transectLayers.push(line);
+                        });
+                    }
+                );
+            }
+        });
+    } else {
+        // Afficher les marqueurs
+        Object.values(this.mapListService.layerDict).forEach((marker: any) => {
+            marker.setOpacity(1);
+        });
+        
+        // Supprimer les transects
+        this.transectLayers.forEach(layer => this._map.removeLayer(layer));
+        this.transectLayers = [];
+        this.transectLayerMap.clear();
+        
+    }
+});
+   
     this.addCustomControl();
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
@@ -211,6 +259,11 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                     }
                 });
                 this.filteredData = data[1].features.map(feature => {
+                  this._api.getTransectsByStation(feature.properties.id_station).subscribe(
+                    (transects: any[]) => {
+                      this.expandedStations[feature.properties.id_station] = transects;
+                    }
+                  );
                   return {
                     'Station' : feature.properties.name !== "" ? feature.properties.name : "Sans nom",
                     "Habitat" : feature.properties.habitat_name,
@@ -247,26 +300,40 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 }
 onViewStation(id_station: number) {
-  this.transectLayers.forEach(layer => this._map.removeLayer(layer));
-  this.transectLayers = [];
-    if (this.expandedStations[id_station]) {
-        delete this.expandedStations[id_station];
-    } else {
-        this._api.getTransectsByStation(id_station).subscribe(
-            (data: any[]) => {
-                this.expandedStations[id_station] = data;
-                data.forEach((transect) =>{
-                  console.log('transect:', transect.transect_label, transect.geom_start, transect.geom_end);
-                 let line = L.polyline([[transect.geom_start.coordinates[1], transect.geom_start.coordinates[0]], [transect.geom_end.coordinates[1], transect.geom_end.coordinates[0]]])
-                  .bindTooltip(transect.transect_label)
-                  .addTo(this._map)
-                this.transectLayers.push(line)
-                })
-            },
-            error => {
-                this.toastr.error('Erreur lors de la récupération des transects', '', { positionClass: 'toast-top-right' });
-            }
-        );
+    this.transectLayers.forEach(layer => this._map.removeLayer(layer));
+    this.transectLayers = [];
+    this.transectLayerMap.clear();
+    this.selectedTransectLayer = null;
+
+    const data = this.expandedStations[id_station];
+    if (data) {
+        data.forEach((transect) => {
+            if (!transect.geom_start || !transect.geom_end) return;
+            let line = L.polyline(
+                [[transect.geom_start.coordinates[1], transect.geom_start.coordinates[0]],
+                 [transect.geom_end.coordinates[1], transect.geom_end.coordinates[0]]],
+                { color: '#3388ff' }
+            )
+            .bindTooltip(transect.transect_label)
+            .addTo(this._map);
+            line.on('click', () => {
+              this.onTransectMapClick(transect.id_transect, transect.id_station);
+            })
+            line.on('mouseover', () => {
+                this._map.getContainer().style.cursor = 'cell';
+            });
+            line.on('mouseout', () => {
+                this._map.getContainer().style.cursor = '';
+            });
+            this.transectLayerMap.set(transect.id_transect, line);
+            this.transectLayers.push(line);
+        });
+
+        // Zoomer sur les transects
+        if (this.transectLayers.length > 0) {
+            let group = L.featureGroup(this.transectLayers);
+            this._map.fitBounds(group.getBounds());
+        }
     }
 }
 
@@ -392,16 +459,45 @@ getTransects(params?) {
     marker.addTo(this._map);
   }
 
-  onMapClick(id): void {
-    const integerId = parseInt(id);
-    this.mapListService.selectedRow = [];
-    this.mapListService.selectedRow.push(this.mapListService.tableData[integerId - 1]);
+  onMapClick(id: string): void {
+    const id_station = parseInt(id);
+    const index = this.filteredData.findIndex(s=> s.id_station === id_station);
+    if(index === -1){
+      return ;
+    }
+    const pageSize = this.paginator.pageSize;
+    const pageIndex = Math.floor(index/pageSize);
+
+    this.paginator.pageIndex = pageIndex;
+    this.paginator.page.emit({
+      pageIndex : pageIndex,
+      pageSize : pageSize,
+      length : this.paginator.length
+    })
+
+    const element = this.filteredData[index];
+    this.expandedElement = element;
+    this.onViewStation(id_station)
+    
   }
 
-  onRowSelect(row) {
-    let id = row.selected[0]['id_base_site'];
-    const selectedLayer = this.mapListService.layerDict[id];
-    this.zoomOnSelectedLayer(this._map, selectedLayer, 16);
+  onRowSelect(element:any) {
+    const id_station = element.id_station;
+    const marker = this.mapListService.layerDict[id_station];
+    if(marker){
+      this._map.removeLayer(marker)
+    }
+
+    this.onViewStation(id_station);
+    setTimeout(() => {
+      if(this.transectLayers.length > 0){
+        let group = L.featureGroup(this.transectLayers);
+        this._map.fitBounds(group.getBounds());
+      }
+    },500);
+    console.log('element cliqué:', element);
+    console.log('expandedStations:', this.expandedStations);
+    console.log('expandedStations[element.id_station]:', this.expandedStations[element.id_station]);
   }
 
   zoomOnSelectedLayer(map, layer, zoom) {
@@ -470,6 +566,41 @@ getTransects(params?) {
   resetMinMaxDate() {
     this.maxDate = { year: 2200, month: 1, day: 1 };
     this.minDate = null;
+  }
+  onSelectTransect(id_transect: number) {
+    this.transectLayers.forEach((layer: any) => {
+        layer.setStyle({ color: '#3388ff' });
+    });
+    
+    const selectedLayer = this.transectLayerMap.get(id_transect)
+    if (selectedLayer) {
+        selectedLayer.setStyle({ color: '#ff0000' });
+        this.selectedTransectLayer = selectedLayer;
+        this.selectedTransectId = id_transect;
+    }
+}
+  onTransectMapClick(id_transect: number, id_station:number){
+    const index = this.filteredData.findIndex(s => s.id_station === id_station);
+    if(index=== -1){
+      return ;
+    }
+    const pageSize = this.paginator.pageSize;
+    const pageIndex = Math.floor(index/pageSize);
+    this.paginator.pageIndex = pageIndex;
+    this.paginator.page.emit({
+      pageIndex : pageIndex,
+      pageSize : pageSize,
+      length : this.paginator.length
+    })
+
+    const element = this.filteredData[index];
+    this.expandedElement = null;
+    setTimeout(() => {
+      this.expandedElement = element;
+      this.selectedTransectId = id_transect;
+      this.onSelectTransect(id_transect)
+    })
+
   }
   
 

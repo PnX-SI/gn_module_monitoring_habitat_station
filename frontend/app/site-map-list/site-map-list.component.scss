@@ -119,3 +119,10 @@ tr.example-element-row:not(.example-expanded-row):active {
 :host ::ng-deep .mat-sort-header-arrow {
   color: white;
 }
+.selected-transect {
+    background-color: #c0dc89 !important;
+    font-weight: bold;
+}
+:host ::ng-deep .leaflet-interactive {
+    cursor: pointer !important;
+}

@@ -130,7 +130,9 @@
                               </tr>
                             </thead>
                             <tbody class = "sub-table-body">
-                              <tr *ngFor = "let transect of expandedStations[element.id_station]">
+                              <tr *ngFor = "let transect of expandedStations[element.id_station]"
+                              [class.selected-transect]="transect.id_transect === selectedTransectId"
+                              (click) = "onSelectTransect(transect.id_transect); $event.stopPropagation()", style = "cursor: pointer;">
                                 <th scope="row">{{transect.transect_label}}</th>
                                 <td>{{transect.nb_visits}}</td>
                                 <td>{{transect.last_visit}}</td>
@@ -151,7 +153,7 @@
               <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
                   class="example-element-row"
                   [class.example-expanded-row]="expandedElement === element"
-                  (click)="expandedElement = expandedElement === element ? null : element">
+                  (click)="expandedElement = expandedElement === element ? null : element; onRowSelect(element)">
               </tr>
               <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
               <tr class="mat-row" *matNoDataRow>
