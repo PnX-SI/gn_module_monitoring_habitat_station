@@ -1,31 +1,11 @@
 {
+    "extends": "../../geonature/frontend/tsconfig.json",
     "compilerOptions": {
-        "importHelpers": true,
-        "outDir": "/home/<user>/workspace/geonature/frontend/dist/out-tsc",
-        "sourceMap": true,
-        "declaration": false,
-        "module": "ES2022",
-        "moduleResolution": "node",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "useDefineForClassFields": false,
-        "target": "ES2022",
-        "typeRoots": [
-            "node_modules/@types",
-            "/home/<user>/workspace/geonature/frontend/src/typings.d.ts"
-        ],
-        "lib": [
-            "ES2022",
-            "dom"
-        ],
-        "baseUrl": "/home/<user>/workspace/geonature/frontend/",
+        "ignoreDeprecations": "6.0",
+        "rootDir": "../..",
+        "baseUrl": "../../geonature/frontend",
+        "preserveSymlinks": true,
         "paths": {
-            "tslib" : [
-                "node_modules/tslib/tslib.d.ts"
-            ],
-            "@angular/*": [
-                "node_modules/@angular/*"
-            ],
             "@geonature_common/*": [
                 "src/app/GN2CommonModule/*"
             ],
@@ -38,6 +18,19 @@
             "@librairies/*": [
                 "node_modules/*"
             ],
+            "*": [
+                "node_modules/*"
+            ]
         }
-    }
+    },
+    "include": [
+        "app/**/*.ts",
+        "../../geonature/frontend/src/**/*.ts",
+        "../../geonature/frontend/external_modules/**/*.ts"
+    ],
+    "exclude": [
+        "../../geonature/frontend/src/test.ts",
+        "../../geonature/frontend/src/**/*.spec.ts",
+        "../../geonature/frontend/node_modules"
+    ]
 }

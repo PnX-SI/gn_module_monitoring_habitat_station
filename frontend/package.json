@@ -1,6 +1,6 @@
 {
   "name": "monitoring_habitat_station",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Module Suivi Habitat Station",
   "license": "GPLv3",
   "dependencies": {
