@@ -112,7 +112,68 @@ FROM pr_monitoring_habitat_station.tmp_visits AS vs
 JOIN pr_monitoring_habitat_station.t_transects AS ts
     ON ts.transect_label = vs."label tran";
 ```
+## Importer les stations
 
+Les stations regroupent plusieurs transects. La géométrie de la station est calculée automatiquement comme le barycentre des points de départ des transects associés.
+
+```sql
+-- Créer une station manuellement
+INSERT INTO pr_monitoring_habitat_station.t_stations
+    (name, cd_hab, geom)
+VALUES
+    ('Nom de la station', 1234, ST_SetSRID(ST_MakePoint(6.123456, 44.123456), 4326));
+```
+
+```sql
+-- Associer des transects existants à une station
+UPDATE pr_monitoring_habitat_station.t_transects
+SET id_station = (
+    SELECT id_station
+    FROM pr_monitoring_habitat_station.t_stations
+    WHERE name = 'Nom de la station'
+)
+WHERE transect_label LIKE 'Nom_station%';
+```
+
+```sql
+-- Recalculer la géométrie d'une station après association des transects
+UPDATE pr_monitoring_habitat_station.t_stations s
+SET geom = (
+    SELECT ST_Centroid(ST_Collect(t.geom_start))
+    FROM pr_monitoring_habitat_station.t_transects t
+    WHERE t.id_station = s.id_station
+);
+```
+
+## Importer les capteurs de température
+
+Les capteurs de température sont associés aux transects avec un numéro de série et une date d'installation.
+
+```sql
+-- Insérer un capteur de température pour un transect
+INSERT INTO pr_monitoring_habitat_station.t_temperature_sensors
+    (id_transect, serial_number, install_date)
+VALUES
+    (
+        (SELECT id_transect FROM pr_monitoring_habitat_station.t_transects WHERE transect_label = 'Label_du_transect'),
+        '20011415',
+        '2022-08-25'
+    );
+```
+
+```sql
+-- Importer plusieurs capteurs depuis une table temporaire
+-- (après avoir importé le CSV dans tmp_sensors)
+INSERT INTO pr_monitoring_habitat_station.t_temperature_sensors
+    (id_transect, serial_number, install_date)
+SELECT
+    t.id_transect,
+    s.serial_number,
+    s.install_date::date
+FROM tmp_sensors s
+JOIN pr_monitoring_habitat_station.t_transects t
+    ON t.transect_label = s.transect_label;
+```
 
 ## Importer les visites
 
