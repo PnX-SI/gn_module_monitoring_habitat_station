@@ -23,6 +23,18 @@ def build_hierarchy(plots, parent_id=None):
         result.append(plot_dict)
     return result
 
+def get_plot_depth(id_parent):
+    depth = 1
+    current_id = id_parent
+    while current_id is not None:
+        parent = DB.session.get(TPlot, current_id)
+        if parent is None:
+            break
+        current_id = parent.id_parent
+        depth += 1
+    return depth
+
+
 def create_plot(plot_data):
       sub_plots = plot_data.pop('sub_plots', [])
       transect = DB.session.get(TTransect, plot_data.get("id_transect"))
@@ -36,6 +48,12 @@ def create_plot(plot_data):
                 raise NotFound("Parent plot not found")
             if parent_plot.id_transect != plot_data.get("id_transect"):
                 return {"error": "Parent plot does not belong to the same transect"}, 400
+            depth = get_plot_depth(plot_data.get("id_parent"))
+            max_depth = blueprint.config["max_plot_depth"]
+            if depth >= max_depth:
+                raise ValueError(f"La profondeur maximale de {max_depth} niveaux est atteinte")
+            
+           
       plot = TPlot(**plot_data)
       DB.session.add(plot)
       DB.session.flush()
@@ -45,6 +63,7 @@ def create_plot(plot_data):
         sub_plot_data['id_transect'] = plot.id_transect
         create_plot(sub_plot_data)
       return plot
+
 
 @blueprint.route("/transects/<id_transect>/plots", methods=["GET"])
 @permissions.check_cruved_scope("R", module_code=MODULE_CODE)

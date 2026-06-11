@@ -114,9 +114,12 @@ def get_all_stations():
     results = (
         DB.session.execute(q.limit(items_per_page).offset(page * items_per_page)).unique().all()
     )
+    
 
     if pagination_serverside:
-        data = results.items
+        data = DB.session.execute(
+            q.limit(items_per_page).offset(page * items_per_page)
+        ).unique().all()
     else:
         data = DB.session.execute(q).unique().all()
 

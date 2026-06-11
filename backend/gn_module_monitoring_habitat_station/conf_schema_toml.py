@@ -44,3 +44,5 @@ class GnModuleSchemaConf(Schema):
     site_type_code = fields.String(load_default="HAB")
     user_list_code = fields.String(load_default=METADATA_CODE)
     municipality_type_code = fields.String(load_default="COM")
+    max_plot_depth= fields.Integer(load_default =3)
+

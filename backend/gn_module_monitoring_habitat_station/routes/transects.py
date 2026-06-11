@@ -108,11 +108,13 @@ def load_transect(id_site):
         base_site_code = transect["properties"]["t_base_site"]["base_site_code"]
         base_site_description = transect["properties"]["t_base_site"]["base_site_description"]
         base_site_name = transect["properties"]["t_base_site"]["base_site_name"]
+        uuid_base_site = str(transect["properties"]["t_base_site"]["uuid_base_site"])
         if transect["properties"]["t_base_site"]:
             del transect["properties"]["t_base_site"]
         transect["properties"]["base_site_code"] = base_site_code
         transect["properties"]["base_site_description"] = base_site_description
         transect["properties"]["base_site_name"] = base_site_name
+        transect["properties"]["uuid_base_site"] = uuid_base_site 
         return transect
     return None
 
