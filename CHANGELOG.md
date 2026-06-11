@@ -1,6 +1,46 @@
-# CHANGELOG
+# Changelog
+
+All notable changes to this project will be documented in this file in English.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [2.0.0] - 2026-06-10
+
+### 🚀 Added
+
+- Added the concept of **station** grouping several transects (`t_stations`) with name, habitat and geometry automatically calculated as the centroid of associated transects.
+- Added **temperature sensors** (`t_temperature_sensors`) associated with transects with serial number and installation date.
+- Added the concept of **sub-plots** via an `id_parent` field in `t_plots` allowing a recursive plot hierarchy configurable via the `max_plot_depth` parameter.
+- Added **filters** on the station list: visit year, municipality, habitat, organism.
+- Added **map-list interaction**: clicking on a station in the table zooms to its transects on the map, clicking on a transect on the map highlights the corresponding row in the table with pagination management.
+- Added a **map legend** indicating the symbol for stations and transects.
+- Automatic display of transects on the map when zooming in beyond a certain level.
+- Added configuration parameter `max_plot_depth` to limit the depth of the plot hierarchy (default: 2).
+- Added backend routes: `GET /stations`, `GET /stations/years`, `GET /stations/area`, `GET /stations/organism`, `GET /stations/<id>/transects`.
+- Added plot migration script (`migration_placette.sql`) to create parent plots from existing sub-plots.
+- Added temperature sensor migration script (`migration_capteurs_temp.sql`).
+
+### 🔄 Changed
+
+- The site list has been replaced by a **station list** with an expandable table displaying associated transects (Angular Material `mat-table`).
+- The transect creation/edit form now integrates management of the **station**, **sensors** and **hierarchical plots** in creation mode.
+- The `cd_hab` field has been moved from `t_transects` to `t_stations` (habitat is linked to the station, not the transect).
+- Station geometry is automatically recalculated after each transect is added or modified (ST_Centroid centroid of geom_start points).
+- Frontend updated to use Angular Material for the station table.
+- Improved plot display in the releve form with sub-plot management.
+
+### ⚠️ Upgrade
+
+This version introduces **non-backward-compatible** database changes. The Alembic migration `4ef2f84caba3` creates new tables and columns. In case of downgrade, data entered in the new tables (`t_stations`, `t_temperature_sensors`) and columns (`id_parent`, `id_station`, `azimut`) will be **lost**.
+
+1. Apply the Alembic migration with the `by_label` tag (CBNA convention):
+   `geonature db upgrade monitoring_habitat_station@head --tag by_label`
+2. Apply the plot migration script:
+   `psql -h localhost -U geonatadmin -d geonature2db -f migration_placette.sql`
+3. Apply the temperature sensor migration script:
+   `psql -h localhost -U geonatadmin -d geonature2db -f migration_capteurs_temp.sql`
 
 ## [1.3.0] - 2025-03-03
 
