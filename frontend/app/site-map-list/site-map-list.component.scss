@@ -126,3 +126,15 @@ tr.example-element-row:not(.example-expanded-row):active {
 :host ::ng-deep .leaflet-interactive {
     cursor: pointer !important;
 }
+:host ::ng-deep .info.legend {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    line-height: 1.8;
+    
+    p {
+        margin: 0 0 8px 0;
+        font-weight: bold;
+    }
+}

@@ -7,12 +7,34 @@
           <h4 class="card-title">{{ visit_name }}</h4>
         </div>
         <div class="card-body py-0">
-          <div class="pb-2">
-            <button type="button" class="btn btn-link btn-sm back-button" (click)="backToVisites()">
+          
+          <div class="pb-2 d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-link btn-sm back-button" (click)="backToVisites()">
               <i class="fa fa-arrow-left" aria-hidden="true"> </i>
               Retour au transect n° {{ idSite }}
+          </button>
+        <div>
+            <button
+                *ngIf="!isNew && updateIsAllowed"
+                class="btn box-shadow"
+                [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'"
+                (click)="onEdit()"
+            >
+                <i *ngIf="disabledForm" class="fa fa-edit" aria-hidden="true"> </i>
+                {{ edit_btn }}
             </button>
-          </div>
+            <button
+                *ngIf="(!disabledForm && addIsAllowed) || (!disabledForm && updateIsAllowed)"
+                type="submit"
+                class="btn btn-success box-shadow ml-3 submit-btn"
+                [disabled]="!visitForm.valid"
+                (click)="onSubmitVisit()"
+            >
+                <i class="material-icons">save</i>
+                {{ submit_label }}
+            </button>
+        </div>
+    </div>
 
           <form [formGroup]="visitForm">
             <fieldset [disabled]="disabledForm">
@@ -54,25 +76,23 @@
                       <ng-container *ngFor="let plot of plotHierarchy">
                           <!-- Placette principale -->
                           <button
-                              class="plot"
-                              [class.active]="isActive(plot)"
-                              (click)="onChangePlot(plot)"
-                          >
-                              <i class="fa fa-angle-right plot-icon" [class.plot-active]="isActive(plot)"></i>
-                              <span class="plot-item"><i class="fa fa-hashtag"></i> {{ plot.code_plot }}</span>
-                              <span class="plot-item" *ngIf="plot.distance_plot">
-                                  <i class="material-icons gps-icon">location_on</i> {{ plot.distance_plot }} mètres
-                              </span>
-                              <!-- Bouton toggle si sous-placettes -->
-                              <span *ngIf="plot.sub_plots?.length > 0"
-                                  class="ml-2"
-                                  (click)="$event.stopPropagation(); togglePlot(plot.id_plot)">
-                                  <i class="fa" [ngClass]="expandedPlots[plot.id_plot] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                              </span>
-                              <span *ngIf="plot.isModifided && plot.status == true" class="badge badge-warning">Modifiée</span>
-                              <span *ngIf="plot.status == false" class="badge badge-danger">Erreur</span>
-                              <span *ngIf="plot.isEmpty" class="badge badge-secondary">Vide</span>
-                          </button>
+                            class="plot d-flex justify-content-between align-items-center w-100"
+                            [class.active]="isActive(plot)"
+                            (click)="onChangePlot(plot)"
+                        >
+                            <span class="plot-item"><i class="fa fa-hashtag"></i> {{ plot.code_plot }}</span>
+                            <span class="plot-item" *ngIf="plot.distance_plot">
+                                <i class="material-icons gps-icon">location_on</i> {{ plot.distance_plot }} mètres
+                            </span>
+                            <span *ngIf="plot.sub_plots?.length > 0"
+                                (click)="$event.stopPropagation(); togglePlot(plot.id_plot)">
+                                <i class="fa" [ngClass]="expandedPlots[plot.id_plot] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </span>
+                            <span *ngIf="!plot.sub_plots?.length"></span>
+                            <span *ngIf="plot.isModifided && plot.status == true" class="badge badge-warning">Modifiée</span>
+                            <span *ngIf="plot.status == false" class="badge badge-danger">Erreur</span>
+                            <span *ngIf="plot.isEmpty" class="badge badge-secondary">Vide</span>
+                        </button>
                           <!-- Sous-placettes -->
                           <ng-container *ngIf="expandedPlots[plot.id_plot]">
                               <button
@@ -112,29 +132,5 @@
     </div>
   </div>
 
-  <div class="card-footer" *ngIf="updateIsAllowed || addIsAllowed">
-    <div class="d-flex justify-content-end">
-      <button
-        *ngIf="!isNew && updateIsAllowed"
-        class="btn box-shadow"
-        [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'"
-        (click)="onEdit()"
-      >
-        <i *ngIf="disabledForm" class="fa fa-edit" aria-hidden="true"> </i>
-        {{ edit_btn }}
-      </button>
-      <button
-        *ngIf="(!disabledForm && addIsAllowed) || (!disabledForm && updateIsAllowed)"
-        type="submit"
-        class="btn btn-success box-shadow ml-3 submit-btn"
-        [disabled]="!visitForm.valid"
-        (click)="onSubmitVisit()"
-      >
-        <i class="material-icons">
-          save
-        </i>
-        {{ submit_label }}
-      </button>
-    </div>
-  </div>
+ 
 </div>

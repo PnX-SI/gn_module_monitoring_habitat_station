@@ -101,11 +101,10 @@
           <div class="row">
             <div *ngIf="disabledForm" class="col-sm-12 col-md-3">
               <div class="form-group">
-                <label>Identifiant</label>
-                <input
-                  value="{{ currentSite.properties.id_base_site }}"
-                  class="form-control form-control-sm"
-                />
+                <label>Code</label>
+                <input value="{{ currentSite.properties.base_site_code }}" class="form-control form-control-sm"/>
+                <label>UUID</label>
+                <input value="{{ currentSite.properties.uuid_base_site }}" class="form-control form-control-sm"/>
               </div>
             </div>
             <div class="col-sm-12 col-md-9">
@@ -338,11 +337,7 @@
                             <i class="material-icons gps-icon">location_on</i> {{ plot.distance_plot }} mètres
                         </span>
                         <div class="d-flex align-items-center">
-                            <div *ngIf="plot.sub_plots?.length > 0"
-                                class="btn btn-sm btn-link"
-                                (click)="togglePlot(plot.id_plot)">
-                                <i class="fa" [ngClass]="expandedPlots[plot.id_plot] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                            </div>
+                            
                             <button *ngIf="!disabledForm"
                                 class="btn btn-sm btn-warning mr-1"
                                 (click)="onEditPlot(plot, editPlotContent, i)">
@@ -353,6 +348,11 @@
                                 (click)="onConfirmDeletePlot(plot.id_plot, confirmPlotContent, i)">
                                 <i class="fa fa-trash"></i>
                             </button>
+                            <div *ngIf="plot.sub_plots?.length > 0"
+                                class="btn btn-sm btn-link"
+                                (click)="togglePlot(plot.id_plot)">
+                                <i class="fa" [ngClass]="expandedPlots[plot.id_plot] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </div>
                         </div>
                     </li>
                     <!-- Sous-placettes -->
@@ -387,8 +387,23 @@
 
   <ng-container *ngIf="!isNew">
     <div class="card">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Liste des visites</h4>
+         <pnx-modal-download
+            labelButton="Télécharger ces visites"
+            [pathDownload]="storeService.urlLoad"
+            [exportFormat]="storeService.mhsConfig.export_available_format"
+            [queryString]="storeService.queryString"
+          >
+          </pnx-modal-download>
+         <button
+            *ngIf="addVisitIsAllowed"
+            class="btn btn-sm btn-success pull-right box-shadow"
+            (click)="onNewVisit()"
+          >
+            <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+            Ajouter une nouvelle visite
+          </button>
       </div>
 
       <div class="card-body py-0">
@@ -422,26 +437,6 @@
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>
-      </div>
-
-      <div class="card-footer">
-        <div class="d-flex justify-content-between">
-          <pnx-modal-download
-            labelButton="Télécharger ces visites"
-            [pathDownload]="storeService.urlLoad"
-            [exportFormat]="storeService.mhsConfig.export_available_format"
-            [queryString]="storeService.queryString"
-          >
-          </pnx-modal-download>
-          <button
-            *ngIf="addVisitIsAllowed"
-            class="btn btn-sm btn-success pull-right box-shadow"
-            (click)="onNewVisit()"
-          >
-            <i class="fa fa-plus-circle" aria-hidden="true"> </i>
-            Ajouter une nouvelle visite
-          </button>
-        </div>
       </div>
     </div>
   </ng-container>
@@ -511,8 +506,8 @@
         <small>Code placette parente (optionnel) :</small>
         <select class="form-control form-control-sm" [formControl]="formPlot.controls.id_parent">
           <option [ngValue]="null">-- Aucune (placette principale) --</option>
-          <option *ngFor="let plot of plotHierarchy ; let i = index "[ngValue]="isNew ? i :plot.id_plot">
-            {{ plot.code_plot }}
+          <option *ngFor="let plot of getFlatPlots(plotHierarchy) ; let i = index "[ngValue]="isNew ? i :plot.id_plot">
+            {{ '— '.repeat(plot.depth - 1) }}{{ plot.code_plot }}
           </option>
         </select>
       </div>

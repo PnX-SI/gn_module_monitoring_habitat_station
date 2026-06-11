@@ -218,7 +218,6 @@ export class ListVisitComponent implements OnInit, OnDestroy {
         },
         error => {
           let notErrorStatus = [204, 404];
-          console.log('error.status:', error.status);
           if (!notErrorStatus.includes(error.status)) {
             this.toastr.error(
               'Une erreur est survenue lors de la récupération des informations sur le serveur.',
@@ -235,6 +234,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.api.getOneTransect(this.idSite).subscribe(
       site => {
         this.currentSite = site;
+        console.log('currentSite properties:', this.currentSite.properties);
         if (!this.currentSite.properties?.cor_plots) {
           let msg = 'Ajouter des placettes à votre transect pour y associer des visites.';
           this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
@@ -257,7 +257,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
           msg = 'Une erreur est survenue lors de la récupération des informations sur le serveur.';
         }
         this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
-        console.log('error: ', error);
+        
       }
     );
   }
@@ -644,11 +644,12 @@ onSaveEditPlot() {
     }
   
 }
-getParentCode(id_parent: number): string {
-  if(this.isNew){
-    return this.plotHierarchy[id_parent]?.code_plot || '';
-  }
-  const parent = this.plotHierarchy.find(p => p.id_plot === id_parent);
+getParentCode(id_parent: any): string {
+    const flatPlots = this.getFlatPlots(this.plotHierarchy);
+    if (this.isNew) {
+        return flatPlots[id_parent]?.code_plot || '';
+    }
+    const parent = flatPlots.find(p => p.id_plot === id_parent);
     return parent ? parent.code_plot : '';
 }
 onSelectStation(id_station: any) {
@@ -688,6 +689,21 @@ onSaveStation() {
             this.toastr.error('Erreur lors de la création de la station', '', { positionClass: 'toast-top-right' });
         }
     );
+}
+getFlatPlots(plots: any[], depth: number = 1): any[] {
+    const maxDepth = this.storeService.mhsConfig.max_plot_depth;
+    console.log('getFlatPlots appelé:', plots, 'depth:', depth, 'maxDepth:', maxDepth);
+    let result = [];
+    plots.forEach(plot => {
+        if (depth < maxDepth) {
+            result.push({...plot, depth});
+            if (plot.sub_plots?.length > 0) {
+                result = result.concat(this.getFlatPlots(plot.sub_plots, depth + 1));
+            }
+        }
+    });
+    console.log('résultat:', result);
+    return result;
 }
 
   ngOnDestroy() {

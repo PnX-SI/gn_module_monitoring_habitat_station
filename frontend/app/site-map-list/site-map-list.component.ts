@@ -9,6 +9,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Page } from '../shared/models/page.model';
+import { Transect } from '../shared/models/transect.model';
 import * as L from 'leaflet';
 import 'Leaflet.Deflate';
 
@@ -107,7 +108,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   minDate: any;
   maxDate: any;
   public stations = [];
-  public expandedStations: {[key: number]: any[]} = {};
+  public expandedStations: {[key: number]: Transect[]} = {};
   public dataSource = new MatTableDataSource([])
   public columnsToDisplay = ['Station', 'Habitat', 'Nbre transect', 'Nbre visite', 'Derniere visite']
   public columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
@@ -146,6 +147,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getStations();
     this.center = this.storeService.mhsConfig.zoom_center;
     this.zoom = this.storeService.mhsConfig.zoom;
+    this.page.size = this.storeService.mhsConfig.items_per_page; 
     this.initFilters();
   }
 
@@ -213,6 +215,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
 });
    
     this.addCustomControl();
+    this.addLegend();
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this._api.getStationsYears().subscribe(
@@ -244,7 +247,10 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (data !== null) {
                 this.sites = data[1];
                 this.page.totalElements = data[0].totalItems;
-                this.page.size = data[0].itemsPerPage;
+                    if (this.storeService.mhsConfig.pagination_serverside) {
+                        this.page.size = data[0].itemsPerPage;
+                    }
+
                 this.sites.features.forEach(site => {
                     if (!_.find(this.tabHab, (habitat: Habitat) => {
                         return habitat.cd_hab == site.properties.cd_hab;
@@ -260,7 +266,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                 });
                 this.filteredData = data[1].features.map(feature => {
                   this._api.getTransectsByStation(feature.properties.id_station).subscribe(
-                    (transects: any[]) => {
+                    (transects: Transect[]) => {
                       this.expandedStations[feature.properties.id_station] = transects;
                     }
                   );
@@ -277,7 +283,6 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                 
                 this.dataSource.data = this.filteredData;
                 this.page.totalElements = data[0].totalItems;
-                this.page.size = data[0].itemsPerPage;
             } else {
                 this.filteredData = [];
                 this.dataSource.data = [];
@@ -305,9 +310,9 @@ onViewStation(id_station: number) {
     this.transectLayerMap.clear();
     this.selectedTransectLayer = null;
 
-    const data = this.expandedStations[id_station];
+    const data: Transect[]= this.expandedStations[id_station];
     if (data) {
-        data.forEach((transect) => {
+        data.forEach((transect:Transect) => {
             if (!transect.geom_start || !transect.geom_end) return;
             let line = L.polyline(
                 [[transect.geom_start.coordinates[1], transect.geom_start.coordinates[0]],
@@ -341,54 +346,7 @@ onInfo(id_base_site: any) {
     this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, id_base_site]);
 }
 
-getTransects(params?) {
-    this._api.getAllTransects(params).subscribe(
-      data => {
-        if (data !== null) {
-          this.sites = data[1];
-          this.page.totalElements = data[0].totalItems;
-          this.page.size = data[0].itemsPerPage;
-          this.sites.features.forEach(site => {
-            if (
-              !_.find(this.tabHab, (habitat: Habitat) => {
-                return habitat.cd_hab == site.properties.cd_hab;
-              })
-            ) {
-              this.tabHab.push({
-                cd_hab: site.properties.cd_hab,
-                nom_habitat: site.properties.nom_habitat,
-              });
-              this.tabHab = _.sortBy(this.tabHab, [
-                (habitat: Habitat) => {
-                  return habitat.nom_habitat;
-                },
-              ]);
-            }
-          });
-          this.mapListService.loadTableData(data[1]);
-          this.filteredData = this.mapListService.tableData;
-        }
-        else {
-          this.filteredData = []
-        }
-        this.dataLoaded = true;
-      },
-      error => {
-        let msg =
-          'Une erreur est survenue lors de la récupération des informations sur le serveur.';
-        if (error.status == 404) {
-          this.page.totalElements = 0;
-          this.page.size = 0;
-          this.filteredData = [];
-        } else if (error.status == 403) {
-          msg = "Vous n'êtes pas autorisé à afficher ces données.";
-        } else {
-          this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
-        }
-        this.dataLoaded = true;
-      }
-    );
-  }
+
 
   initFilters() {
     this.filterForm = this.formBuilder.group({
@@ -495,9 +453,7 @@ getTransects(params?) {
         this._map.fitBounds(group.getBounds());
       }
     },500);
-    console.log('element cliqué:', element);
-    console.log('expandedStations:', this.expandedStations);
-    console.log('expandedStations[element.id_station]:', this.expandedStations[element.id_station]);
+
   }
 
   zoomOnSelectedLayer(map, layer, zoom) {
@@ -602,6 +558,13 @@ getTransects(params?) {
     })
 
   }
+  addLegend() {
+    let legend = new L.Control({ position: 'bottomright' });
+    legend.onAdd = () => {
+        return this.storeService.buildMapLegend();
+    };
+    legend.addTo(this._map);
+}
   
 
   ngOnDestroy() {

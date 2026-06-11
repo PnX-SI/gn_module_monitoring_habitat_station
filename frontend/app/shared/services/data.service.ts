@@ -173,7 +173,7 @@ export class DataService {
     });
   }
 
-  getTransectsByStation(id_station: any) {
+  getTransectsByStation(id_station: number) {
       return this._http.get(
           `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/${id_station}/transects`
       );
