@@ -7,6 +7,42 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Inédit]
 
+## [2.0.0] - 2026-06-10
+
+### 🚀 Ajouté
+
+- Ajout de la notion de **station** regroupant plusieurs transects (`t_stations`) avec nom, habitat et géométrie calculée automatiquement comme barycentre des transects associés.
+- Ajout des **capteurs de température** (`t_temperature_sensors`) associés aux transects avec numéro de série et date d'installation.
+- Ajout de la notion de **sous-placettes** via un champ `id_parent` dans `t_plots` permettant une hiérarchie récursive de placettes configurable via le paramètre `max_plot_depth`.
+- Ajout des **filtres** sur la liste des stations : année de visite, commune, habitat, organisme.
+- Ajout de l'**interaction carte-liste** : clic sur une station dans le tableau zoome sur ses transects sur la carte, clic sur un transect sur la carte met en surbrillance la ligne correspondante dans le tableau avec gestion de la pagination.
+- Ajout d'une **légende** sur la carte indiquant le symbole des stations et des transects.
+- Affichage automatique des transects sur la carte au zoom à partir d'un certain niveau.
+- Ajout du paramètre de configuration `max_plot_depth` pour limiter la profondeur de la hiérarchie des placettes (défaut : 2).
+- Ajout des routes backend : `GET /stations`, `GET /stations/years`, `GET /stations/area`, `GET /stations/organism`, `GET /stations/<id>/transects`.
+- Ajout du script de migration des placettes (`migration_placette.sql`) pour créer les placettes parentes depuis les sous-placettes existantes.
+- Ajout du script de migration des capteurs de température (`migration_capteurs_temp.sql`).
+
+### 🔄 Modifié
+
+- La liste des sites est remplacée par une liste des **stations** avec tableau expandable affichant les transects associés (`mat-table` Angular Material).
+- Le formulaire de création/modification d'un transect intègre désormais la gestion de la **station**, des **capteurs** et des **placettes hiérarchiques** en mode création.
+- Le champ `cd_hab` est déplacé de `t_transects` vers `t_stations` (l'habitat est lié à la station, pas au transect).
+- La géométrie de la station est recalculée automatiquement après chaque ajout ou modification d'un transect (barycentre ST_Centroid des geom_start).
+- Mise à jour du frontend vers Angular Material pour le tableau des stations.
+- Amélioration de l'affichage des placettes dans le formulaire de relevé avec gestion des sous-placettes.
+
+### ⚠️ Mise à niveau
+
+Cette version introduit des changements de base de données **non rétro-compatibles**. La migration Alembic `4ef2f84caba3` crée de nouvelles tables et colonnes. En cas de downgrade, les données saisies dans les nouvelles tables (`t_stations`, `t_temperature_sensors`) et colonnes (`id_parent`, `id_station`, `azimut`) seront **perdues**.
+
+1. Appliquer la migration Alembic avec le tag `by_label` (convention CBNA) :
+   `geonature db upgrade monitoring_habitat_station@head --tag by_label`
+2. Appliquer le script de migration des placettes :
+   `psql -h localhost -U geonatadmin -d geonature2db -f migration_placette.sql`
+3. Appliquer le script de migration des capteurs de température :
+   `psql -h localhost -U geonatadmin -d geonature2db -f migration_capteurs_temp.sql`
+
 ## [1.3.0] - 2025-03-03
 
 ### 🔄 Modifié
