@@ -37,6 +37,7 @@ def get_plot_depth(id_parent):
 
 def create_plot(plot_data):
       sub_plots = plot_data.pop('sub_plots', [])
+      plot_data.pop('temp_id', None)
       transect = DB.session.get(TTransect, plot_data.get("id_transect"))
       # verify if the transect exist
       if transect is None:
@@ -50,7 +51,7 @@ def create_plot(plot_data):
                 return {"error": "Parent plot does not belong to the same transect"}, 400
             depth = get_plot_depth(plot_data.get("id_parent"))
             max_depth = blueprint.config["max_plot_depth"]
-            if depth >= max_depth:
+            if depth > max_depth:
                 raise ValueError(f"La profondeur maximale de {max_depth} niveaux est atteinte")
             
            

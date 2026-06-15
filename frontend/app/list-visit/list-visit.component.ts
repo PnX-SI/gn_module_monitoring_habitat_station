@@ -179,7 +179,8 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       transect_label: [null, Validators.required],
       id_station: [null],
       id_nomenclature_plot_position: [null, Validators.required],
-      azimut:[null]
+      azimut:[null],
+      cd_hab:[null],
     });
     return formTransect;
   }
@@ -693,7 +694,8 @@ onSelectStation(id_station: any) {
         (data: any) => {
             this.selectedStation = data;
             this.formTransect.patchValue({
-                id_station: id_station
+                id_station: id_station,
+                cd_hab: data.properties.cd_hab
             });
         },
         error => {
@@ -716,7 +718,8 @@ onSaveStation() {
         (data: any) => {
             this.selectedStation = data;
             this.formTransect.patchValue({
-                id_station: data.properties.id_station
+                id_station: data.properties.id_station,
+                cd_hab: data.properties.cd_hab,
             });
             this.modalRef.close();
             this.toastr.success('Station créée avec succès', '', { positionClass: 'toast-top-right' });
