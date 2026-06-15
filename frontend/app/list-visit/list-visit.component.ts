@@ -178,6 +178,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       transect_label: [null, Validators.required],
       id_station: [null],
       id_nomenclature_plot_position: [null, Validators.required],
+      azimut:[null]
     });
     return formTransect;
   }
@@ -276,6 +277,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       plot_size: this.currentSite.properties.plot_size,
       plot_shape: this.currentSite.properties.plot_shape,
       transect_label: this.currentSite.properties.transect_label,
+      azimut: this.currentSite.properties.azimut,
     });
   }
 
