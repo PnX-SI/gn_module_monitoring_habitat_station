@@ -345,7 +345,7 @@
                             </button>
                             <button *ngIf="!disabledForm"
                                 class="btn btn-sm btn-danger"
-                                (click)="onConfirmDeletePlot(plot.id_plot, confirmPlotContent, i)">
+                                (click)="onConfirmDeletePlot(plot.id_plot, confirmPlotContent, i, plot)">
                                 <i class="fa fa-trash"></i>
                             </button>
                             <div *ngIf="plot.sub_plots?.length > 0"
@@ -506,7 +506,7 @@
         <small>Code placette parente (optionnel) :</small>
         <select class="form-control form-control-sm" [formControl]="formPlot.controls.id_parent">
           <option [ngValue]="null">-- Aucune (placette principale) --</option>
-          <option *ngFor="let plot of getFlatPlots(plotHierarchy) ; let i = index "[ngValue]="isNew ? i :plot.id_plot">
+          <option *ngFor="let plot of getFlatPlots(plotHierarchy) "[ngValue]="isNew ? plot.temp_id :plot.id_plot">
             {{ '— '.repeat(plot.depth - 1) }}{{ plot.code_plot }}
           </option>
         </select>

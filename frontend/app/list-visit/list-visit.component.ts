@@ -71,6 +71,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   plotToEditIndex: number = null;
   formStation: FormGroup;
   formEditPlot: FormGroup;
+  private plotIdCounter : number =0;
   plotToDeleteObject: any = null;
    private _transformer = (node: PlotNode, level: number): FlatPlotNode => ({
     expandable: !!node.sub_plots && node.sub_plots.length > 0,
@@ -324,20 +325,36 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   onRemoveSubPlot(index : number ){
     this.subplots.splice(index, 1);
   }
-  buildHierarchy(plots: any[]): any[] {
-    const roots = plots.filter(p => p.id_parent === null || p.id_parent === undefined);
-    roots.forEach(root => {
-        root.sub_plots = plots.filter(p => p.id_parent === plots.indexOf(root));
-    });
-    return roots;
-}
+ 
+findPlotById(plots : any[], id: number): any{
+  for(let plot of plots){
+    if (plot.temp_id === id){
+      return plot;
+    }
+    if(plot.sub_plots?.length > 0){
+      const found = this.findPlotById(plot.sub_plots, id);
+      if(found) return found;
+    }
+  }
+  return null;
+} 
 
 onSavePlot() {
     let plot = this.formPlot.value;
     
     if(this.isNew){
-      this.plotHierarchy.push(plot);
-      this.plotHierarchy = this.buildHierarchy([...this.plotHierarchy]);
+      plot.temp_id = this.plotIdCounter++;
+      plot.sub_plots = [];
+      if(plot.id_parent !== null && plot.id_parent !== undefined){
+        const parent = this.findPlotById(this.plotHierarchy, plot.id_parent);
+        if(parent){
+          if(!parent.sub_plots) parent.sub_plots = [];
+          parent.sub_plots.push(plot)
+        }
+      }else{
+        this.plotHierarchy.push(plot);
+      }
+      this.plotHierarchy = [...this.plotHierarchy];
       this.modalRef.close();
       this.toastr.success('Placette ajoutée avec succès', '', { positionClass: 'toast-top-right' });
     }else{
@@ -353,14 +370,27 @@ onSavePlot() {
         }
       )
     }
-   
 }
+      
 onSaveAndContinuePlot() {
     let plot = this.formPlot.value;
     let savedParent = plot.id_parent;
+
     if(this.isNew){
-      this.plotHierarchy.push(plot);
-      this.plotHierarchy = this.buildHierarchy([...this.plotHierarchy]);
+      plot.temp_id = this.plotIdCounter++;
+      plot.sub_plots = [];
+
+      if (plot.id_parent !== null && plot.id_parent !== undefined) {
+          const parent = this.findPlotById(this.plotHierarchy, plot.id_parent);
+          if (parent) {
+              if (!parent.sub_plots) parent.sub_plots = [];
+              parent.sub_plots.push(plot);
+          }
+      } else {
+          this.plotHierarchy.push(plot);
+      }
+      this.plotHierarchy = [...this.plotHierarchy];
+
       this.formPlot.patchValue({
                 code_plot: null,
                 distance_plot: null,
@@ -386,8 +416,6 @@ onSaveAndContinuePlot() {
         }
     );
     }
-    
-    
 }
 
 onEdit() {
@@ -575,6 +603,19 @@ onEdit() {
     });
     this.modalRef = this.modalService.open(content, { centered: true });
   }
+  removePlot(plots: any[], target: any): boolean {
+    const index = plots.indexOf(target);
+    if (index !== -1) {
+        plots.splice(index, 1);
+        return true;
+    }
+    for (let plot of plots) {
+        if (plot.sub_plots?.length > 0) {
+            if (this.removePlot(plot.sub_plots, target)) return true;
+        }
+    }
+    return false;
+}
 
   onConfirmDeletePlot(id_plot: number, confirmContent: any, index?: number, plot?: any) {
     this.plotToDelete = id_plot;
@@ -586,16 +627,8 @@ onEdit() {
 
 onConfirmDeletePlotAction() {
     if(this.isNew){
-        if(this.plotToDeleteObject?.id_parent !== null && this.plotToDeleteObject?.id_parent !== undefined){
-            
-            const parent = this.plotHierarchy[this.plotToDeleteObject.id_parent];
-            parent.sub_plots = parent.sub_plots.filter(s => s !== this.plotToDeleteObject);
-            this.plotHierarchy = [...this.plotHierarchy];
-        } else {
-            // Placette principale
-            this.plotHierarchy.splice(this.plotToDeleteIndex, 1);
-            this.plotHierarchy = [...this.plotHierarchy];
-        }
+        this.removePlot(this.plotHierarchy, this.plotToDeleteObject);
+        this.plotHierarchy = [...this.plotHierarchy];
         this.confirmPlotModalRef.close();
         this.toastr.success('Placette supprimée avec succès', '', { positionClass: 'toast-top-right' });
     } else {
@@ -623,15 +656,16 @@ onEditPlot(plot: any, content: any, index?:number) {
 }
 
 onSaveEditPlot() {
-    let plot = this.formEditPlot.value;
-    plot.id_plot = this.plotToEdit.id_plot;
+    let formValue = this.formEditPlot.value;
+
     if(this.isNew){
-      this.plotHierarchy[this.plotToEditIndex] = {...this.plotHierarchy[this.plotToEditIndex], ...this.formEditPlot.value};
+      Object.assign(this.plotToEdit, formValue);
       this.plotHierarchy = [...this.plotHierarchy];
       this.modalRef.close();
       this.toastr.success('Placette modifiée avec succès', '', { positionClass: 'toast-top-right' });
-      
     }else{
+      let plot = formValue;
+      plot.id_plot = this.plotToEdit.id_plot;
       plot.id_transect = this.currentSite.properties?.id_transect;
         this.api.updatePlot(plot).subscribe(
         data => {
@@ -644,13 +678,13 @@ onSaveEditPlot() {
         }
     );
     }
-  
 }
 getParentCode(id_parent: any): string {
-    const flatPlots = this.getFlatPlots(this.plotHierarchy);
     if (this.isNew) {
-        return flatPlots[id_parent]?.code_plot || '';
+        const parent = this.findPlotById(this.plotHierarchy, id_parent);
+        return parent ? parent.code_plot : '';
     }
+    const flatPlots = this.getFlatPlots(this.plotHierarchy);
     const parent = flatPlots.find(p => p.id_plot === id_parent);
     return parent ? parent.code_plot : '';
 }
@@ -692,6 +726,7 @@ onSaveStation() {
         }
     );
 }
+
 getFlatPlots(plots: any[], depth: number = 1): any[] {
     const maxDepth = this.storeService.mhsConfig.max_plot_depth;
     console.log('getFlatPlots appelé:', plots, 'depth:', depth, 'maxDepth:', maxDepth);
