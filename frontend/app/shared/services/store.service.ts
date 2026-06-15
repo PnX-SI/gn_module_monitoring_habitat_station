@@ -41,5 +41,19 @@ export class StoreService {
         </div>
     `;
     return div;
-}
+  } 
+  loadQueryString(){
+    this.queryString = new HttpParams({
+      fromString : localStorage.getItem('mhs-filters-querystring') ?? undefined
+    })
+  }
+  saveQueryString(){
+    localStorage.setItem('mhs-filters-querystring', this.queryString.toString())
+  }
+  clearQueryString(){
+    let filterkey = this.queryString.keys();
+    filterkey.forEach(key => {
+      this.queryString = this.queryString.delete(key);
+    })
+  }
 }

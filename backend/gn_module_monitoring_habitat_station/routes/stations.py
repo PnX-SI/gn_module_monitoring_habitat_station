@@ -89,6 +89,7 @@ def get_all_stations():
             )
         .outerjoin(corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit)
         .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
         .group_by(Station.id_station, Habref.lb_hab_fr)
     )
     if "filterHab" in parameters:
@@ -106,6 +107,9 @@ def get_all_stations():
                 User.prenom_role == parameters["observer"]
             )
         )
+    if 'organism' in parameters:
+        q = q.where(Organisme.nom_organisme == parameters["organism"])
+
     page = request.args.get("page", 1, type=int)
     items_per_page = blueprint.config["items_per_page"]
     pagination_serverside = blueprint.config["pagination_serverside"]
@@ -187,7 +191,7 @@ def get_area():
 def get_organism():
     q =(
         select(
-            Organisme.nom_organisme, User.nom_role, User.prenom_role, User.id_organisme
+            Organisme.nom_organisme
         )
         .select_from(Station)
         .outerjoin(TTransect, TTransect.id_station == Station.id_station)

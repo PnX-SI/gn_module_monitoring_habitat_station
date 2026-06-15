@@ -143,12 +143,21 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.storeService.loadQueryString();
     this.checkPermission();
-    this.getStations();
+    
     this.center = this.storeService.mhsConfig.zoom_center;
     this.zoom = this.storeService.mhsConfig.zoom;
     this.page.size = this.storeService.mhsConfig.items_per_page; 
     this.initFilters();
+    this.getStations(this.getFiltersFromQueryString());
+  }
+  private getFiltersFromQueryString(){
+    let filter: any = {}
+    this.storeService.queryString.keys().forEach(key => {
+      filter[key] = this.storeService.queryString.get(key);
+    });
+    return Object.keys(filter).length > 0 ? filter : undefined
   }
 
   ngAfterViewInit() {
@@ -352,10 +361,10 @@ onInfo(id_base_site: any) {
     this.filterForm = this.formBuilder.group({
       date_low: null,
       date_up: null,
-      filterHab: null,
-      year: null,
-      area_name: null,
-      organism: null,
+      filterHab: this.storeService.queryString.get('filterHab'),
+      year: this.storeService.queryString.get('year'),
+      area_name: this.storeService.queryString.get('area_name'),
+      organism: this.storeService.queryString.get('organism'),
 
     });
     this.filterForm.controls['date_low'].statusChanges.subscribe(() => {
@@ -498,7 +507,15 @@ onInfo(id_base_site: any) {
     filter.date_up = this.dateParser.format(this.filterForm.value.date_up);
     filter.year = this.filterForm.value.year;
     filter.area_name = this.filterForm.value.area_name;
-    filter.organism= this.filterForm.value.organism
+    filter.organism= this.filterForm.value.organism;
+     Object.keys(filter).forEach(key => {
+        if (filter[key]) {
+            this.storeService.queryString = this.storeService.queryString.set(key, filter[key]);
+        } else {
+            this.storeService.queryString = this.storeService.queryString.delete(key);
+        }
+    });
+    this.storeService.saveQueryString();
     this.getStations(filter);
   }
 
@@ -568,9 +585,7 @@ onInfo(id_base_site: any) {
   
 
   ngOnDestroy() {
-    let filterkey = this.storeService.queryString.keys();
-    filterkey.forEach(key => {
-      this.storeService.queryString = this.storeService.queryString.delete(key);
-    });
-  }
+    this.storeService.saveQueryString();
+    this.storeService.clearQueryString();
+}
 }
