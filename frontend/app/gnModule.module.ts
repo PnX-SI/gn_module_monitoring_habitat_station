@@ -28,6 +28,8 @@ import {MatIconModule} from '@angular/material/icon'
 import {MatButtonModule} from '@angular/material/button'
 import {MatTableModule} from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { FrenchPaginatorIntl } from './shared/services/french-paginator-intl.service';
 import {MatSortModule} from '@angular/material/sort'
 import {MatProgressBarModule} from '@angular/material/progress-bar'
 
@@ -37,7 +39,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar'
 @NgModule({
   declarations: [SiteMapListComponent, ListVisitComponent, ReleveComponent, PlotReleveComponent],
   imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule,MatTableModule, MatPaginatorModule, MatSortModule, MatProgressBarModule],
-  providers: [HttpClient, DataService, StoreService, UserService],
+  providers: [HttpClient, DataService, StoreService, UserService, {provide: MatPaginatorIntl, useClass: FrenchPaginatorIntl}],
   bootstrap: [],
 })
 export class GeonatureModule {}

@@ -237,7 +237,6 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.api.getOneTransect(this.idSite).subscribe(
       site => {
         this.currentSite = site;
-        console.log('currentSite properties:', this.currentSite.properties);
         if (!this.currentSite.properties?.cor_plots) {
           let msg = 'Ajouter des placettes à votre transect pour y associer des visites.';
           this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
@@ -732,7 +731,6 @@ onSaveStation() {
 
 getFlatPlots(plots: any[], depth: number = 1): any[] {
     const maxDepth = this.storeService.mhsConfig.max_plot_depth;
-    console.log('getFlatPlots appelé:', plots, 'depth:', depth, 'maxDepth:', maxDepth);
     let result = [];
     plots.forEach(plot => {
         if (depth < maxDepth) {
@@ -742,7 +740,6 @@ getFlatPlots(plots: any[], depth: number = 1): any[] {
             }
         }
     });
-    console.log('résultat:', result);
     return result;
 }
 
