@@ -204,7 +204,7 @@
                   max="90"
                   min="-90"
                   step="0.001"
-                  placeholder="Y"
+                  placeholder="0 à 359"
                 />
               </div>
               <div class="col">
@@ -315,7 +315,8 @@
           </div>
          
         </fieldset>
-         <label> Liste des placettes </label>
+        <fieldset>
+          <legend> Liste des placettes </legend>
             <div class="d-flex">
                 <button
                     *ngIf="!disabledForm"
@@ -381,6 +382,9 @@
                     
                 </ng-container>
             </ul>
+
+        </fieldset>
+         
       </form>
     </div>
   </div>

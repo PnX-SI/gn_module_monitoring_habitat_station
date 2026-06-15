@@ -29,13 +29,14 @@ import {MatButtonModule} from '@angular/material/button'
 import {MatTableModule} from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort'
+import {MatProgressBarModule} from '@angular/material/progress-bar'
 
 
 
 
 @NgModule({
   declarations: [SiteMapListComponent, ListVisitComponent, ReleveComponent, PlotReleveComponent],
-  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule,MatTableModule, MatPaginatorModule, MatSortModule],
+  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule,MatTableModule, MatPaginatorModule, MatSortModule, MatProgressBarModule],
   providers: [HttpClient, DataService, StoreService, UserService],
   bootstrap: [],
 })

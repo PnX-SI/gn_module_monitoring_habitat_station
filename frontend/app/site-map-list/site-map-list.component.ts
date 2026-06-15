@@ -110,7 +110,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public stations = [];
   public expandedStations: {[key: number]: Transect[]} = {};
   public dataSource = new MatTableDataSource([])
-  public columnsToDisplay = ['Station', 'Habitat', 'Nbre transect', 'Nbre visite', 'Derniere visite']
+  public columnsToDisplay = ['Station', 'Habitat', 'Nbre transect', 'Nbre visite', 'Dernière visite']
   public columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
   public expandedElement : any;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -251,6 +251,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getStations(params?: any) {
+    this.dataLoaded = false;
     this._api.getAllStations(params).subscribe(
         data => {
             if (data !== null) {
@@ -284,7 +285,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
                     "Habitat" : feature.properties.habitat_name,
                     'Nbre visite': feature.properties.nb_visits,
                     'Nbre transect': feature.properties.nb_transect,
-                    'Derniere visite': feature.properties.last_visit,
+                    'Dernière visite': feature.properties.last_visit,
                     'id_station' : feature.properties.id_station
 
                   };
@@ -521,6 +522,8 @@ onInfo(id_base_site: any) {
 
   resetFilters() {
     this.filterForm.reset();
+    this.storeService.clearQueryString(),
+    this.storeService.saveQueryString(),
     this.getStations();
     this.resetMinMaxDate();
     setTimeout(() => {

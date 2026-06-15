@@ -1,4 +1,4 @@
-<div id="cover-spin" *ngIf="!dataLoaded"></div>
+
 <div class="row row-0">
   <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -99,6 +99,7 @@
       </fieldset>
       <br />
       <div class="wrapper wrapper-datatable mt-3" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden;">
+      <mat-progress-bar mode="indeterminate" *ngIf="!dataLoaded"></mat-progress-bar>
        <table mat-table 
             [dataSource] = "dataSource" multiTemplateDataRows matSort
             class = "mat-elevation-28">
@@ -124,8 +125,8 @@
                               <tr>
                                 
                                 <th scope = "col">Nom transect</th>
-                                <th scope = "col">Nb visites</th>
-                                <th scope = "col">Dernières visites</th>
+                                <th scope = "col">Nbre visite</th>
+                                <th scope = "col">Dernière visite</th>
                                 <th scope = "col">Actions</th>
                               </tr>
                             </thead>
