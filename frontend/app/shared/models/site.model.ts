@@ -17,5 +17,7 @@ export interface ISite {
     base_site_name?: string;
     date_max?: string;
     observers?: any[];
+    azimut?:number
+
   };
 }
