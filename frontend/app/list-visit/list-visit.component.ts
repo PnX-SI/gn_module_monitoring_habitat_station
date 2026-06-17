@@ -715,6 +715,7 @@ onSaveStation() {
     let station = this.formStation.value;
     this.api.addStation(station).subscribe(
         (data: any) => {
+            this.stations.push(data);
             this.selectedStation = data;
             this.formTransect.patchValue({
                 id_station: data.properties.id_station,
