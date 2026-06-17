@@ -38,6 +38,7 @@ const I18N_VALUES = {
 };
 
 
+
 @Injectable()
 export class I18n {
   language = 'fr';
@@ -122,6 +123,13 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   private selectedTransectLayer : L.Polyline = null; 
   private transectLayerMap: Map<number, L.Polyline> = new Map();
   private selectedTransectId : number = null;
+  public columnTooltips: { [key: string]: string } = {
+    'Station': 'Nom de la station',
+    'Habitat': 'Habitat associé à la station',
+    'Nbre transect': 'Nombre de transects de la station',
+    'Nbre visite': 'Nombre de visites de la station',
+    'Dernière visite': 'Date de la dernière visite'
+};
 
 
   constructor(
