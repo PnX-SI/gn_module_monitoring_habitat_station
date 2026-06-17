@@ -156,7 +156,8 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     
     this.center = this.storeService.mhsConfig.zoom_center;
     this.zoom = this.storeService.mhsConfig.zoom;
-    this.page.size = this.storeService.mhsConfig.items_per_page; 
+    const savedPageSize = localStorage.getItem('mhs-page-size');
+    this.page.size = savedPageSize ? parseInt(savedPageSize, 10) : this.storeService.mhsConfig.items_per_page;
     this.initFilters();
     this.getStations(this.getFiltersFromQueryString());
   }
@@ -592,6 +593,10 @@ onInfo(id_base_site: any) {
         return this.storeService.buildMapLegend();
     };
     legend.addTo(this._map);
+}
+onPageChange(event: any) {
+    this.page.size = event.pageSize;
+    localStorage.setItem('mhs-page-size', event.pageSize.toString());
 }
   
 
