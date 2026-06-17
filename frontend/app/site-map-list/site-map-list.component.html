@@ -102,6 +102,7 @@
       <mat-progress-bar mode="indeterminate" *ngIf="!dataLoaded"></mat-progress-bar>
        <table mat-table 
             [dataSource] = "dataSource" multiTemplateDataRows matSort
+            matSortActive="Station" matSortDirection="asc"
             class = "mat-elevation-28">
             <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
               <th mat-header-cell mat-sort-header *matHeaderCellDef class = "mat-header-cell"> {{column}} </th>
