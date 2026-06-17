@@ -155,9 +155,13 @@
               <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
                   class="example-element-row"
                   [class.example-expanded-row]="expandedElement === element"
+                  [class.selected-station-row]="expandedElement === element"
                   (click)="expandedElement = expandedElement === element ? null : element; onRowSelect(element)">
               </tr>
-              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" 
+                  class="example-detail-row"
+                  [class.selected-station-row]="row === expandedElement">
+              </tr>
               <tr class="mat-row" *matNoDataRow>
                 <td class="mat-cell" colspan="6">
                     Aucune station à afficher
