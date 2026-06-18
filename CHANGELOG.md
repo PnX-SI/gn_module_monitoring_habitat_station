@@ -153,7 +153,7 @@ Follow the update order below:
 
 - Update syntax for utils-flask-sqla.
 - Update syntax for Marshmallow use in config schema.
-- Change module code to SHS.
+- Change module code to MHS.
 - Fix issues due to upgrade to Angular 7.
 - Clean chore files.
 

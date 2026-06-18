@@ -153,7 +153,7 @@ Suivez l'ordre de mise à jour ci-dessous :
 
 - Mettre à jour la syntaxe pour utils-flask-sqla.
 - Mettre à jour la syntaxe pour l'utilisation de Marshmallow dans le schéma de configuration.
-- Changer le code du module en SHS.
+- Changer le code du module en MHS.
 - Résoudre les problèmes dus à la mise à niveau vers Angular 7.
 - Nettoyer les fichiers de tâches.
 
