@@ -91,6 +91,7 @@ def get_all_stations():
         .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
         .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
         .group_by(Station.id_station, Habref.lb_hab_fr)
+        .order_by(Station.name)
     )
     if "filterHab" in parameters:
         q = q.where(Station.cd_hab == parameters["filterHab"])
