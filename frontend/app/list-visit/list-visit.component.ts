@@ -279,6 +279,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       plot_shape: this.currentSite.properties.plot_shape,
       transect_label: this.currentSite.properties.transect_label,
       azimut: this.currentSite.properties.azimut,
+      id_station: this.currentSite.properties.id_station,
     });
   }
 

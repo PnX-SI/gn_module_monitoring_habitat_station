@@ -3,6 +3,7 @@ export interface ISite {
   properties?: {
     id_base_site?: number;
     id_transect?: number;
+    id_station?:number;
     cd_hab?: number;
     organisme?: string;
     nom_habitat?: string;
