@@ -14,7 +14,6 @@
         <legend class="filters-legend">
           <h6><i class="fa fa-filter"></i> Filtres</h6>
         </legend>
-        <form *ngIf="dataLoaded" class="wrapper wrapper-filter">
         <form class="wrapper wrapper-filter">
           <div class="row">
             <div class="searchSite col">
@@ -92,9 +91,9 @@
               </select>
             </div>
           </div>
-          <button class="btn btn-sm btn-success pull-right " (click)="onFilter()">Filtrer</button>
-          <button class="btn btn-sm btn-secodary pull-right mr-3" (click)="resetFilters()">
-            Réinitialiser
+          <button mat-stroked-button color="primary" (click)="resetFilters()" class="pull-right">
+              <mat-icon>restart_alt</mat-icon>
+              Réinitialiser
           </button>
         </form>
       </fieldset>

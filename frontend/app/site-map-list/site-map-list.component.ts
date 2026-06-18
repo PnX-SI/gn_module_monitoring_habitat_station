@@ -375,8 +375,12 @@ onInfo(id_base_site: any) {
       year: this.storeService.queryString.get('year'),
       area_name: this.storeService.queryString.get('area_name'),
       organism: this.storeService.queryString.get('organism'),
-
     });
+
+    this.filterForm.valueChanges.subscribe(() => {
+        this.onFilter();
+    });
+
     this.filterForm.controls['date_low'].statusChanges.subscribe(() => {
       if (this.filterForm.controls['date_low'].value) {
         this.minDate = this.filterForm.controls['date_low'].value;
@@ -391,7 +395,7 @@ onInfo(id_base_site: any) {
           this.filterForm.controls['date_low'].setValue(this.minDate);
       }
     });
-  }
+}
 
   setPage(pageInfo) {
     this.page.pageNumber = pageInfo.offset + 1;
