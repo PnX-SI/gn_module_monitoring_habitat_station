@@ -128,7 +128,13 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
     'Habitat': 'Habitat associé à la station',
     'Nbre transect': 'Nombre de transects de la station',
     'Nbre visite': 'Nombre de visites de la station',
-    'Dernière visite': 'Date de la dernière visite'
+    'Dernière visite': 'Date de la dernière visite',
+    
+};
+public transectColumnTooltips: { [key: string]: string } = {
+    'Nom transect': 'Nom du transect',
+    'Nbre visite': 'Nombre de visites du transect',
+    'Dernière visite': 'Date de la dernière visite du transect',
 };
 
 

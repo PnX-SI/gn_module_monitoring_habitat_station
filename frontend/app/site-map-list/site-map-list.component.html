@@ -124,11 +124,10 @@
                          <table class = "table">
                             <thead class="sub-table-header">
                               <tr>
-                                
-                                <th scope = "col">Nom transect</th>
-                                <th scope = "col">Nbre visite</th>
-                                <th scope = "col">Dernière visite</th>
-                                <th scope = "col">Actions</th>
+                                <th scope="col" [matTooltip]="transectColumnTooltips['Nom transect']">Nom transect</th>
+                                <th scope="col" [matTooltip]="transectColumnTooltips['Nbre visite']">Nbre visite</th>
+                                <th scope="col" [matTooltip]="transectColumnTooltips['Dernière visite']">Dernière visite</th>
+                                <th scope="col">Actions</th>
                               </tr>
                             </thead>
                             <tbody class = "sub-table-body">
