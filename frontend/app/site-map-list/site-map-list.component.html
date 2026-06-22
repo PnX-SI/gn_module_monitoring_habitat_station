@@ -109,13 +109,28 @@
               <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
             </ng-container>
             <ng-container matColumnDef="expand">
-              <th mat-header-cell  *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-              <td mat-cell *matCellDef="let element">
-                <button mat-icon-button aria-label="expand row" matTooltip="Voir les transects" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation(); onViewStation(element.id_station)" >
-                  <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
-                  <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
-                </button>
-              </td>
+                <th mat-header-cell *matHeaderCellDef class="mat-header-cell" aria-label="row actions">&nbsp;</th>
+                <td mat-cell *matCellDef="let element">
+                    <div class="d-flex align-items-center">
+                        <!-- Bouton Modifier -->
+                        <button 
+                            mat-icon-button 
+                            class="btn btn-sm btn-warning mr-1"
+                            matTooltip="Modifier la station"
+                            (click)="onEditStation(element, editStationContent); $event.stopPropagation()">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                        <!-- Bouton Dérouler -->
+                        <button 
+                            mat-icon-button 
+                            aria-label="expand row" 
+                            matTooltip="Voir les transects"
+                            (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation(); onViewStation(element.id_station)">
+                            <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+                            <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+                        </button>
+                    </div>
+                </td>
             </ng-container>
             <ng-container matColumnDef="expandedDetail">
                 <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
@@ -186,3 +201,47 @@
     </pnx-map>
   </div>
 </div>
+<ng-template #editStationContent let-d="dismiss">
+    <div class="modal-header">
+        <h5 class="modal-title">Modifier la station</h5>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formEditStation">
+            <div class="form-group">
+                <small>Nom de la station * :</small>
+                <input class="form-control form-control-sm" 
+                       [formControl]="formEditStation.controls.name" />
+            </div>
+            <div class="form-group">
+                <small>Remarques :</small>
+                <textarea class="form-control form-control-sm"
+                          [formControl]="formEditStation.controls.remarks"
+                          rows="3">
+                </textarea>
+            </div>
+            <div class="form-group">
+                <small>Habitat * :</small>
+                <select class="form-control form-control-sm"
+                        [formControl]="formEditStation.controls.cd_hab">
+                    <option [ngValue]="null">-- Sélectionnez un habitat --</option>
+                    <option *ngFor="let habitat of habitats"
+                            [ngValue]="habitat.cd_hab">
+                        {{ habitat.nom_complet }}
+                    </option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm" 
+                (click)="d('Close click')">Fermer</button>
+        <button type="button" class="btn btn-success btn-sm"
+                [disabled]="formEditStation.invalid"
+                (click)="onSaveEditStation()">
+            Enregistrer
+        </button>
+    </div>
+</ng-template>

@@ -38,6 +38,12 @@ export class DataService {
         station
     );
 }
+updateStation(station:any){
+  return this._http.patch(
+    `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/${station.id_station}`,
+    station
+  );
+}
 
   addTransect(transect:any) {
     return this._http.post(

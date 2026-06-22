@@ -7,11 +7,12 @@ import {
   NgbDateStruct,
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Page } from '../shared/models/page.model';
 import { Transect } from '../shared/models/transect.model';
 import * as L from 'leaflet';
 import 'Leaflet.Deflate';
+import { NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
 import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
@@ -100,6 +101,7 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public tabHab: Habitat[] = [];
   public addIsAllowed: boolean = false;
   public dataLoaded = false;
+  private modalRef: NgbModalRef;
   public center;
   public zoom;
   private _map;
@@ -119,10 +121,13 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   public tabYear = [];
   public tabArea = [];
   public tabOrganism = [];
+  public habitats: any;
   private transectLayers: L.Layer[] =[];
   private selectedTransectLayer : L.Polyline = null; 
   private transectLayerMap: Map<number, L.Polyline> = new Map();
   private selectedTransectId : number = null;
+  public formEditStation: FormGroup;
+  private stationToEdit: any = null;
   public columnTooltips: { [key: string]: string } = {
     'Station': 'Nom de la station',
     'Habitat': 'Habitat associé à la station',
@@ -149,7 +154,8 @@ public transectColumnTooltips: { [key: string]: string } = {
     public mapListService: MapListService,
     public router: Router,
     private toastr: ToastrService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private modalService: NgbModal,
   ) {
     datePickerConfig.outsideDays = 'hidden';
     datePickerConfig.minDate = { year: 1735, month: 1, day: 1 };
@@ -178,6 +184,9 @@ public transectColumnTooltips: { [key: string]: string } = {
   ngAfterViewInit() {
     let moduleCode = this.config['MHS']['MODULE_CODE'].toLocaleLowerCase();
     this._map = this.mapService.getMap();
+    this._api.getHabitats().subscribe(data => {
+        this.habitats = data;
+    });
     this._deflate_features = (L as any).deflate({
         minSize: 10,
         markerOptions: () => {
@@ -607,6 +616,35 @@ onInfo(id_base_site: any) {
 onPageChange(event: any) {
     this.page.size = event.pageSize;
     localStorage.setItem('mhs-page-size', event.pageSize.toString());
+}
+onEditStation(station : any, content:any){
+  this.stationToEdit = station;
+  this._api.getOneStation(station.id_station).subscribe(
+    (data: any) =>{
+      this.formEditStation = this.formBuilder.group({
+        name: [data.properties.name, Validators.required],
+        remarks: [data.properties.remarks],
+        cd_hab: [data.properties.cd_hab, Validators.required],
+      });
+       this.modalRef = this.modalService.open(content, { centered: true });
+    }
+    
+  )
+   
+}
+onSaveEditStation(){
+  let station = this.formEditStation.value;
+  station.id_station = this.stationToEdit.id_station;
+  this._api.updateStation(station).subscribe(
+    data => {
+      this.modalRef.close();
+      this.getStations();
+      this.toastr.success('Station modifiée avec succès', '', { positionClass: 'toast-top-right' });
+    },
+    error=>{
+      this.toastr.error('Erreur lors de la modification de la station', '', { positionClass: 'toast-top-right' });
+    }
+  )
 }
   
 
