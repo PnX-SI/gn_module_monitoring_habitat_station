@@ -638,7 +638,7 @@ onSaveEditStation(){
   this._api.updateStation(station).subscribe(
     data => {
       this.modalRef.close();
-      this.getStations();
+      this.getStations(this.getFiltersFromQueryString());
       this.toastr.success('Station modifiée avec succès', '', { positionClass: 'toast-top-right' });
     },
     error=>{
