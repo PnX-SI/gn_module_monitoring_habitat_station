@@ -44,6 +44,11 @@ updateStation(station:any){
     station
   );
 }
+deleteStation(id_station: any){
+  return this._http.delete(
+    `${this.config.API_ENDPOINT}${this.config['MHS']['MODULE_URL']}/stations/${id_station}`
+  )
+}
 
   addTransect(transect:any) {
     return this._http.post(

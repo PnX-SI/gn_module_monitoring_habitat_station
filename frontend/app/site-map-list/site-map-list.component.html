@@ -112,18 +112,24 @@
                 <th mat-header-cell *matHeaderCellDef class="mat-header-cell" aria-label="row actions">&nbsp;</th>
                 <td mat-cell *matCellDef="let element">
                     <div class="d-flex align-items-center">
-                        <!-- Bouton Modifier -->
-                        <button 
-                            mat-icon-button 
-                            class="btn btn-sm btn-warning mr-1"
-                            matTooltip="Modifier la station"
-                            (click)="onEditStation(element, editStationContent); $event.stopPropagation()">
-                            <i class="fa fa-edit"></i>
+                        <!-- Menu Actions -->
+                        <button mat-icon-button [matMenuTriggerFor]="menu" 
+                            (click)="$event.stopPropagation()"
+                            matTooltip="Actions">
+                            <mat-icon>more_vert</mat-icon>
                         </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item (click)="onEditStation(element, editStationContent)">
+                                <mat-icon>edit</mat-icon>
+                                <span>Modifier</span>
+                            </button>
+                            <button mat-menu-item (click)="onDeleteStation(element, confirmStationContent)">
+                                <mat-icon>delete</mat-icon>
+                                <span>Supprimer</span>
+                            </button>
+                        </mat-menu>
                         <!-- Bouton Dérouler -->
-                        <button 
-                            mat-icon-button 
-                            aria-label="expand row" 
+                        <button mat-icon-button aria-label="expand row" 
                             matTooltip="Voir les transects"
                             (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation(); onViewStation(element.id_station)">
                             <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
@@ -244,4 +250,16 @@
             Enregistrer
         </button>
     </div>
+</ng-template>
+<ng-template #confirmStationContent let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmer la suppression</h5>
+  </div>
+  <div class="modal-body">
+    Êtes-vous sûr de vouloir supprimer cette station?
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default btn-sm" (click)="d('Close click')">Annuler</button>
+    <button class="btn btn-danger btn-sm" (click)="onConfirmDeleteStation()">Supprimer</button>
+  </div>
 </ng-template>

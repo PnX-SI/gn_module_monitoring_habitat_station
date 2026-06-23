@@ -128,6 +128,8 @@ export class SiteMapListComponent implements OnInit, AfterViewInit, OnDestroy {
   private selectedTransectId : number = null;
   public formEditStation: FormGroup;
   private stationToEdit: any = null;
+  private stationToDelete: any= null;
+  private confirmModalRef: NgbModalRef;
   public columnTooltips: { [key: string]: string } = {
     'Station': 'Nom de la station',
     'Habitat': 'Habitat associé à la station',
@@ -630,8 +632,8 @@ onEditStation(station : any, content:any){
     }
     
   )
-   
 }
+
 onSaveEditStation(){
   let station = this.formEditStation.value;
   station.id_station = this.stationToEdit.id_station;
@@ -643,6 +645,27 @@ onSaveEditStation(){
     },
     error=>{
       this.toastr.error('Erreur lors de la modification de la station', '', { positionClass: 'toast-top-right' });
+    }
+  )
+}
+onDeleteStation(element: any, content:any){
+  if(element['Nbre transect'] >0){
+    this.toastr.error('Cette station ne peut être supprimée car elle possède des transects', '', {positionClass: 'toast-top-rigth'});
+  }else if(element['Nbre transect']=== 0){
+    this.stationToDelete= element;
+    this.confirmModalRef = this.modalService.open(content, { centered: true });
+  }
+
+}
+onConfirmDeleteStation(){
+  this._api.deleteStation(this.stationToDelete.id_station).subscribe(
+    data=>{
+      this.getStations(this.getFiltersFromQueryString());
+      this.confirmModalRef.close();
+      this.toastr.success('Station supprimée', '', {positionClass:'toast-top-right'});
+    },
+    error=>{
+      this.toastr.error('Erreur lors de la suppression de la station', '', {positionClass:'toast-top-right'})
     }
   )
 }
