@@ -239,6 +239,7 @@
                       <button
                             *ngIf="!disabledForm"
                             class="btn btn-sm btn-warning mr-1"
+                            matTooltip="Modifier le capteur"
                             (click)="onEditSensor(sensor, sensorContent, i)"
                         >
                             <i class="fa fa-edit"></i>
@@ -246,6 +247,7 @@
                         <button
                             *ngIf="!disabledForm"
                             class="btn btn-sm btn-danger"
+                            matTooltip="Supprimer le capteur"
                             (click)="onConfirmDelete(sensor.id_sensor, confirmContent, i)"
                         >
                             <i class="fa fa-trash"></i>
@@ -480,7 +482,8 @@
   </div>
   <div class="modal-footer">
     <button class="btn btn-default btn-sm" (click)="d('Close click')">Annuler</button>
-    <button class="btn btn-danger btn-sm" (click)="onConfirmDeleteSensor()">Supprimer</button>
+    <button class="btn btn-danger btn-sm" 
+    (click)="onConfirmDeleteSensor()">Supprimer</button>
   </div>
 </ng-template>
 
