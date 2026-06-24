@@ -458,7 +458,7 @@ onEdit() {
           this.toastr.success('Le transect a été ajouté avec succès', '', {
             positionClass: 'toast-top-right',
           });
-          this.backToSites();
+          this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, (data as any).data.properties.id_base_site]);
         },
         error => {
           this.toastr.error('Une erreur est survenue lors de la création du transect', '', {
