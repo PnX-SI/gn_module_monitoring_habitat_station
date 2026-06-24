@@ -32,13 +32,14 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { FrenchPaginatorIntl } from './shared/services/french-paginator-intl.service';
 import {MatSortModule} from '@angular/material/sort'
 import {MatProgressBarModule} from '@angular/material/progress-bar'
+import { MatMenuModule } from '@angular/material/menu';
 
 
 
 
 @NgModule({
   declarations: [SiteMapListComponent, ListVisitComponent, ReleveComponent, PlotReleveComponent],
-  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule,MatTableModule, MatPaginatorModule, MatSortModule, MatProgressBarModule],
+  imports: [GN2CommonModule, RouterModule.forChild(routes), CommonModule, MatTreeModule, MatIconModule,MatButtonModule,MatTableModule, MatPaginatorModule, MatSortModule, MatProgressBarModule,MatMenuModule],
   providers: [HttpClient, DataService, StoreService, UserService, {provide: MatPaginatorIntl, useClass: FrenchPaginatorIntl}],
   bootstrap: [],
 })

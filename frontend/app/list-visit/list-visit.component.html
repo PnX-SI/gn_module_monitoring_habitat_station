@@ -38,63 +38,58 @@
 
       <form [formGroup]="formTransect">
         <fieldset class="mb-3">
-    <legend>Station</legend>
+      <legend>Station</legend>
 
-    <!-- Mode création -->
-    <div *ngIf="isNew">
-        <div class="form-group">
-            <label>Choisir une station existante</label>
-            <select class="form-control form-control-sm"
-                    [formControl]="formTransect.controls.id_station"
-                    (change)="onSelectStation(formTransect.controls.id_station.value)">
-                <option [ngValue]="null">-- Sélectionnez une station --</option>
-                <option *ngFor="let station of stations"
-                        [ngValue]="station.properties.id_station">
-                    {{ station.properties.name }}
-                </option>
-            </select>
-        </div>
 
-        <!-- Infos station sélectionnée -->
-        <div *ngIf="selectedStation" class="mt-2">
-            <div class="form-group">
-                <label>Nom</label>
-                <p class="form-control form-control-sm">{{ selectedStation?.properties?.name }}</p>
-            </div>
-            <div class="form-group">
-                <label>Habitat</label>
-                <p class="form-control form-control-sm">{{ selectedStation?.properties?.habitat_name }}</p>
-            </div>
-            <div class="form-group">
-                <label>Commune</label>
-                <p class="form-control form-control-sm">{{ selectedStation?.properties?.nom_commune }}</p>
-            </div>
-        </div>
+              <!-- Mode création -->
+              <div *ngIf="isNew">
+                <div class="mb-3">
+                  <button type="button" 
+                      class="btn btn-sm btn-success box-shadow"
+                      (click)="onNewStation(stationContent)">
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                      Ajouter une station
+                  </button>
+                  <button *ngIf="selectedStation" type="button" 
+                    class="btn btn-sm btn-warning box-shadow ml-2"
+                    matTooltip="Modifier la station sélectionnée"
+                    (click)="onEditCurrentStation(editCurrentStationContent)">
+                    <i class="fa fa-edit" aria-hidden="true"></i>
+                    Modifier
+                </button>
+                </div>
+                  <div class="form-group">
+                      <label>Choisir une station existante</label>
+                      <select class="form-control form-control-sm"
+                              [formControl]="formTransect.controls.id_station"
+                              (change)="onSelectStation(formTransect.controls.id_station.value)">
+                          <option [ngValue]="null">-- Sélectionnez une station --</option>
+                          <option *ngFor="let station of stations"
+                                  [ngValue]="station.properties.id_station">
+                              {{ station.properties.name }}
+                          </option>
+                      </select>
+                  </div>
 
-        <!-- Bouton nouvelle station -->
-        <button type="button" class="btn btn-sm btn-outline-success mt-2"
-                (click)="onNewStation(stationContent)">
-            <i class="fa fa-plus-circle"></i> Nouvelle station
-        </button>
-    </div>
+                  
+                  <!-- Infos station sélectionnée -->
+                    <div *ngIf="selectedStation" class="mt-2">
+                        <p><strong>Nom :</strong> {{ selectedStation?.properties?.name }}</p>
+                        <p><strong>Habitat :</strong> {{ selectedStation?.properties?.habitat_name }}</p>
+                        <!--<p><strong>Commune :</strong> {{ selectedStation?.properties?.nom_commune }}</p>!-->
+                    </div>
 
-    <!-- Mode consultation/édition -->
-    <div *ngIf="!isNew">
-        <div class="form-group">
-            <label>Nom station</label>
-            <p class="form-control form-control-sm">{{ currentSite?.properties?.base_site_name }}</p>
-        </div>
-        <div class="form-group">
-            <label>Habitat</label>
-            <p class="form-control form-control-sm">{{ currentSite?.properties?.nom_habitat }}</p>
-        </div>
-        <div class="form-group">
-            <label>Commune</label>
-            <p class="form-control form-control-sm">{{ currentSite?.properties?.nom_commune }}</p>
-        </div>
-    </div>
+                  
+              </div>
 
-</fieldset>
+              <!-- Mode consultation/édition -->
+              <div *ngIf="!isNew">
+                  <p><strong>Nom station :</strong> {{ currentSite?.properties?.base_site_name }}</p>
+                  <p><strong>Habitat :</strong> {{ currentSite?.properties?.nom_habitat }}</p>
+                  <p><strong>Commune :</strong> {{ currentSite?.properties?.nom_commune }}</p>
+              </div>
+
+          </fieldset>
         <fieldset class="mb-3" [disabled]="disabledForm">
           <legend>
             Transect
@@ -634,6 +629,50 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-default btn-sm" (click)="d('Close click')">Fermer</button>
         <button type="button" class="btn btn-success btn-sm" [disabled]="formEditPlot.invalid" (click)="onSaveEditPlot()">
+            Enregistrer
+        </button>
+    </div>
+</ng-template>
+<ng-template #editCurrentStationContent let-d="dismiss">
+    <div class="modal-header">
+        <h5 class="modal-title">Modifier la station</h5>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formEditStation">
+            <div class="form-group">
+                <small>Nom de la station * :</small>
+                <input class="form-control form-control-sm" 
+                       [formControl]="formEditStation.controls.name" />
+            </div>
+            <div class="form-group">
+                <small>Remarques :</small>
+                <textarea class="form-control form-control-sm"
+                          [formControl]="formEditStation.controls.remarks"
+                          rows="3">
+                </textarea>
+            </div>
+            <div class="form-group">
+                <small>Habitat * :</small>
+                <select class="form-control form-control-sm"
+                        [formControl]="formEditStation.controls.cd_hab">
+                    <option [ngValue]="null">-- Sélectionnez un habitat --</option>
+                    <option *ngFor="let habitat of habitats"
+                            [ngValue]="habitat.cd_hab">
+                        {{ habitat.nom_complet }}
+                    </option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm" 
+                (click)="d('Close click')">Fermer</button>
+        <button type="button" class="btn btn-success btn-sm"
+                [disabled]="formEditStation.invalid"
+                (click)="onSaveEditCurrentStation()">
             Enregistrer
         </button>
     </div>

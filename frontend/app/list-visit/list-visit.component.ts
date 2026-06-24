@@ -71,7 +71,9 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   plotToEditIndex: number = null;
   formStation: FormGroup;
   formEditPlot: FormGroup;
+  formEditStation: FormGroup;
   private plotIdCounter : number =0;
+  public stationToEdit:any;
   plotToDeleteObject: any = null;
    private _transformer = (node: PlotNode, level: number): FlatPlotNode => ({
     expandable: !!node.sub_plots && node.sub_plots.length > 0,
@@ -281,6 +283,13 @@ export class ListVisitComponent implements OnInit, OnDestroy {
       azimut: this.currentSite.properties.azimut,
       id_station: this.currentSite.properties.id_station,
     });
+    if(this.currentSite.properties?.id_station){
+      this.api.getOneStation(this.currentSite.properties.id_station).subscribe(
+        (data:any)=>{
+          this.selectedStation = data;
+        }
+      );
+    }
   }
 
   backToSites() {
@@ -690,6 +699,11 @@ getParentCode(id_parent: any): string {
     return parent ? parent.code_plot : '';
 }
 onSelectStation(id_station: any) {
+    if (!id_station || id_station === 'null') {
+        this.selectedStation = null;
+        this.formTransect.patchValue({ id_station: null, cd_hab: null });
+        return;
+    }
     this.api.getOneStation(id_station).subscribe(
         (data: any) => {
             this.selectedStation = data;
@@ -717,6 +731,9 @@ onSaveStation() {
     this.api.addStation(station).subscribe(
         (data: any) => {
             this.stations.push(data);
+            this.stations = this.stations.sort((a, b) => 
+                a.properties.name.localeCompare(b.properties.name)
+            );
             this.selectedStation = data;
             this.formTransect.patchValue({
                 id_station: data.properties.id_station,
@@ -743,6 +760,39 @@ getFlatPlots(plots: any[], depth: number = 1): any[] {
         }
     });
     return result;
+}
+onEditCurrentStation( content:any){
+  this.stationToEdit = this.selectedStation;
+  this.api.getOneStation(this.selectedStation.properties.id_station).subscribe(
+    (data: any) =>{
+      this.formEditStation = this.formBuilder.group({
+        name: [data.properties.name, Validators.required],
+        remarks: [data.properties.remarks],
+        cd_hab: [data.properties.cd_hab, Validators.required],
+      });
+       this.modalRef = this.modalService.open(content, { centered: true });
+    }
+    
+  )
+}
+onSaveEditCurrentStation(){
+  let station = this.formEditStation.value;
+  station.id_station = this.stationToEdit.properties.id_station;
+  this.api.updateStation(station).subscribe(
+    data => {
+      this.modalRef.close();
+      this.selectedStation= data;
+      this.api.getAllStations().subscribe((result: any) => {
+                this.stations = result[1].features.sort((a, b) =>
+                    a.properties.name.localeCompare(b.properties.name)
+                );
+            });
+      this.toastr.success('Station modifiée avec succès', '', { positionClass: 'toast-top-right' });
+    },
+    error=>{
+      this.toastr.error('Erreur lors de la modification de la station', '', { positionClass: 'toast-top-right' });
+    }
+  )
 }
 
   ngOnDestroy() {
