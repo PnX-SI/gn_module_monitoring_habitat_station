@@ -163,9 +163,7 @@ export class PlotReleveComponent implements OnInit, OnChanges {
       if (this.relevePlotId) {
         strate.id_releve_plot = this.relevePlotId;
       }
-      if (!strate.id_releve_plot_strat) {
-        delete strate.id_releve_plot_strat;
-      }
+      
       delete strate.label_default;
     });
     _.map(this.plotForm.value.taxons_releve, taxon => {
