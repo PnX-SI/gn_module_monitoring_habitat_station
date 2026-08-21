@@ -167,6 +167,7 @@ export class ReleveComponent implements OnInit {
       data => {
         this.visit = data;
         this.userService.check_user_cruved_visit('U', this.visit).subscribe(ucruved => {
+          console.log('DEBUG updateIsAllowed:', ucruved, 'visit:', this.visit);
           this.updateIsAllowed = ucruved;
         });
         this.visit.perturbations = null;
@@ -303,7 +304,14 @@ export class ReleveComponent implements OnInit {
     this.toastr.success('Visite enregistrée avec succès', '', {
       positionClass: 'toast-top-right',
     });
-    this.backToVisites();
+    if (this.isNew) {
+      this.backToVisites();
+    } else {
+      this.disabledForm = true;
+      this.edit_btn = 'Éditer';
+      this.checked = 0;
+      this.getVisit();
+    }
   }
 
   private onDataSavedError(error) {
