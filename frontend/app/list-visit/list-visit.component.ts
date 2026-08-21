@@ -73,8 +73,10 @@ export class ListVisitComponent implements OnInit, OnDestroy {
   formEditPlot: FormGroup;
   formEditStation: FormGroup;
   private plotIdCounter : number =0;
+  public stationToDelete:any;
   public stationToEdit:any;
   plotToDeleteObject: any = null;
+  selectedStationTransects: any[] = [];
    private _transformer = (node: PlotNode, level: number): FlatPlotNode => ({
     expandable: !!node.sub_plots && node.sub_plots.length > 0,
     id_plot: node.id_plot,
@@ -155,17 +157,17 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.onVisitDetails(e.selected[0].id_base_visit);
   }
 
-  checkPermission() {
-    this.userService.check_isAdmin('U').subscribe(ucruved => {
-      this.upIsAllowed = ucruved;
+ checkPermission() {
+    this.userService.check_user_cruved('U').subscribe(ucruved => {
+        this.upIsAllowed = ucruved;
     });
-    this.userService.check_isAdmin('C').subscribe(ucruved => {
-      this.addIsAllowed = ucruved;
+    this.userService.check_user_cruved('C').subscribe(ucruved => {
+        this.addIsAllowed = ucruved;
     });
     this.userService.check_user_cruved_visit('C').subscribe(ucruved => {
-      this.addVisitIsAllowed = ucruved;
+        this.addVisitIsAllowed = ucruved;
     });
-  }
+}
 
   initFormTransect(): FormGroup {
     const formTransect = this.formBuilder.group({
@@ -239,6 +241,7 @@ export class ListVisitComponent implements OnInit, OnDestroy {
     this.api.getOneTransect(this.idSite).subscribe(
       site => {
         this.currentSite = site;
+        console.log('can_edit:', this.currentSite.properties.can_edit);
         if (!this.currentSite.properties?.cor_plots) {
           let msg = 'Ajouter des placettes à votre transect pour y associer des visites.';
           this.toastr.error(msg, '', { positionClass: 'toast-top-right' });
@@ -458,7 +461,7 @@ onEdit() {
           this.toastr.success('Le transect a été ajouté avec succès', '', {
             positionClass: 'toast-top-right',
           });
-          this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, (data as any).data.properties.id_base_site]);
+          this.router.navigate([`${this.config['MHS']['MODULE_URL']}/transects`, (data as any).properties.id_base_site]);
         },
         error => {
           this.toastr.error('Une erreur est survenue lors de la création du transect', '', {
@@ -473,7 +476,13 @@ onEdit() {
           this.toastr.success('Le transect a été modifié avec succès', '', {
             positionClass: 'toast-top-right',
           });
-          this.backToSites();
+          this.currentSite = data;
+          this.storeService.setCurrentSite(this.currentSite);
+          this.pachForm();
+          this.plots = this.currentSite.properties.cor_plots || [];
+          this.disabledForm = true;
+          this.edit_btn = 'Éditer';
+
         },
         error => {
           this.toastr.error('Une erreur est survenue lors de la modification du transect', '', {
@@ -711,6 +720,11 @@ onSelectStation(id_station: any) {
                 id_station: id_station,
                 cd_hab: data.properties.cd_hab
             });
+            this.api.getTransectsByStation(id_station).subscribe(
+                (transects: any[]) => {
+                    this.selectedStationTransects = transects;
+                }
+            );
         },
         error => {
             this.toastr.error('Erreur lors de la récupération de la station', '', { positionClass: 'toast-top-right' });
@@ -793,6 +807,29 @@ onSaveEditCurrentStation(){
       this.toastr.error('Erreur lors de la modification de la station', '', { positionClass: 'toast-top-right' });
     }
   )
+}
+onDeleteCurrentStation(content: any) {
+    this.stationToDelete = this.selectedStation;
+    this.confirmModalRef = this.modalService.open(content, { centered: true });
+}
+onConfirmDeleteCurrentStation(){
+    this.api.deleteStation(this.stationToDelete.properties.id_station).subscribe(
+        data => {
+            this.confirmModalRef.close();
+            this.selectedStation = null;
+            this.selectedStationTransects = [];
+            this.formTransect.patchValue({ id_station: null, cd_hab: null });
+            this.api.getAllStations().subscribe((result: any) => {
+                this.stations = result[1].features.sort((a, b) =>
+                    a.properties.name.localeCompare(b.properties.name)
+                );
+            });
+            this.toastr.success('Station supprimée', '', { positionClass: 'toast-top-right' });
+        },
+        error => {
+            this.toastr.error('Erreur lors de la suppression de la station', '', { positionClass: 'toast-top-right' });
+        }
+    );
 }
 
   ngOnDestroy() {
