@@ -15,6 +15,7 @@
         </div>
         <div class="col text-right">
           <button
+            
             *ngIf="(!disabledForm && upIsAllowed) || (!disabledForm && addIsAllowed)"
             type="submit"
             class="btn btn-success btn-sm ml-3 pull-right box-shadow"
@@ -25,7 +26,7 @@
             Enregister
           </button>
           <button
-            *ngIf="!isNew && upIsAllowed"
+            *ngIf="!isNew && disabledForm && currentSite?.properties?.can_edit"
             class="btn btn-sm pull-right box-shadow"
             [ngClass]="disabledForm ? 'btn-warning' : 'btn-secondary'"
             (click)="onEdit()"
@@ -33,6 +34,7 @@
             <i *ngIf="disabledForm" class="fa fa-edit" aria-hidden="true"> </i>
             {{ edit_btn }}
           </button>
+          
         </div>
       </div>
 
@@ -44,6 +46,58 @@
               <!-- Mode création -->
               <div *ngIf="isNew">
                 <div class="mb-3">
+                  <button type="button" 
+                      class="btn btn-sm btn-success box-shadow"
+                      (click)="onNewStation(stationContent)">
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                      Ajouter une station
+                  </button>
+                  <button *ngIf="selectedStation" type="button" 
+                    class="btn btn-sm btn-warning box-shadow ml-2"
+                    matTooltip="Modifier la station sélectionnée"
+                    (click)="onEditCurrentStation(editCurrentStationContent)">
+                    <i class="fa fa-edit" aria-hidden="true"></i>
+                    Modifier
+                </button>
+                <button *ngIf="selectedStation && selectedStationTransects.length === 0"
+                    type="button" 
+                    class="btn btn-sm btn-danger box-shadow ml-2"
+                    matTooltip="Supprimer la station sélectionnée"
+                    (click)="onDeleteCurrentStation(confirmDeleteCurrentStationContent)">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    Supprimer
+                </button>
+                </div>
+                  <div class="form-group">
+                      <label>Choisir une station existante</label>
+                      <select class="form-control form-control-sm"
+                              [formControl]="formTransect.controls.id_station"
+                              (change)="onSelectStation(formTransect.controls.id_station.value)">
+                          <option [ngValue]="null">-- Sélectionnez une station --</option>
+                          <option *ngFor="let station of stations"
+                                  [ngValue]="station.properties.id_station">
+                              {{ station.properties.name }}
+                          </option>
+                      </select>
+                  </div>
+
+                  
+                  <!-- Infos station sélectionnée -->
+                    <div *ngIf="selectedStation" class="mt-2">
+                        <p><strong>Nom :</strong> {{ selectedStation?.properties?.name }}</p>
+                        <p><strong>Habitat :</strong> {{ selectedStation?.properties?.habitat_name }}</p>
+                        <p *ngIf = selectedStation?.properties?.nom_commune !="">
+                          <strong>Commune :</strong> {{ selectedStation?.properties?.nom_commune }}
+                        </p>
+                    </div>
+
+                  
+              </div>
+
+              <!-- Mode consultation/édition -->
+              <div *ngIf="!isNew">
+                <div *ngIf="!disabledForm">
+                  <div class="mb-3">
                   <button type="button" 
                       class="btn btn-sm btn-success box-shadow"
                       (click)="onNewStation(stationContent)">
@@ -70,23 +124,11 @@
                           </option>
                       </select>
                   </div>
-
-                  
-                  <!-- Infos station sélectionnée -->
-                    <div *ngIf="selectedStation" class="mt-2">
-                        <p><strong>Nom :</strong> {{ selectedStation?.properties?.name }}</p>
-                        <p><strong>Habitat :</strong> {{ selectedStation?.properties?.habitat_name }}</p>
-                        <!--<p><strong>Commune :</strong> {{ selectedStation?.properties?.nom_commune }}</p>!-->
-                    </div>
-
-                  
-              </div>
-
-              <!-- Mode consultation/édition -->
-              <div *ngIf="!isNew">
-                  <p><strong>Nom station :</strong> {{ currentSite?.properties?.base_site_name }}</p>
+                    
+                </div>
+                  <p><strong>Nom station :</strong> {{ currentSite?.properties?.station_name }}</p>
                   <p><strong>Habitat :</strong> {{ currentSite?.properties?.nom_habitat }}</p>
-                  <p><strong>Commune :</strong> {{ currentSite?.properties?.nom_commune }}</p>
+                  <p *ngIf = selectedStation?.properties?.nom_commune !=""><strong>Commune :</strong> {{ currentSite?.properties?.nom_commune }}</p>
               </div>
 
           </fieldset>
@@ -679,4 +721,16 @@
             Enregistrer
         </button>
     </div>
+</ng-template>
+<ng-template #confirmDeleteCurrentStationContent let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmer la suppression</h5>
+  </div>
+  <div class="modal-body">
+    Êtes-vous sûr de vouloir supprimer cette station?
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default btn-sm" (click)="d('Close click')">Annuler</button>
+    <button class="btn btn-danger btn-sm" (click)="onConfirmDeleteCurrentStation()">Supprimer</button>
+  </div>
 </ng-template>
