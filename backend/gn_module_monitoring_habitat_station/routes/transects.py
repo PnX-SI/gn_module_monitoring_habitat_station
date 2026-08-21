@@ -18,10 +18,12 @@ from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp
 from geoalchemy2 import functions as geo_funcs
 import json
+from geonature.core.gn_permissions.tools import get_scopes_by_action
+
 
 from ..blueprint import blueprint
 from ..models import TTransect, TPlot, TemperatureSensor, Station
-from ..repositories import get_id_type_site
+from ..repositories import get_id_type_site,check_user_cruved_transect
 from gn_module_monitoring_habitat_station import MODULE_CODE
 import datetime
 from .plots import create_plot
@@ -105,6 +107,22 @@ def load_transect(id_site):
             transect["properties"]["observers"] = str(data[3])
         if data[4]:
             transect["properties"]["nom_habitat"] = str(data[4])
+        
+        id_digitiser = data[0].t_base_site.id_digitiser
+        scope = get_scopes_by_action(module_code=MODULE_CODE)["U"]
+        can_edit = False
+        if scope == 3:
+            can_edit = True
+        elif scope == 2:
+            digitiser = DB.session.get(User, id_digitiser)
+            if digitiser and digitiser.id_organisme == g.current_user.id_organisme:
+                can_edit = True
+        elif scope == 1:
+            if id_digitiser == g.current_user.id_role:
+                can_edit = True
+        transect["properties"]["can_edit"] = can_edit
+        if data[0].station:
+            transect["properties"]["station_name"] = data[0].station.name
         base_site_code = transect["properties"]["t_base_site"]["base_site_code"]
         base_site_description = transect["properties"]["t_base_site"]["base_site_description"]
         base_site_name = transect["properties"]["t_base_site"]["base_site_name"]
@@ -306,6 +324,16 @@ def update_transect(id_transect, scope):
     update a transect
     """
     data = dict(request.get_json())
+
+    existing_transect = DB.session.get(TTransect, id_transect)
+    if existing_transect is None:
+        raise NotFound(f"Transect {id_transect} does not exist")
+
+    digitiser = None
+    if existing_transect.t_base_site and existing_transect.t_base_site.id_digitiser:
+        digitiser = DB.session.get(User, existing_transect.t_base_site.id_digitiser)
+
+    check_user_cruved_transect(g.current_user, existing_transect, str(scope), digitiser)
 
     # Update base site table
     DB.session.execute(

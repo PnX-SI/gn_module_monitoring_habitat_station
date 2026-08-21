@@ -11,13 +11,13 @@ from geonature.utils.env import DB
 from geonature.utils.errors import GeonatureApiError
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 from pypnusershub.db.tools import InsufficientRightsError
+from pypnusershub.db.models import User
 
 from ..models import CorHabTaxon
 
 
 class PostYearError(GeonatureApiError):
     pass
-
 
 def check_user_cruved_visit(user, visit, cruved_level):
     """
@@ -54,6 +54,10 @@ def check_user_cruved_visit(user, visit, cruved_level):
             elif role.id_organisme == user.id_organisme:
                 is_allowed = True
                 break
+        if not is_allowed and visit.id_digitiser:
+            digitiser = DB.session.get(User, visit.id_digitiser)
+            if digitiser and digitiser.id_organisme == user.id_organisme:
+                is_allowed = True
         if not is_allowed:
             raise InsufficientRightsError(
                 ('User "{}" cannot update visit number {} ').format(
@@ -61,6 +65,37 @@ def check_user_cruved_visit(user, visit, cruved_level):
                 ),
                 403,
             )
+
+    elif cruved_level == "3":
+        is_allowed = True
+def check_user_cruved_transect(user, transect, cruved_level, digitiser=None):
+    """
+    Check if user have right on a transect object, related to his cruved
+    if not, raise 403 error
+    if allowed return void
+    """
+    is_allowed = False
+
+    if cruved_level == "1":
+        if transect.t_base_site.id_digitiser == user.id_role:
+            is_allowed = True
+
+    elif cruved_level == "2":
+        if transect.t_base_site.id_digitiser == user.id_role:
+            is_allowed = True
+        elif digitiser and digitiser.id_organisme == user.id_organisme:
+            is_allowed = True
+
+    elif cruved_level == "3":
+        is_allowed = True
+
+    if not is_allowed:
+        raise InsufficientRightsError(
+            ('User "{}" cannot update transect number {} ').format(
+                user.id_role, transect.id_transect
+            ),
+            403,
+        )
 
 
 # TODO: move this function in conservation shared library. See also SHT and SFT.

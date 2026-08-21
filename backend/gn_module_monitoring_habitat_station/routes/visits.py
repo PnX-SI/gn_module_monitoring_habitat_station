@@ -30,6 +30,7 @@ from ..models import (
 )
 from ..repositories import (
     check_year_visit,
+    check_user_cruved_visit,
     get_taxons_by_cd_hab,
     clean_string,
     strip_html,
@@ -85,6 +86,9 @@ def get_one_visit(id_visit):
                 "observers",
             ]
         )
+        digitiser = DB.session.get(User, data.id_digitiser)
+        if digitiser:
+            visit["id_organisme"] = digitiser.id_organisme
 
         for releve in visit["cor_releve_plot"]:
             plot_data = dict()
@@ -183,9 +187,9 @@ def add_visit(scope):
 
 
 @blueprint.route("/visits/<id_visit>", methods=["PATCH"])
-@permissions.check_cruved_scope("U", module_code=MODULE_CODE)
+@permissions.check_cruved_scope("U", get_scope= True, module_code=MODULE_CODE)
 @json_resp
-def update_visit(id_visit):
+def update_visit(id_visit,scope):
     """
     Mettre à jour une visite
     """
@@ -194,6 +198,8 @@ def update_visit(id_visit):
     existingVisit = DB.session.get(Visit, id_visit)
     if existingVisit == None:
         raise NotFound(f"Visit {id_visit} does not exist")
+
+    check_user_cruved_visit(g.current_user, existingVisit, str(scope))
 
     existingVisit = existingVisit.as_dict()
 
@@ -284,14 +290,16 @@ def export_visits():
 
     if "id_base_site" in parameters:
         query = query.where(ExportVisits.idbsite == parameters["id_base_site"])
-    elif "id_base_visit" in parameters:
+    if "id_base_visit" in parameters:
         query = query.where(ExportVisits.idbvisit == parameters["id_base_visit"])
-    elif "id_releve_plot" in parameters:
+    if "id_releve_plot" in parameters:
         query = query.where(ExportVisits.idreleve == parameters["id_releve_plot"])
-    elif "year" in parameters:
+    if "year" in parameters:
         query = query.where(func.date_part("year", ExportVisits.visitdate) == parameters["year"])
-    elif "cd_hab" in parameters:
-        query = query.where(ExportVisits.cd_hab == parameters["cd_hab"])
+    if "filterHab" in parameters:
+        query = query.where(ExportVisits.cd_hab == parameters["filterHab"])
+    if "organism" in parameters:
+        query = query.where(ExportVisits.nom_organisme.ilike(f"%{parameters['organism']}%"))
 
     data = DB.session.scalars(query).all()
 
