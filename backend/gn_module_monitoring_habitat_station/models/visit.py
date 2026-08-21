@@ -154,6 +154,7 @@ class ExportVisits(MonitoringHabitatStation):
     plotpos = DB.Column(DB.Integer)
     plotsize = DB.Column(DB.Integer)
     observers = DB.Column(DB.Unicode)
+    nom_organisme = DB.Column(DB.Unicode)
     lbhab = DB.Column(DB.Unicode)
     geom_start = DB.Column(Geometry("GEOMETRY", 4326))
     geom_end = DB.Column(Geometry("GEOMETRY", 4326))

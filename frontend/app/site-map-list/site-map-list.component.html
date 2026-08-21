@@ -3,6 +3,17 @@
   <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-shs">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h4 class="card-title">Liste des stations</h4>
+         <pnx-modal-download
+            *ngIf="filteredData.length > 0"
+            labelButton="Télécharger les visites"
+            [pathDownload]="storeService.urlLoad"
+            [exportFormat]="storeService.mhsConfig.export_available_format"
+            [queryString]="storeService.queryString"
+        >
+        </pnx-modal-download>
+        <button *ngIf="filteredData.length === 0" class="btn btn-sm btn-secondary" disabled matTooltip="Aucune visite à télécharger">
+            Télécharger les visites
+        </button>
       <button class="btn btn-sm btn-success pull-right box-shadow" (click)="onNewTransect()" *ngIf="addIsAllowed">
         <i class="fa fa-plus-circle" aria-hidden="true"> </i>
         Ajouter un nouveau transect
@@ -123,7 +134,9 @@
                                 <mat-icon>edit</mat-icon>
                                 <span>Modifier</span>
                             </button>
-                            <button mat-menu-item (click)="onDeleteStation(element, confirmStationContent)">
+                            <button mat-menu-item 
+                            *ngIf="element['Nbre transect']=== 0 "
+                            (click)="onDeleteStation(element, confirmStationContent)">
                                 <mat-icon>delete</mat-icon>
                                 <span>Supprimer</span>
                             </button>

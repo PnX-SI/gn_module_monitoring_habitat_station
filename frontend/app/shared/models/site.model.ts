@@ -18,7 +18,9 @@ export interface ISite {
     base_site_name?: string;
     date_max?: string;
     observers?: any[];
-    azimut?:number
+    azimut?:number;
+    can_edit?: boolean;
+    station_name?: string;
 
   };
 }

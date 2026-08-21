@@ -37,11 +37,11 @@ def upgrade():
         FROM
             (
                 VALUES
-                    ('MHS', 'ALL', 'C', True, 'Ajouter des données au module SHS'),
-                    ('MHS', 'ALL', 'R', True, 'Voir les données du module SHS'),
-                    ('MHS', 'ALL', 'U', True, 'Modifier les données du module SHS'),
-                    ('MHS', 'ALL', 'E', True, 'Exporter les données du module SHS'),
-                    ('MHS', 'ALL', 'D', True, 'Supprimer les données du module SHS')
+                    ('MHS', 'ALL', 'C', True, 'Ajouter des données au module MHS'),
+                    ('MHS', 'ALL', 'R', True, 'Voir les données du module MHS'),
+                    ('MHS', 'ALL', 'U', True, 'Modifier les données du module MHS'),
+                    ('MHS', 'ALL', 'E', True, 'Exporter les données du module MHS'),
+                    ('MHS', 'ALL', 'D', True, 'Supprimer les données du module MHS')
             ) AS v (module_code, object_code, action_code, scope_filter, label)
         JOIN
             gn_commons.t_modules m ON m.module_code = v.module_code
