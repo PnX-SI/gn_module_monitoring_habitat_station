@@ -31,6 +31,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - La géométrie de la station est recalculée automatiquement après chaque ajout ou modification d'un transect (barycentre ST_Centroid des geom_start).
 - Mise à jour du frontend vers Angular Material pour le tableau des stations.
 - Amélioration de l'affichage des placettes dans le formulaire de relevé avec gestion des sous-placettes.
+- Renommage des fichiers de config pour être cohérent avec le nouveau format GeoNature : `conf_gn_module.sample.toml` → `mhs_config.sample.toml`.
 
 ### ⚠️ Mise à niveau
 
@@ -48,6 +49,7 @@ Cette version introduit des changements de base de données **non rétro-compati
 ### 🔄 Modifié
 
 L'export a été modifié [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40):
+
 - Les noms des champs ont été modifiés : espaces remplacés par des underscores et plus d'accents.
 - Le champ _Taille placette mètres_ a été renommé en _Surface en m²_.
 - Les valeurs des champs `observers` et `organismes` ont été regroupés sous le champ unique `observers`.

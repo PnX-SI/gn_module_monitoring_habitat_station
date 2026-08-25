@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ## [2.0.0] - 2026-06-10
 
 ### 🚀 Added
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Station geometry is automatically recalculated after each transect is added or modified (ST_Centroid centroid of geom_start points).
 - Frontend updated to use Angular Material for the station table.
 - Improved plot display in the releve form with sub-plot management.
+- Renaming of configuration files to ensure compatibility with GeoNature: `conf_gn_module.sample.toml` → `mhs_config.sample.toml`.
 
 ### ⚠️ Upgrade
 
@@ -47,6 +49,7 @@ This version introduces **non-backward-compatible** database changes. The Alembi
 ### 🔄 Modified
 
 The export has been modified [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40):
+
 - Field names have been modified: spaces replaced by underscores and no more accents.
 - The _Plot size meters_ field has been renamed to _Area in m²_.
 - The values of the `observers` and `organisms` fields have been grouped together under the single `observers` field.
@@ -62,7 +65,6 @@ The export has been modified [#40](https://github.com/PnX-SI/gn_module_monitorin
 ### 🐛 Fixed
 
 - Geojson export is working again. [#40](https://github.com/PnX-SI/gn_module_monitoring_habitat_station/issues/40)
-
 
 ## [1.2.0] - 2024-08-20
 

@@ -1,0 +1,42 @@
+# Exports available formats
+export_available_format = ['geojson', 'csv', 'shapefile']
+
+# Code (cd_nomenclature) of "TYPE_SITE" nomenclature used.
+site_type_code = "HAB"
+# Code of users list (utilisateurs.t_listes)
+user_list_code = "OFS"
+# Code of municipalities list (ref_geo.bib_areas_types)
+municipality_type_code = "COM"
+# Name of habitat list (taxonomie.bib_listes.nom_liste)
+habitat_list_name = "Suivi Habitat Station"
+# Max depth for monitoring plots creation
+max_plot_depth = 3
+
+# Map view default position
+zoom_center = [44.863664, 6.268670]
+# Map view default zoom level
+zoom = 10
+# Enable server side pagination (must be tested !)
+pagination_serverside = false
+# Default number of items by page for pagination
+items_per_page = 10
+
+# Labels for stations list
+site_message = { "emptyMessage" = "Aucun site à afficher ", "totalMessage" = "sites(s) au total" }
+# Labels for visits list
+list_visit_message = { "emptyMessage" = "Aucune visite sur ce site ", "totalMessage" = "visites au total" }
+# Labels for visits list detail
+detail_list_visit_message = { "emptyMessage" = "Aucune autre visite sur ce site ", "totalMessage" = "visites au total" }
+
+# Labels for columns of stations list
+default_site_columns = [
+    { "name" = "Identifiant", "prop" = "id_base_site", "width" = "90" },
+    { "name" = "Habitat", "prop" = "nom_habitat", "width" = "350" },
+    { "name" = "Nombre de visites", "prop" = "nb_visit", "width" = "120" },
+    { "name" = "Date de la dernière visite", "prop" = "date_max", "width" = "160" },
+]
+# Labels for colums of visits list
+default_list_visit_columns = [
+    { "name" = "Date", "prop" = "visit_date_min", "width" = "120" },
+    { "name" = "Observateur(s)", "prop" = "observers", "width" = "350" },
+]
