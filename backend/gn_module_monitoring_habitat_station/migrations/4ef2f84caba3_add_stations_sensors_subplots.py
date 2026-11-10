@@ -5,14 +5,13 @@ Revises: 352a1cc0b350
 Create Date: 2026-04-16 16:53:39.420714
 
 """
-from alembic import op, context
-import sqlalchemy as sa
 
+from alembic import op, context
 
 
 # revision identifiers, used by Alembic.
-revision = '4ef2f84caba3'
-down_revision = '352a1cc0b350'
+revision = "4ef2f84caba3"
+down_revision = "352a1cc0b350"
 branch_labels = None
 depends_on = None
 
@@ -20,7 +19,7 @@ depends_on = None
 def upgrade():
     tag = context.get_tag_argument()
     op.execute(
-        """ 
+        """
             CREATE TABLE pr_monitoring_habitat_station.t_stations (
                 id_station SERIAL PRIMARY KEY,
                 geom GEOMETRY(Point, 4326),
@@ -32,10 +31,9 @@ def upgrade():
                         REFERENCES ref_habitats.habref(cd_hab)
                         ON UPDATE CASCADE
                 );
-
         """
     )
-    
+
     op.execute(
         """
             CREATE TABLE pr_monitoring_habitat_station.t_temperature_sensors(
@@ -49,28 +47,25 @@ def upgrade():
                 ON UPDATE CASCADE ON DELETE CASCADE,
                 CONSTRAINT unique_sensor_transect_date
                 UNIQUE(serial_number, id_transect, install_date)
-                );    
-                
+                );
+
         """
     )
-    
+
     op.execute(
         """
             ALTER TABLE pr_monitoring_habitat_station.t_transects
             ADD COLUMN id_station INTEGER NULL;
-                
         """
     )
-    
+
     op.execute(
         """
             ALTER TABLE pr_monitoring_habitat_station.t_transects
             ADD COLUMN azimut INTEGER NULL;
-                
         """
     )
-    
-    
+
     op.execute(
         """
             ALTER TABLE pr_monitoring_habitat_station.t_transects
@@ -78,39 +73,39 @@ def upgrade():
             FOREIGN KEY(id_station)
             REFERENCES pr_monitoring_habitat_station.t_stations(id_station)
             ON UPDATE CASCADE ON DELETE SET NULL;
-                
+
         """
     )
-    
+
     op.execute(
         """
             ALTER TABLE pr_monitoring_habitat_station.t_plots
             ADD COLUMN id_parent INTEGER NULL;
         """
     )
-    
+
     op.execute(
         """
             ALTER TABLE pr_monitoring_habitat_station.t_plots
             ADD CONSTRAINT fk_t_plots_id_parent
             FOREIGN KEY (id_parent)
             REFERENCES pr_monitoring_habitat_station.t_plots(id_plot)
-            ON DELETE CASCADE; 
+            ON DELETE CASCADE;
         """
     )
 
     op.execute(
-        """ 
-            ALTER TABLE pr_monitoring_habitat_station.t_plots     
+        """
+            ALTER TABLE pr_monitoring_habitat_station.t_plots
             ALTER COLUMN code_plot
             SET NOT NULL;
 
         """
     )
-     # Transect data migration
+    # Transect data migration
 
-     # Migration using label tag
-    if tag == 'by_label':
+    # Migration using label tag
+    if tag == "by_label":
         op.execute(
             """
             WITH grouped_transects AS (
@@ -189,25 +184,24 @@ def upgrade():
             """
         )
 
+
 def downgrade():
     op.execute(
         """
-            ALTER TABLE pr_monitoring_habitat_station.t_plots     
+            ALTER TABLE pr_monitoring_habitat_station.t_plots
             ALTER COLUMN code_plot
             DROP NOT NULL;
-
         """
     )
     op.execute(
         """
-            ALTER TABLE pr_monitoring_habitat_station.t_plots 
+            ALTER TABLE pr_monitoring_habitat_station.t_plots
             DROP CONSTRAINT fk_t_plots_id_parent;
-
         """
     )
     op.execute(
         """
-            ALTER TABLE pr_monitoring_habitat_station.t_plots 
+            ALTER TABLE pr_monitoring_habitat_station.t_plots
             DROP COLUMN id_parent;
 
         """
@@ -222,7 +216,7 @@ def downgrade():
         """
             ALTER TABLE pr_monitoring_habitat_station.t_transects
             DROP COLUMN id_station;
-                
+
         """
     )
     op.execute(
@@ -231,20 +225,14 @@ def downgrade():
             DROP COLUMN azimut;
         """
     )
-    
+
     op.execute(
         """
             DROP TABLE pr_monitoring_habitat_station.t_temperature_sensors;
-
         """
     )
     op.execute(
         """
             DROP TABLE pr_monitoring_habitat_station.t_stations;
-
         """
     )
-    
-    
-    
-    
