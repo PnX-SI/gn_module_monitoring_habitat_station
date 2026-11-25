@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin } from 'rxjs/observable/forkJoin';
+import { forkJoin } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import * as _ from 'lodash';
 

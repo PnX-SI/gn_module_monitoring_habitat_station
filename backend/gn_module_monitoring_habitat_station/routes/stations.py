@@ -8,7 +8,7 @@ from geonature.utils.env import DB
 from geonature.core.gn_permissions import decorators as permissions
 from utils_flask_sqla.response import json_resp
 from pypn_habref_api.models import Habref
-from geonature.core.gn_monitoring.models import  corVisitObserver, TBaseVisits
+from geonature.core.gn_monitoring.models import  CorVisitObserver, TBaseVisits
 from ref_geo.models import LAreas
 from pypnusershub.db.models import User, Organisme
 
@@ -87,8 +87,8 @@ def get_all_stations():
                     LAreas.id_type == func.ref_geo.get_id_area_type(blueprint.config["municipality_type_code"])
                 )
             )
-        .outerjoin(corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit)
-        .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(CorVisitObserver.__table__, CorVisitObserver.__table__.c.id_base_visit == TBaseVisits.id_base_visit)
+        .outerjoin(User, User.id_role == CorVisitObserver.__table__.c.id_role)
         .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
         .group_by(Station.id_station, Habref.lb_hab_fr)
         .order_by(Station.name)
@@ -197,8 +197,8 @@ def get_organism():
         .select_from(Station)
         .outerjoin(TTransect, TTransect.id_station == Station.id_station)
         .outerjoin(TBaseVisits,TBaseVisits.id_base_site == TTransect.id_base_site)
-        .outerjoin(corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit)
-        .outerjoin(User,  User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(CorVisitObserver.__table__, CorVisitObserver.__table__.c.id_base_visit == TBaseVisits.id_base_visit)
+        .outerjoin(User,  User.id_role == CorVisitObserver.__table__.c.id_role)
         .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
         .distinct()
     )

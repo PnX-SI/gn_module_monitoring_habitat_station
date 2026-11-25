@@ -9,10 +9,6 @@ from geojson import FeatureCollection
 
 from geonature.utils.env import DB, ROOT_DIR
 from geonature.core.gn_permissions import decorators as permissions
-from geonature.core.gn_monitoring.models import (
-    corVisitObserver,
-    TBaseVisits,
-)
 from geonature.core.gn_meta.models import TDatasets
 from geonature.core.gn_commons.models import TModules
 from pypnusershub.db.models import User
