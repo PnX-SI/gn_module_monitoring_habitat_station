@@ -1,13 +1,14 @@
 from flask import request, g
 from geojson import FeatureCollection
-from sqlalchemy import and_, distinct, func, update, select
+from sqlalchemy import and_, distinct, func, insert, update, select
 from werkzeug.exceptions import NotFound
 
 from geonature.utils.env import DB
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_monitoring.models import (
-    corVisitObserver,
-    corSiteArea,
+    CorVisitObserver,
+    cor_site_area,
+    cor_site_type,
     TBaseVisits,
     TBaseSites,
 )
@@ -40,15 +41,15 @@ def get_all_sites():
     """
     parameters = request.args
 
+    site_type_id = get_id_type_site(blueprint.config["site_type_code"])
+
     q = (
         select(TBaseSites)
+        .join(cor_site_type, cor_site_type.c.id_base_site == TBaseSites.id_base_site)
         .outerjoin(TTransect, TBaseSites.id_base_site == TTransect.id_base_site)
         .where(
-            and_(
-                TBaseSites.id_nomenclature_type_site
-                == get_id_type_site(blueprint.config["site_type_code"]),
-                TTransect.id_base_site == None,
-            )
+            cor_site_type.c.id_type_site == site_type_id,
+            TTransect.id_base_site.is_(None),
         )
     )
 
@@ -82,14 +83,14 @@ def load_transect(id_site):
             TTransect.id_nomenclature_plot_position == TNomenclatures.id_nomenclature,
         )
         .outerjoin(Habref, TTransect.cd_hab == Habref.cd_hab)
-        .outerjoin(corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit)
-        .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(CorVisitObserver.__table__, CorVisitObserver.__table__.c.id_base_visit == TBaseVisits.id_base_visit)
+        .outerjoin(User, User.id_role == CorVisitObserver.__table__.c.id_role)
         .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
-        .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TTransect.id_base_site)
+        .outerjoin(cor_site_area, cor_site_area.c.id_base_site == TTransect.id_base_site)
         .outerjoin(
             LAreas,
             and_(
-                LAreas.id_area == corSiteArea.c.id_area,
+                LAreas.id_area == cor_site_area.c.id_area,
                 LAreas.id_type
                 == func.ref_geo.get_id_area_type(blueprint.config["municipality_type_code"]),
             ),
@@ -156,8 +157,8 @@ def get_all_transects():
         )
         .outerjoin(TBaseVisits, TBaseVisits.id_base_site == TTransect.id_base_site)
         .outerjoin(Habref, TTransect.cd_hab == Habref.cd_hab)
-        .outerjoin(corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit)
-        .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(CorVisitObserver.__table__, CorVisitObserver.__table__.c.id_base_visit == TBaseVisits.id_base_visit)
+        .outerjoin(User, User.id_role == CorVisitObserver.__table__.c.id_role)
         .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
         .group_by(TTransect, Habref.lb_hab_fr)
     )
@@ -261,8 +262,9 @@ def add_transect(scope):
 
     try:
         # Create Site
+        site_type_id = get_id_type_site(blueprint.config["site_type_code"])
+
         site = TBaseSites(
-            id_nomenclature_type_site=get_id_type_site(blueprint.config["site_type_code"]),
             base_site_name=f"HAB - {MODULE_CODE} - {data['transect_label']}",
             base_site_description=data.pop("base_site_description", None),
             first_use_date=datetime.datetime.now(),
@@ -271,6 +273,13 @@ def add_transect(scope):
         )
         DB.session.add(site)
         DB.session.flush()  # Get site ID before commit
+
+        DB.session.execute(
+            insert(cor_site_type).values(
+                id_base_site=site.id_base_site,
+                id_type_site=site_type_id,
+            )
+        )
 
         # Assign site ID and generate site code
         data["id_base_site"] = site.id_base_site

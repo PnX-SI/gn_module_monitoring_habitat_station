@@ -346,7 +346,7 @@ SELECT sites.id_base_site AS idbsite,
     transect.geom_start,
     transect.geom_end,
     sites.geom,
-    org.nom_organisme,
+    org.nom_organisme
 FROM gn_monitoring.t_base_sites AS sites
     JOIN gn_monitoring.t_base_visits AS visits
         ON sites.id_base_site = visits.id_base_site
